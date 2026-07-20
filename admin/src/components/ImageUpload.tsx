@@ -1,16 +1,21 @@
 import { useState, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-import { Upload, X, Image } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { IconUpload, IconX, IconPhoto, IconTrash, IconRefresh, IconLink } from "@tabler/icons-react";
 
 interface ImageUploadProps {
   value: string;
   onChange: (url: string) => void;
+  label?: string;
 }
 
-export function ImageUpload({ value, onChange }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, label = "Cover Image" }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [urlValue, setUrlValue] = useState(value || "");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const upload = useCallback(async (file: File) => {
@@ -26,7 +31,8 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
     try {
       const data = await api.upload<{ url: string }>("/upload", file);
       onChange(data.url);
-      toast.success("Image uploaded");
+      setUrlValue(data.url);
+      toast.success("Image uploaded to R2");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed");
     } finally {
@@ -47,55 +53,120 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
     e.target.value = "";
   }, [upload]);
 
+  const handleUrlApply = () => {
+    onChange(urlValue);
+    setShowUrlInput(false);
+  };
+
+  const handleRemove = () => {
+    onChange("");
+    setUrlValue("");
+  };
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {value ? (
-        <div className="relative group rounded-lg border overflow-hidden">
-          <img src={value} alt="Uploaded" className="w-full h-40 object-cover" />
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-            <button
+        <div className="relative group rounded-xl border border-border/50 overflow-hidden bg-muted/30">
+          <img src={value} alt="Uploaded preview" className="w-full h-48 object-cover" />
+          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+            <Button
               type="button"
+              variant="secondary"
+              size="sm"
               onClick={() => inputRef.current?.click()}
-              className="px-3 py-1.5 text-sm bg-white rounded-md font-medium hover:bg-gray-100"
+              className="gap-1.5"
             >
-              Replace
-            </button>
-            <button
+              <IconRefresh className="h-4 w-4" /> Replace
+            </Button>
+            <Button
               type="button"
-              onClick={() => onChange("")}
-              className="p-1.5 bg-white rounded-md hover:bg-gray-100"
+              variant="destructive"
+              size="sm"
+              onClick={handleRemove}
+              className="gap-1.5"
             >
-              <X className="h-4 w-4" />
-            </button>
+              <IconTrash className="h-4 w-4" /> Remove
+            </Button>
           </div>
           {uploading && (
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+            <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2 text-white">
+              <div className="h-8 w-8 animate-spin rounded-full border-3 border-white/30 border-t-white" />
+              <span className="text-sm font-medium">Uploading...</span>
             </div>
           )}
+          <div className="absolute bottom-2 left-2 right-2">
+            <p className="text-xs text-white/90 bg-black/50 backdrop-blur-sm rounded-md px-2 py-1 truncate">
+              {value}
+            </p>
+          </div>
         </div>
       ) : (
         <div
           onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
           onDragLeave={() => setDragActive(false)}
           onDrop={handleDrop}
-          onClick={() => inputRef.current?.click()}
-          className={`flex flex-col items-center justify-center h-40 rounded-lg border-2 border-dashed cursor-pointer transition-colors ${
-            dragActive ? "border-[#1B2A4A] bg-[#1B2A4A]/5" : "border-muted-foreground/25 hover:border-muted-foreground/50"
+          onClick={() => !uploading && inputRef.current?.click()}
+          className={`relative flex flex-col items-center justify-center h-48 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${
+            dragActive ? "border-gold bg-gold/5" : "border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/30"
           }`}
         >
           {uploading ? (
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-[#1B2A4A]" />
+            <div className="flex flex-col items-center gap-2 text-muted-foreground">
+              <div className="h-8 w-8 animate-spin rounded-full border-3 border-muted-foreground/30 border-t-gold" />
+              <span className="text-sm font-medium">Uploading to R2...</span>
+            </div>
           ) : (
             <>
-              <Image className="h-8 w-8 text-muted-foreground/40 mb-2" />
-              <p className="text-sm text-muted-foreground">Drag & drop or click to upload</p>
-              <p className="text-xs text-muted-foreground/60 mt-1">PNG, JPG, WEBP up to 5MB</p>
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gold/10 mb-3">
+                <IconUpload className="h-6 w-6 text-gold" />
+              </div>
+              <p className="text-sm font-medium text-foreground">Drag & drop or click to upload</p>
+              <p className="text-xs text-muted-foreground mt-1">PNG, JPG, WEBP up to 5MB</p>
             </>
           )}
         </div>
       )}
+
       <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleChange} />
+
+      {/* URL Fallback */}
+      <div className="flex items-center gap-2">
+        {!showUrlInput ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowUrlInput(true)}
+            className="text-muted-foreground hover:text-foreground gap-1.5"
+          >
+            <IconLink className="h-4 w-4" /> Or paste image URL
+          </Button>
+        ) : (
+          <div className="flex items-center gap-2 w-full">
+            <Input
+              placeholder="https://..."
+              value={urlValue}
+              onChange={(e) => setUrlValue(e.target.value)}
+              className="flex-1"
+            />
+            <Button type="button" size="sm" onClick={handleUrlApply}>Apply</Button>
+            <Button type="button" variant="ghost" size="icon" onClick={() => setShowUrlInput(false)}>
+              <IconX className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
+}
+
+export function ImageThumbnail({ src, alt, className }: { src?: string; alt?: string; className?: string }) {
+  if (!src) {
+    return (
+      <div className={`flex items-center justify-center bg-muted rounded-md ${className}`}>
+        <IconPhoto className="h-5 w-5 text-muted-foreground/50" />
+      </div>
+    );
+  }
+  return <img src={src} alt={alt || "Image"} className={`object-cover rounded-md ${className}`} />;
 }

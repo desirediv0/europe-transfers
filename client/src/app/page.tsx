@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import type { Package, City } from "@/lib/types";
 import TransferSearchWidget from "@/components/TransferSearchWidget";
+import TestimonialsCarousel from "@/components/TestimonialsCarousel";
 import {
   IconCar,
   IconPackage,
@@ -416,6 +417,9 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* Testimonials */}
+      <TestimonialsCarousel />
 
       {/* CTA */}
       <section className="bg-navy relative overflow-hidden">

@@ -9,7 +9,6 @@ import DashboardPage from "@/pages/DashboardPage";
 import LocationsPage from "@/pages/LocationsPage";
 import CarTypesPage from "@/pages/CarTypesPage";
 import RoutesPage from "@/pages/RoutesPage";
-import RoutePricesPage from "@/pages/RoutePricesPage";
 import PackagesPage from "@/pages/PackagesPage";
 import BookingsPage from "@/pages/BookingsPage";
 import UsersPage from "@/pages/UsersPage";
@@ -44,7 +43,6 @@ export default function App() {
                     <Route path="/locations" element={<LocationsPage />} />
                     <Route path="/car-types" element={<CarTypesPage />} />
                     <Route path="/routes" element={<RoutesPage />} />
-                    <Route path="/route-prices" element={<RoutePricesPage />} />
                     <Route path="/packages" element={<PackagesPage />} />
                     <Route path="/bookings" element={<BookingsPage />} />
                     <Route path="/users" element={<UsersPage />} />
