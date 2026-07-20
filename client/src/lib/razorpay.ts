@@ -60,6 +60,12 @@ export async function initRazorpay(options: RazorpayOptions): Promise<boolean> {
   const rzp = new window.Razorpay(options);
 
   return new Promise((resolve, reject) => {
+    const originalHandler = options.handler;
+    options.handler = (response) => {
+      originalHandler?.(response);
+      resolve(true);
+    };
+
     rzp.on("payment.failed", (response: { error: { description: string } }) => {
       reject(new Error(response.error.description || "Payment failed"));
     });
@@ -72,6 +78,5 @@ export async function initRazorpay(options: RazorpayOptions): Promise<boolean> {
     };
 
     rzp.open();
-    resolve(true);
   });
 }

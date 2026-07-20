@@ -22,11 +22,14 @@
   --color-ring: oklch(0.785 0.158 84.429);
   --radius: 0.625rem;
 
-  --color-navy: #1B2A4A;
+  --color-navy: #0F1A2E;
+  --color-navy-light: #1B2A4A;
+  --color-navy-lighter: #263B5E;
   --color-gold: #C9A227;
   --color-gold-light: #d4b44a;
+  --color-gold-muted: #C9A22715;
 
-  --font-serif: "Georgia", "Times New Roman", serif;
+  --font-sans: "Jost", system-ui, -apple-system, sans-serif;
 }
 
 @layer base {
@@ -44,5 +47,15 @@
   }
   .maplibregl-popup-tip {
     @apply hidden!;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .glass {
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
   }
 }

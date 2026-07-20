@@ -12,7 +12,7 @@ export function Providers({ children }: { children: ReactNode }) {
     <AuthProvider>
       <BookingProvider>
         <Header />
-        <main className="min-h-[calc(100vh-4rem)]">{children}</main>
+        <main className="pt-16">{children}</main>
         <Footer />
         <Toaster position="top-right" richColors />
       </BookingProvider>

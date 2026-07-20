@@ -19,7 +19,9 @@ const createRouteSchema = z.object({
 });
 
 const updateRouteSchema = z.object({
-  isActive: z.boolean(),
+  isActive: z.boolean().optional(),
+  fromLocationId: z.string().min(1).optional(),
+  toLocationId: z.string().min(1).optional(),
 });
 
 router.get("/", getRoutes);

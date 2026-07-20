@@ -84,16 +84,39 @@ export const createRoute = asyncHandler(async (req, res) => {
 });
 
 export const updateRoute = asyncHandler(async (req, res) => {
-  const { isActive } = req.body;
+  const { isActive, fromLocationId, toLocationId } = req.body;
 
   const existing = await prisma.route.findUnique({ where: { id: req.params.id } });
   if (!existing) {
     throw new ApiError(404, "Route not found");
   }
 
+  const data = {};
+  if (typeof isActive === "boolean") data.isActive = isActive;
+
+  if (fromLocationId !== undefined || toLocationId !== undefined) {
+    const newFrom = fromLocationId || existing.fromLocationId;
+    const newTo = toLocationId || existing.toLocationId;
+
+    if (newFrom === newTo) {
+      throw new ApiError(400, "From and To locations must be different");
+    }
+
+    if (newFrom !== existing.fromLocationId || newTo !== existing.toLocationId) {
+      const duplicate = await prisma.route.findUnique({
+        where: { fromLocationId_toLocationId: { fromLocationId: newFrom, toLocationId: newTo } },
+      });
+      if (duplicate && duplicate.id !== existing.id) {
+        throw new ApiError(409, "Route already exists between these locations");
+      }
+      data.fromLocationId = newFrom;
+      data.toLocationId = newTo;
+    }
+  }
+
   const route = await prisma.route.update({
     where: { id: req.params.id },
-    data: { isActive },
+    data,
     include: { fromLocation: true, toLocation: true },
   });
   return apiResponse(res, 200, "Route updated", route);

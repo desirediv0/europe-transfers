@@ -16,18 +16,32 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(method: ApiMethod, path: string, body?: unknown): Promise<T> {
-  const res = await fetch(`${env.API_URL}${path}`, {
-    method,
-    credentials: "include",
-    headers: body instanceof FormData ? {} : { "Content-Type": "application/json" },
-    body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
-  });
+async function parseResponse(res: Response) {
+  const contentType = res.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    return await res.json();
+  }
+  const text = await res.text();
+  return { success: res.ok, message: text || res.statusText, data: null };
+}
 
-  const json: ApiResponse<T> = await res.json();
+async function request<T>(method: ApiMethod, path: string, body?: unknown): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(`${env.API_URL}${path}`, {
+      method,
+      credentials: "include",
+      headers: body instanceof FormData ? {} : { "Content-Type": "application/json" },
+      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    throw new ApiError(0, "Network error. Please check your connection.");
+  }
+
+  const json: ApiResponse<T> = await parseResponse(res);
 
   if (!res.ok) {
-    throw new ApiError(res.status, json.message || "Request failed");
+    throw new ApiError(res.status, json.message || res.statusText || "Request failed");
   }
 
   return json.data;

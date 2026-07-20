@@ -106,13 +106,13 @@ export const createBooking = asyncHandler(async (req, res) => {
 
   const booking = await prisma.booking.create({
     data: {
-      routeId,
-      carTypeId,
+      route: { connect: { id: routeId } },
+      carType: { connect: { id: carTypeId } },
       customerName,
       phone,
       email: email || null,
-      pickupAddress: pickupAddress || null,
-      dropAddress: dropAddress || null,
+      pickupAddress: pickupAddress || "",
+      dropAddress: dropAddress || "",
       travelDate: new Date(travelDate),
       travelTime: travelTime || null,
       pax,
