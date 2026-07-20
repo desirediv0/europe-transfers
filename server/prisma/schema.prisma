@@ -1,0 +1,230 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ──────────────────────────────────────────────
+
+enum AdminRole {
+  SUPER_ADMIN
+  EDITOR
+}
+
+enum IdDocumentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum OtpPurpose {
+  LOGIN
+  VERIFY_EMAIL
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  PARTIAL
+  FAILED
+  REFUNDED
+}
+
+// ─── Auth & Users ───────────────────────────────────────
+
+model Admin {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         AdminRole @default(EDITOR)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model User {
+  id               String           @id @default(cuid())
+  name             String
+  email            String           @unique
+  phone            String           @unique
+  passwordHash     String
+  idDocumentUrl    String?
+  idDocumentStatus IdDocumentStatus  @default(PENDING)
+  isEmailVerified  Boolean          @default(false)
+  otps             Otp[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model Otp {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code      String
+  purpose   OtpPurpose
+  expiresAt DateTime
+  consumed  Boolean    @default(false)
+  createdAt DateTime   @default(now())
+}
+
+// ─── Package Tourism (kept for tour packages) ───────────
+
+model Country {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  cities    City[]
+  packages  Package[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model City {
+  id        String    @id @default(cuid())
+  countryId String
+  country   Country   @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  name      String
+  slug      String    @unique
+  image     String?
+  latitude  Float?
+  longitude Float?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Package {
+  id            String         @id @default(cuid())
+  title         String
+  slug          String         @unique
+  countryId     String
+  country       Country        @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  durationDays  Int
+  coverImage    String?
+  summary       String?
+  priceFrom     Decimal?       @db.Decimal(10, 2)
+  isActive      Boolean        @default(true)
+  itineraryDays ItineraryDay[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model ItineraryDay {
+  id          String   @id @default(cuid())
+  packageId   String
+  package     Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  dayNumber   Int
+  title       String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ─── Transfer Booking System (new) ──────────────────────
+
+model Location {
+  id        String   @id @default(cuid())
+  name      String
+  city      String
+  latitude  Float?
+  longitude Float?
+  isActive  Boolean  @default(true)
+  fromRoutes Route[] @relation("FromLocation")
+  toRoutes   Route[] @relation("ToLocation")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CarType {
+  id          String       @id @default(cuid())
+  name        String
+  seats       Int
+  image       String?
+  isAC        Boolean      @default(true)
+  isWiFi      Boolean      @default(false)
+  isLuggage   Boolean      @default(true)
+  isChildSeat Boolean      @default(false)
+  isVIP       Boolean      @default(false)
+  isPetFriendly Boolean    @default(false)
+  isActive    Boolean      @default(true)
+  routePrices RoutePrice[]
+  bookings    Booking[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Route {
+  id             String       @id @default(cuid())
+  fromLocationId String
+  fromLocation   Location     @relation("FromLocation", fields: [fromLocationId], references: [id], onDelete: Cascade)
+  toLocationId   String
+  toLocation     Location     @relation("ToLocation", fields: [toLocationId], references: [id], onDelete: Cascade)
+  isActive       Boolean      @default(true)
+  routePrices    RoutePrice[]
+  bookings       Booking[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([fromLocationId, toLocationId])
+}
+
+model RoutePrice {
+  id        String   @id @default(cuid())
+  routeId   String
+  route     Route    @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  carTypeId String
+  carType   CarType  @relation(fields: [carTypeId], references: [id], onDelete: Cascade)
+  price     Decimal  @db.Decimal(10, 2)
+  currency  String   @default("EUR")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([routeId, carTypeId])
+}
+
+model Booking {
+  id            String        @id @default(cuid())
+  routeId       String
+  route         Route         @relation(fields: [routeId], references: [id], onDelete: Restrict)
+  carTypeId     String
+  carType       CarType       @relation(fields: [carTypeId], references: [id], onDelete: Restrict)
+  customerName  String
+  phone         String
+  email         String?
+  pickupAddress String
+  dropAddress   String
+  travelDate    DateTime
+  travelTime    String?
+  pax           Int
+  luggageNotes  String?
+  price         Decimal       @db.Decimal(10, 2)
+  currency      String        @default("EUR")
+  paymentStatus PaymentStatus @default(PENDING)
+  bookingStatus BookingStatus @default(PENDING)
+  paymentId     String?
+  message       String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+// ─── Testimonials ───────────────────────────────────────
+
+model Testimonial {
+  id          String   @id @default(cuid())
+  name        String
+  rating      Int
+  message     String
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
