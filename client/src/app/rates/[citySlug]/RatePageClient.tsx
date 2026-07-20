@@ -10,13 +10,20 @@ import {
   IconArrowRight,
   IconMapPin,
   IconRoute,
-  IconArmchair,
   IconLuggage,
   IconSnowflake,
   IconWifi,
   IconBabyCarriage,
   IconCrown,
   IconPaw,
+  IconCheck,
+  IconCalendar,
+  IconPhone,
+  IconInfoCircle,
+  IconCar,
+  IconClock,
+  IconUsers,
+  IconTag,
 } from "@tabler/icons-react";
 
 interface Props {
@@ -40,28 +47,68 @@ function hashGradient(text: string) {
   return gradientPairs[Math.abs(hash) % gradientPairs.length];
 }
 
-function SectionHeading({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle?: string }) {
+function FeatureBadge({ active, icon: Icon, label }: { active: boolean; icon: React.ElementType; label: string }) {
   return (
-    <div>
-      <span className="text-xs font-bold tracking-[0.15em] text-gold uppercase">{eyebrow}</span>
-      <h2 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-white">{title}</h2>
-      {subtitle && <p className="mt-3 text-base text-white/50 max-w-2xl leading-relaxed">{subtitle}</p>}
+    <div
+      className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full border ${
+        active
+          ? "bg-navy/5 border-navy/10 text-navy"
+          : "bg-muted/50 border-transparent text-muted-foreground/60 line-through"
+      }`}
+    >
+      <Icon className="h-3 w-3" />
+      {label}
     </div>
   );
 }
 
-function FeatureBadge({ active, icon: Icon, label }: { active: boolean; icon: React.ElementType; label: string }) {
+function VehicleCard({
+  rp,
+  route,
+}: {
+  rp: RoutePrice;
+  route: Route & { routePrices: RoutePrice[] };
+}) {
   return (
-    <div
-      className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-md border ${
-        active
-          ? "bg-gold/10 border-gold/30 text-gold"
-          : "bg-white/5 border-white/10 text-white/30"
-      }`}
-    >
-      <Icon className="h-3.5 w-3.5" />
-      {label}
-    </div>
+    <Card className="group overflow-hidden border-border/50 bg-white transition-all hover:shadow-xl hover:shadow-black/5 hover:border-gold/40 hover:-translate-y-0.5">
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-gold/10 to-gold/5 shrink-0">
+            <IconCar className="h-5 w-5 text-gold" strokeWidth={1.5} />
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-bold text-navy">€{Number(rp.price).toFixed(2)}</p>
+            <p className="text-xs text-muted-foreground">Fixed total price</p>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <p className="font-semibold text-base">{rp.carType?.name || "Standard Car"}</p>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Up to {rp.carType?.seats || "—"} passengers
+          </p>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          <FeatureBadge active={rp.carType?.isAC || false} icon={IconSnowflake} label="AC" />
+          <FeatureBadge active={rp.carType?.isWiFi || false} icon={IconWifi} label="WiFi" />
+          <FeatureBadge active={rp.carType?.isLuggage || false} icon={IconLuggage} label="Luggage" />
+          <FeatureBadge active={rp.carType?.isChildSeat || false} icon={IconBabyCarriage} label="Child Seat" />
+          <FeatureBadge active={rp.carType?.isVIP || false} icon={IconCrown} label="VIP" />
+          <FeatureBadge active={rp.carType?.isPetFriendly || false} icon={IconPaw} label="Pets" />
+        </div>
+
+        <Link
+          href={`/checkout?routeId=${route.id}&carTypeId=${rp.carType?.id}&routePriceId=${rp.routePriceId}&from=${encodeURIComponent(
+            route.fromLocation?.name || ""
+          )}&to=${encodeURIComponent(route.toLocation?.name || "")}`}
+        >
+          <Button variant="gold" className="w-full mt-5 rounded-full group-hover:shadow-md transition-all">
+            Book Now <IconArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </Link>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -78,8 +125,14 @@ export function RatePageClient({ locations, routes, citySlug }: Props) {
   if (cityLocations.length === 0) {
     return (
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 text-center">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
+          <IconMapPin className="h-8 w-8 text-muted-foreground" />
+        </div>
         <h1 className="text-3xl sm:text-4xl font-bold">City Not Found</h1>
-        <p className="mt-3 text-muted-foreground">No routes found for {citySlug}</p>
+        <p className="mt-3 text-muted-foreground">No routes found for {citySlug}. Please explore our home page.</p>
+        <Link href="/" className="mt-6 inline-block">
+          <Button variant="gold">Back to Home</Button>
+        </Link>
       </div>
     );
   }
@@ -92,47 +145,51 @@ export function RatePageClient({ locations, routes, citySlug }: Props) {
         <div className={`absolute top-0 right-0 h-[500px] w-[500px] rounded-full bg-gradient-to-br ${heroGradient[0]} ${heroGradient[1]} opacity-10 blur-[120px]`} />
         <div className="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
 
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm font-medium text-white/60 hover:bg-white/10 hover:text-white transition-colors mb-8"
+            className="inline-flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm font-medium text-white/60 hover:bg-white/10 hover:text-white transition-colors mb-6"
           >
             <IconArrowLeft className="h-4 w-4" /> Back to Home
           </Link>
 
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-            <div>
+            <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-sm font-semibold text-gold mb-4">
                 <IconMapPin className="h-4 w-4" />
-                {cityLocations.length} pickup location{cityLocations.length > 1 ? "s" : ""}
+                {cityLocations.length} pickup location{cityLocations.length > 1 ? "s" : ""} in {cityName}
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight">
                 Transfers from <span className="text-gold">{cityName}</span>
               </h1>
-              <p className="mt-4 text-lg text-white/50 max-w-xl">
-                Premium private transfers from {cityName} to top destinations. Fixed prices, professional drivers, instant booking.
+              <p className="mt-4 text-base sm:text-lg text-white/50 max-w-xl leading-relaxed">
+                Premium private transfers from {cityName} to top destinations. Fixed prices, professional drivers, and instant booking.
               </p>
             </div>
-            <div className="flex items-center gap-4 text-sm text-white/50">
-              <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/10">
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/10 text-white/70">
                 <IconRoute className="h-4 w-4 text-gold" />
                 <span>{cityRoutes.length} routes available</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/10 text-white/70">
+                <IconTag className="h-4 w-4 text-gold" />
+                <span>No hidden fees</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Locations */}
+      {/* Pickup Locations */}
       <section className="bg-white border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
             <IconMapPin className="h-4 w-4 text-gold" />
             <span className="font-medium text-foreground">Pickup locations in {cityName}:</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {cityLocations.map((loc) => (
-              <Badge key={loc.id} variant="outline" className="rounded-full px-4 py-1.5 text-sm font-medium border-gold/20 text-foreground bg-gold/5">
+              <Badge key={loc.id} variant="outline" className="rounded-full px-4 py-1.5 text-sm font-medium border-gold/20 text-foreground bg-gold/5 hover:bg-gold/10">
                 {loc.name}
               </Badge>
             ))}
@@ -141,14 +198,16 @@ export function RatePageClient({ locations, routes, citySlug }: Props) {
       </section>
 
       {/* Routes */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
-        <SectionHeading
-          eyebrow="Pricing"
-          title={`Available Routes from ${cityName}`}
-          subtitle="Choose your destination and vehicle. All prices are fixed with no hidden fees."
-        />
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+        <div className="mb-10">
+          <span className="text-xs font-bold tracking-[0.15em] text-gold uppercase">Pricing</span>
+          <h2 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">Available Routes from {cityName}</h2>
+          <p className="mt-2 text-sm sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
+            Choose your destination and vehicle. All prices are fixed with no hidden fees and include meet & greet, luggage, and waiting time.
+          </p>
+        </div>
 
-        <div className="mt-12 space-y-8">
+        <div className="space-y-8">
           {cityRoutes.length === 0 ? (
             <Card className="border-dashed border-2 border-border/50">
               <CardContent className="py-16 text-center">
@@ -168,69 +227,34 @@ export function RatePageClient({ locations, routes, citySlug }: Props) {
             cityRoutes.map((route) => (
               <Card
                 key={route.id}
-                className="overflow-hidden border-border/40 transition-all hover:shadow-xl hover:shadow-black/5 hover:border-gold/20"
+                className="overflow-hidden border-border/40 bg-white transition-all hover:shadow-xl hover:shadow-black/5 hover:border-gold/20"
               >
                 <CardContent className="p-0">
-                  <div className="bg-muted/30 px-6 py-5 border-b border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  {/* Route Header */}
+                  <div className="bg-muted/30 px-5 sm:px-6 py-5 border-b border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10">
-                        <IconRoute className="h-6 w-6 text-gold" strokeWidth={1.5} />
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gold/10 shrink-0">
+                        <IconRoute className="h-5 w-5 text-gold" strokeWidth={1.5} />
                       </div>
                       <div>
-                        <h3 className="text-lg sm:text-xl font-bold">
+                        <h3 className="text-base sm:text-lg font-bold">
                           {route.fromLocation?.name} <span className="text-gold mx-1">→</span> {route.toLocation?.name}
                         </h3>
                         <p className="text-sm text-muted-foreground">{route.routePrices.length} vehicle options</p>
                       </div>
                     </div>
-                    <Badge variant="outline" className="w-fit rounded-full px-3 py-1 border-gold/20 text-gold bg-gold/5">
-                      Fixed Price
-                    </Badge>
+                    <div className="flex items-center gap-3">
+                      <Badge variant="outline" className="w-fit rounded-full px-3 py-1 border-gold/20 text-gold bg-gold/5">
+                        Fixed Price
+                      </Badge>
+                    </div>
                   </div>
 
-                  <div className="p-6">
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {/* Vehicle Options */}
+                  <div className="p-5 sm:p-6">
+                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                       {route.routePrices.map((rp, idx) => (
-                        <div
-                          key={`${route.id}-${rp.routePriceId || idx}`}
-                          className="group relative rounded-2xl border border-border/50 bg-white p-5 transition-all hover:border-gold/30 hover:shadow-lg hover:-translate-y-0.5"
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-gold/10 to-gold/5">
-                              <IconArmchair className="h-6 w-6 text-gold" strokeWidth={1.5} />
-                            </div>
-                            <div className="text-right">
-                              <p className="text-2xl font-bold text-gold">€{Number(rp.price).toFixed(2)}</p>
-                              <p className="text-xs text-muted-foreground">{rp.currency} total</p>
-                            </div>
-                          </div>
-
-                          <div className="mt-4">
-                            <p className="font-semibold text-base">{rp.carType?.name || "Standard Car"}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Up to {rp.carType?.seats || "—"} passengers
-                            </p>
-                          </div>
-
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            <FeatureBadge active={rp.carType?.isAC || false} icon={IconSnowflake} label="AC" />
-                            <FeatureBadge active={rp.carType?.isWiFi || false} icon={IconWifi} label="WiFi" />
-                            <FeatureBadge active={rp.carType?.isLuggage || false} icon={IconLuggage} label="Luggage" />
-                            <FeatureBadge active={rp.carType?.isChildSeat || false} icon={IconBabyCarriage} label="Child Seat" />
-                            <FeatureBadge active={rp.carType?.isVIP || false} icon={IconCrown} label="VIP" />
-                            <FeatureBadge active={rp.carType?.isPetFriendly || false} icon={IconPaw} label="Pets" />
-                          </div>
-
-                          <Link
-                            href={`/checkout?routeId=${route.id}&carTypeId=${rp.carType?.id}&routePriceId=${rp.routePriceId}&from=${encodeURIComponent(
-                              route.fromLocation?.name || ""
-                            )}&to=${encodeURIComponent(route.toLocation?.name || "")}`}
-                          >
-                            <Button variant="gold" className="w-full mt-5 rounded-lg group-hover:shadow-md transition-all">
-                              Book Now <IconArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
-                          </Link>
-                        </div>
+                        <VehicleCard key={`${route.id}-${rp.routePriceId || idx}`} rp={rp} route={route} />
                       ))}
                     </div>
                   </div>
@@ -238,6 +262,56 @@ export function RatePageClient({ locations, routes, citySlug }: Props) {
               </Card>
             ))
           )}
+        </div>
+      </section>
+
+      {/* Info Section */}
+      <section className="bg-muted/30 border-t border-border">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { icon: IconCheck, title: "Fixed Pricing", desc: "No surprise charges. The price you see is the price you pay." },
+              { icon: IconUsers, title: "Professional Drivers", desc: "Licensed, insured, and punctual chauffeurs." },
+              { icon: IconClock, title: "Free Waiting Time", desc: "Airport pickups include complimentary waiting time." },
+              { icon: IconCalendar, title: "24/7 Availability", desc: "Book anytime, day or night, with instant confirmation." },
+            ].map((item) => (
+              <div key={item.title} className="flex items-start gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold/10 shrink-0">
+                  <item.icon className="h-5 w-5 text-gold" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{item.title}</h4>
+                  <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Contact CTA */}
+      <section className="bg-white border-t border-border">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 rounded-3xl bg-navy px-6 sm:px-10 py-8 sm:py-10">
+            <div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white">Need a custom route?</h3>
+              <p className="mt-2 text-sm sm:text-base text-white/60 max-w-lg">
+                Can&apos;t find your destination? Reach out and we&apos;ll prepare a personalized quote for your trip from {cityName}.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link href="/contact">
+                <Button variant="gold" className="rounded-full">
+                  <IconInfoCircle className="mr-2 h-4 w-4" /> Request a Quote
+                </Button>
+              </Link>
+              <Link href="tel:+49123456789">
+                <Button variant="outline" className="rounded-full border-white/20 text-white hover:bg-white/10 hover:text-white">
+                  <IconPhone className="mr-2 h-4 w-4" /> Call Us
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </div>

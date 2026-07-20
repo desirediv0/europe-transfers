@@ -41,12 +41,15 @@ function CheckoutContent() {
 
   const [form, setForm] = useState({
     customerName: searchParams.get("name") || "",
+    countryCode: "+39",
     phone: searchParams.get("phone") || "",
     email: searchParams.get("email") || "",
     pickupAddress: "",
     dropAddress: "",
     luggageNotes: "",
   });
+
+  const fullPhone = `${form.countryCode}${form.phone.replace(/^\+/, "").replace(/\s/g, "")}`;
 
   const [step, setStep] = useState<"form" | "paying" | "success" | "failed">("form");
   const [booking, setBooking] = useState<Booking | null>(null);
@@ -58,6 +61,12 @@ function CheckoutContent() {
       return;
     }
 
+    const phoneDigits = form.phone.replace(/\D/g, "");
+    if (phoneDigits.length < 7) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+
     setStep("paying");
     setErrorMessage("");
 
@@ -66,7 +75,7 @@ function CheckoutContent() {
         routeId,
         carTypeId,
         customerName: form.customerName,
-        phone: form.phone,
+        phone: fullPhone,
         email: form.email || undefined,
         pickupAddress: form.pickupAddress || undefined,
         dropAddress: form.dropAddress || undefined,
@@ -94,7 +103,7 @@ function CheckoutContent() {
         prefill: {
           name: form.customerName,
           email: form.email || undefined,
-          contact: form.phone || undefined,
+          contact: fullPhone || undefined,
         },
         theme: { color: "#C9A227" },
         handler: async (response: RazorpayResponse) => {
@@ -259,13 +268,33 @@ function CheckoutContent() {
                   </div>
                   <div className="space-y-2">
                     <Label>Phone Number *</Label>
-                    <Input
-                      value={form.phone}
-                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                      placeholder="+39 123 456 7890"
-                      disabled={step === "paying"}
-                      className="h-12 rounded-lg"
-                    />
+                    <div className="flex h-12 rounded-lg border border-input bg-transparent shadow-sm overflow-hidden focus-within:ring-1 focus-within:ring-ring">
+                      <select
+                        value={form.countryCode}
+                        onChange={(e) => setForm({ ...form, countryCode: e.target.value })}
+                        disabled={step === "paying"}
+                        className="h-full appearance-none border-0 bg-muted/40 pl-3 pr-7 text-sm font-medium focus:outline-none focus:ring-0"
+                      >
+                        <option value="+39">+39</option>
+                        <option value="+33">+33</option>
+                        <option value="+49">+49</option>
+                        <option value="+34">+34</option>
+                        <option value="+44">+44</option>
+                        <option value="+41">+41</option>
+                        <option value="+31">+31</option>
+                        <option value="+43">+43</option>
+                        <option value="+91">+91</option>
+                        <option value="+1">+1</option>
+                      </select>
+                      <input
+                        type="tel"
+                        value={form.phone}
+                        onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                        placeholder="123 456 7890"
+                        disabled={step === "paying"}
+                        className="h-full flex-1 border-0 bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-0"
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="space-y-2">

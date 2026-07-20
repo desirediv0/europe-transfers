@@ -22,6 +22,10 @@ interface RazorpayOptions {
   };
   modal?: {
     ondismiss?: () => void;
+    escape?: boolean;
+    animation?: boolean;
+    backdropclose?: boolean;
+    confirm_close?: boolean;
   };
   notes?: Record<string, string>;
 }
@@ -34,6 +38,7 @@ export interface RazorpayResponse {
 
 interface RazorpayInstance {
   open: () => void;
+  close: () => void;
   on: (event: string, callback: (response: { error: { description: string } }) => void) => void;
 }
 
@@ -57,25 +62,28 @@ export async function initRazorpay(options: RazorpayOptions): Promise<boolean> {
     throw new Error("Failed to load Razorpay SDK. Check your internet connection.");
   }
 
-  const rzp = new window.Razorpay(options);
-
   return new Promise((resolve, reject) => {
     const originalHandler = options.handler;
+
     options.handler = (response) => {
       originalHandler?.(response);
       resolve(true);
     };
-
-    rzp.on("payment.failed", (response: { error: { description: string } }) => {
-      reject(new Error(response.error.description || "Payment failed"));
-    });
 
     options.modal = {
       ...options.modal,
       ondismiss: () => {
         reject(new Error("Payment cancelled by user"));
       },
+      escape: true,
+      backdropclose: false,
     };
+
+    const rzp = new window.Razorpay(options);
+
+    rzp.on("payment.failed", (response: { error: { description: string } }) => {
+      reject(new Error(response.error.description || "Payment failed"));
+    });
 
     rzp.open();
   });

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -42,12 +43,19 @@ function MobileNav() {
       </SheetTrigger>
       <SheetContent side="left" className="w-80 p-0 bg-navy border-navy-lighter">
         <div className="flex items-center gap-3 px-6 py-5 border-b border-white/10">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gold/10">
-            <IconCar className="h-5 w-5 text-gold" />
-          </div>
-          <span className="font-semibold text-white tracking-tight text-[15px]">
-            The <span className="text-gold">Europe</span> Transfers
-          </span>
+          <Link
+            href="/"
+            onClick={handleNav}
+            className="relative flex h-12 w-44 items-center justify-center rounded-xl bg-white px-3 py-1 shadow-sm"
+          >
+            <Image
+              src="/logo.png"
+              alt="The Europe Transfers"
+              fill
+              className="object-contain p-1"
+              priority
+            />
+          </Link>
         </div>
         <nav className="flex flex-col gap-1 p-4">
           {navLinks.map((link) => (
@@ -112,16 +120,17 @@ export function Header() {
         scrolled && "glass shadow-lg shadow-black/10 border-b border-white/5"
       )}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-8">
+      <div className="mx-auto flex h-16 sm:h-18 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-6 lg:gap-8">
           <MobileNav />
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold/10 transition-colors group-hover:bg-gold/20">
-              <IconCar className="h-4.5 w-4.5 text-gold" />
-            </div>
-            <span className="font-semibold text-white tracking-tight text-[15px]">
-              The <span className="text-gold">Europe</span> Transfers
-            </span>
+          <Link href="/" className="relative h-10 sm:h-12 w-32 sm:w-44 shrink-0">
+            <Image
+              src="/logo-2.jpeg"
+              alt="The Europe Transfers"
+              fill
+              className="object-contain"
+              priority
+            />
           </Link>
           <nav className="hidden md:flex items-center gap-0.5">
             {navLinks.map((link) => (
