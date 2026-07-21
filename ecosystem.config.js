@@ -7,7 +7,7 @@ module.exports = {
       args: "start",
       env: {
         NODE_ENV: "production",
-        PORT: 4005,
+        PORT: 4006,
       },
       instances: 1,
       exec_mode: "fork",
@@ -22,10 +22,10 @@ module.exports = {
       name: "europe-client",
       cwd: "./client",
       script: "node_modules/next/dist/bin/next",
-      args: "start -p 3002",
+      args: "start -p 3006",
       env: {
         NODE_ENV: "production",
-        PORT: 3005,
+        PORT: 3006,
       },
       instances: 1,
       exec_mode: "fork",
