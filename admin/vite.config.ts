@@ -10,7 +10,19 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  preview: {
+    port: 4174,
+    host: "0.0.0.0",
+    allowedHosts: [
+      "admin.cookieaccess.com",
+      "www.admin.cookieaccess.com",
+    ],
+  },
   server: {
-    port: 5173,
+    host: "0.0.0.0",
+    allowedHosts: [
+      "admin.cookieaccess.com",
+      "www.admin.cookieaccess.com",
+    ],
   },
 });
