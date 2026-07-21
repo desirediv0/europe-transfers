@@ -7,7 +7,7 @@ module.exports = {
       args: "start",
       env: {
         NODE_ENV: "production",
-        PORT: process.env.SERVER_PORT || "4000",
+        PORT: process.env.SERVER_PORT || "4005",
       },
       instances: 1,
       exec_mode: "fork",
@@ -25,7 +25,7 @@ module.exports = {
       args: "start",
       env: {
         NODE_ENV: "production",
-        PORT: process.env.CLIENT_PORT || "3000",
+        PORT: process.env.CLIENT_PORT || "3005",
       },
       instances: 1,
       exec_mode: "fork",
@@ -43,7 +43,7 @@ module.exports = {
       args: "start",
       env: {
         NODE_ENV: "production",
-        PORT: process.env.ADMIN_PORT || "5173",
+        PORT: process.env.ADMIN_PORT || "4174",
       },
       instances: 1,
       exec_mode: "fork",
