@@ -105,25 +105,47 @@ export function RatePageClient({ locations, routes, citySlug }: Props) {
   const formattedSlug = citySlug.replace(/-/g, " ");
   const capitalizedCity = formattedSlug.charAt(0).toUpperCase() + formattedSlug.slice(1);
 
+  const normalize = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const targetSlugNorm = normalize(citySlug);
+
   const cityLocations = locations.filter(
-    (l) => l.city.toLowerCase().replace(/\s+/g, "-") === citySlug.toLowerCase()
+    (l) =>
+      normalize(l.city).includes(targetSlugNorm) ||
+      normalize(l.name).includes(targetSlugNorm)
   );
-  
+
   const cityName = cityLocations[0]?.city || capitalizedCity;
 
   const cityRoutes = routes.filter(
     (r) =>
       r.fromLocation &&
       (cityLocations.some((l) => l.id === r.fromLocationId) ||
-        r.fromLocation.city.toLowerCase().replace(/\s+/g, "-") === citySlug.toLowerCase()) &&
+        normalize(r.fromLocation.city).includes(targetSlugNorm) ||
+        normalize(r.fromLocation.name).includes(targetSlugNorm)) &&
       r.isActive
   );
+
+  const CITY_IMAGES: Record<string, string> = {
+    barcelona: "https://images.unsplash.com/photo-1583422409516-2895a771deda?q=80&w=1200&auto=format&fit=crop",
+    rome: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1200&auto=format&fit=crop",
+    milan: "https://images.unsplash.com/photo-1513581166391-887a96ddeafd?q=80&w=1200&auto=format&fit=crop",
+    paris: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=1200&auto=format&fit=crop",
+    zurich: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?q=80&w=1200&auto=format&fit=crop",
+    nice: "https://images.unsplash.com/photo-1533105079780-92b9be482077?q=80&w=1200&auto=format&fit=crop",
+  };
+
+  const bgImage = CITY_IMAGES[targetSlugNorm] || "https://images.unsplash.com/photo-1513581166391-887a96ddeafd?q=80&w=1200&auto=format&fit=crop";
 
   return (
     <div className="bg-slate-50/50 min-h-screen">
       {/* Hero Banner */}
       <section className="relative bg-navy overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-navy/90 to-black/80" />
+        <img
+          src={bgImage}
+          alt={cityName}
+          className="absolute inset-0 h-full w-full object-cover opacity-35"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-navy/90 to-black/75" />
         <div className="absolute top-10 right-20 h-96 w-96 rounded-full bg-gold/10 blur-[120px] pointer-events-none" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
