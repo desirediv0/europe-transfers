@@ -18,9 +18,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = useCallback(async () => {
     try {
-      const res = await fetch(`${env.API_URL}/admin/auth/me`, {
+      let res = await fetch(`${env.API_URL}/admin/auth/me`, {
         credentials: "include",
       });
+
+      if (res.status === 401) {
+        const refreshRes = await fetch(`${env.API_URL}/admin/auth/refresh`, {
+          method: "POST",
+          credentials: "include",
+        });
+
+        if (refreshRes.ok) {
+          res = await fetch(`${env.API_URL}/admin/auth/me`, {
+            credentials: "include",
+          });
+        }
+      }
+
       if (!res.ok) {
         setAdmin(null);
         return;

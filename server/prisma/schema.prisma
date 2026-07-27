@@ -62,6 +62,7 @@ model User {
   idDocumentUrl    String?
   idDocumentStatus IdDocumentStatus  @default(PENDING)
   isEmailVerified  Boolean          @default(false)
+  rejectionReason  String?
   otps             Otp[]
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt

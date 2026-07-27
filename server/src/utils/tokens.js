@@ -17,33 +17,39 @@ export const verifyRefreshToken = (token) => {
   return jwt.verify(token, env.JWT_REFRESH_SECRET);
 };
 
+const isProd = env.NODE_ENV === "production";
+
 export const setAccessCookie = (res, token) => {
   res.cookie("accessToken", token, {
     httpOnly: true,
-    secure: env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 15 * 60 * 1000,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: "/",
   });
 };
 
 export const setRefreshCookie = (res, token) => {
   res.cookie("refreshToken", token, {
     httpOnly: true,
-    secure: env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
     maxAge: 30 * 24 * 60 * 60 * 1000,
+    path: "/",
   });
 };
 
 export const clearAuthCookies = (res) => {
   res.clearCookie("accessToken", {
     httpOnly: true,
-    secure: env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+    path: "/",
   });
   res.clearCookie("refreshToken", {
     httpOnly: true,
-    secure: env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+    path: "/",
   });
 };

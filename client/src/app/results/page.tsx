@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import env from "@/config/env.config";
 import ResultsClient from "./ResultsClient";
 
@@ -22,6 +23,22 @@ export interface SearchData {
     to: { id: string; name: string; city: string; latitude: number | null; longitude: number | null };
   };
   cars: SearchResult[];
+}
+
+function getDemoData(from: string, to: string, pax: number): SearchData {
+  return {
+    route: {
+      id: "demo-route",
+      from: { id: "demo-from", name: from, city: "Milan", latitude: 45.63, longitude: 8.72 },
+      to: { id: "demo-to", name: to, city: "Milan", latitude: 45.464, longitude: 9.19 },
+    },
+    cars: [
+      { routePriceId: "demo-1", carType: { id: "sedan", name: "Sedan", seats: 4, isAC: true }, price: 45, currency: "EUR" },
+      { routePriceId: "demo-2", carType: { id: "suv", name: "SUV", seats: 6, isAC: true }, price: 65, currency: "EUR" },
+      { routePriceId: "demo-3", carType: { id: "van", name: "Van", seats: 8, isAC: true }, price: 85, currency: "EUR" },
+      { routePriceId: "demo-4", carType: { id: "minivan", name: "Minivan", seats: 7, isAC: true }, price: 75, currency: "EUR" },
+    ],
+  };
 }
 
 async function fetchSearchResults(params: {
@@ -68,23 +85,32 @@ export default async function ResultsPage({
   const time = typeof sp.time === "string" ? sp.time : "";
   const pax = sp.pax ? Number(sp.pax) : 1;
 
-  let searchData: SearchData | null = null;
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+  const isLoggedIn = !!accessToken;
+
+  const demoData = getDemoData(from, to, pax);
+  let realData: SearchData | null = null;
   let error: string | null = null;
 
-  try {
-    searchData = await fetchSearchResults({
-      fromLocationId: fromId,
-      toLocationId: toId,
-      passengers: pax,
-    });
-  } catch (e) {
-    error = e instanceof Error ? e.message : "Failed to load results";
+  if (isLoggedIn) {
+    try {
+      realData = await fetchSearchResults({
+        fromLocationId: fromId,
+        toLocationId: toId,
+        passengers: pax,
+      });
+    } catch (e) {
+      error = e instanceof Error ? e.message : "Failed to load results";
+    }
   }
 
   return (
     <ResultsClient
-      searchData={searchData}
+      demoData={demoData}
+      realData={realData}
       error={error}
+      isLoggedIn={isLoggedIn}
       searchParams={{ from, to, fromId, toId, date, time, pax }}
     />
   );

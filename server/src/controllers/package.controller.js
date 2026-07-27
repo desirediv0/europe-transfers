@@ -10,10 +10,26 @@ const paginateArgs = (page = 1, limit = 20) => {
 export const getPackages = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 20;
+  const countryId = req.query.countryId;
+  const search = req.query.search;
+
+  const where = {};
+  if (countryId) where.countryId = countryId;
+  if (search) {
+    where.OR = [
+      { title: { contains: search, mode: "insensitive" } },
+      { summary: { contains: search, mode: "insensitive" } },
+    ];
+  }
 
   const [packages, total] = await Promise.all([
-    prisma.package.findMany({ include: { country: true, itineraryDays: true }, orderBy: { createdAt: "desc" }, ...paginateArgs(page, limit) }),
-    prisma.package.count(),
+    prisma.package.findMany({
+      where,
+      include: { country: true, itineraryDays: true },
+      orderBy: { createdAt: "desc" },
+      ...paginateArgs(page, limit),
+    }),
+    prisma.package.count({ where }),
   ]);
 
   return apiResponse(res, 200, "Packages retrieved", {

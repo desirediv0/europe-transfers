@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { register, uploadId, requestOtp, verifyOtp, logout } from "../controllers/auth.controller.js";
+import { register, uploadId, requestOtp, verifyOtp, login, refresh, logout } from "../controllers/auth.controller.js";
 import protectUser from "../middlewares/auth.middleware.js";
 import upload from "../middlewares/upload.middleware.js";
 import { authRateLimiter, otpRateLimiter } from "../middlewares/rateLimiter.js";
@@ -25,10 +25,17 @@ const otpVerifySchema = z.object({
   code: z.string().length(6),
 });
 
+const loginSchema = z.object({
+  email: z.string().email(),
+  code: z.string().length(6),
+});
+
 router.post("/register", authRateLimiter, validate(registerSchema), register);
-router.post("/upload-id", protectUser, upload.single("file"), uploadId);
 router.post("/otp/request", otpRateLimiter, validate(otpRequestSchema), requestOtp);
 router.post("/otp/verify", otpRateLimiter, validate(otpVerifySchema), verifyOtp);
+router.post("/login", otpRateLimiter, validate(loginSchema), login);
+router.post("/refresh", refresh);
+router.post("/upload-id", protectUser, upload.single("file"), uploadId);
 router.post("/logout", logout);
 
 export default router;

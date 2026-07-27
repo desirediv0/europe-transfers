@@ -6,6 +6,7 @@ export interface User {
   idDocumentUrl?: string;
   idDocumentStatus: "PENDING" | "VERIFIED" | "REJECTED";
   isEmailVerified: boolean;
+  rejectionReason?: string;
 }
 
 export interface Country {

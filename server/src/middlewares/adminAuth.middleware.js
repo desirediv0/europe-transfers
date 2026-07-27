@@ -12,8 +12,8 @@ const protectAdmin = async (req, res, next) => {
 
     const decoded = verifyAccessToken(token);
 
-    if (decoded.role === undefined) {
-      throw new ApiError(401, "Invalid token type");
+    if (!decoded.id) {
+      throw new ApiError(401, "Invalid token");
     }
 
     const admin = await prisma.admin.findUnique({

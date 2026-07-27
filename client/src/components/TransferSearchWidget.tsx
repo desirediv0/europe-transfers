@@ -135,8 +135,8 @@ function TimePicker({ value, onChange }: { value: string; onChange: (v: string) 
 
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="h-12 rounded-xl bg-white px-3">
-        <IconClock className="mr-2 h-4 w-4 text-gold" />
+      <SelectTrigger className="h-12 rounded-xl bg-white px-3.5 text-xs sm:text-sm text-navy border border-gray-200 cursor-pointer w-full">
+        <IconClock className="mr-2 h-4 w-4 text-gold shrink-0" />
         <SelectValue placeholder="Select pickup time" />
       </SelectTrigger>
       <SelectContent>
@@ -169,7 +169,7 @@ export default function TransferSearchWidget() {
         passengers: search.passengers,
       });
       router.push(
-        `/results?from=${encodeURIComponent(search.fromLocationName || "")}&to=${encodeURIComponent(search.toLocationName || "")}&fromId=${search.fromLocationId}&toId=${search.toLocationId}&date=${format(search.pickupDate, "yyyy-MM-dd")}&time=${search.pickupTime}&pax=${search.passengers}`
+        `/fleet?from=${encodeURIComponent(search.fromLocationName || "")}&to=${encodeURIComponent(search.toLocationName || "")}&fromId=${search.fromLocationId}&toId=${search.toLocationId}&date=${format(search.pickupDate, "yyyy-MM-dd")}&time=${search.pickupTime}&pax=${search.passengers}`
       );
     } catch {
       // error handled by api wrapper
@@ -251,33 +251,40 @@ export default function TransferSearchWidget() {
 
         <Separator className="bg-border/60" />
 
-        {/* Date & Time */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* Date & Time (Stacked on mobile, side-by-side on sm screens) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <Label className="text-xs font-bold uppercase tracking-wider text-navy flex items-center gap-1.5">
               <IconCalendar className="h-3.5 w-3.5 text-gold" />
               Date
             </Label>
             <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full h-12 justify-start text-left font-normal rounded-xl bg-white px-3">
-                  <IconCalendar className="mr-2 h-4 w-4 text-gold" />
-                  {search.pickupDate ? format(search.pickupDate, "dd MMM yyyy") : "Pick date"}
+                <Button variant="outline" className="w-full h-12 justify-start text-left font-normal rounded-xl bg-white px-3.5 text-xs sm:text-sm text-navy border-gray-200 cursor-pointer">
+                  <IconCalendar className="mr-2 h-4 w-4 text-gold shrink-0" />
+                  <span className="truncate">
+                    {search.pickupDate ? format(search.pickupDate, "dd MMM yyyy") : "Pick date"}
+                  </span>
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[320px] p-0" align="start" side="bottom" sideOffset={4} collisionPadding={16}>
+              <PopoverContent className="w-[300px] sm:w-[320px] p-0 z-50 rounded-2xl bg-white shadow-2xl border border-gray-100" align="start" side="bottom" sideOffset={4} collisionPadding={16}>
                 <Calendar
                   mode="single"
                   selected={search.pickupDate || undefined}
-                  onSelect={(date) => { updateSearch({ pickupDate: date || null }); setCalendarOpen(false); }}
-                  disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                  onSelect={(date) => {
+                    if (date) {
+                      updateSearch({ pickupDate: date });
+                      setCalendarOpen(false);
+                    }
+                  }}
+                  disabled={{ before: new Date(new Date().setHours(0, 0, 0, 0)) }}
                 />
               </PopoverContent>
             </Popover>
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <Label className="text-xs font-bold uppercase tracking-wider text-navy flex items-center gap-1.5">
               <IconClock className="h-3.5 w-3.5 text-gold" />
               Time
             </Label>

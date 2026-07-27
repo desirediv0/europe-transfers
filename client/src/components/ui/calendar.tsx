@@ -3,7 +3,7 @@
 import * as React from "react";
 import { DayPicker } from "react-day-picker";
 import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
@@ -11,44 +11,40 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
+      className={cn("p-4 bg-white rounded-2xl border border-gray-100 shadow-2xl font-sans w-72 sm:w-80", className)}
       classNames={{
-        months: "flex flex-col",
-        month: "space-y-2",
-        month_caption: "flex justify-center relative items-center h-8",
-        caption_label: "text-sm font-medium",
+        months: "flex flex-col space-y-4",
+        month: "space-y-4",
+        month_caption: "relative flex items-center justify-center pt-1 pb-2 font-black text-navy text-sm",
+        caption_label: "text-sm font-black text-navy",
         nav: "space-x-1 flex items-center",
-        button_previous: cn(
-          buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute left-1"
-        ),
-        button_next: cn(
-          buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute right-1"
-        ),
-        month_grid: "w-full",
-        weekdays: "grid grid-cols-7",
-        weekday:
-          "text-muted-foreground font-normal text-xs text-center py-1",
-        week: "grid grid-cols-7",
-        day: "relative p-0 text-center text-sm h-9 flex items-center justify-center rounded-md focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected])]:rounded-md",
-        range_start: "day-range-start",
-        range_end: "day-range-end",
-        selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground rounded-md",
-        today: "bg-accent text-accent-foreground",
-        outside:
-          "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
-        disabled: "text-muted-foreground opacity-50",
-        range_middle:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground",
+        month_grid: "w-full border-collapse space-y-1",
+        weekdays: "flex w-full justify-between mb-2",
+        weekday: "text-gray-400 font-bold text-[11px] text-center w-9 uppercase tracking-wider",
+        week: "flex w-full mt-1 justify-between",
+        day: "h-9 w-9 p-0 font-bold text-xs flex items-center justify-center rounded-xl transition-all cursor-pointer hover:bg-gold/20 hover:text-navy text-navy",
+        selected: "!bg-[#060C17] !text-white font-black shadow-lg rounded-xl [&>button]:!text-white [&>button]:!font-black",
+        today: "bg-gold/20 text-navy font-bold border border-gold/40",
+        outside: "text-gray-300 opacity-40 hover:opacity-70",
+        disabled: "text-gray-300 opacity-30 cursor-not-allowed",
+        button_previous: "h-8 w-8 bg-slate-100 hover:bg-gold hover:text-navy rounded-xl p-0 flex items-center justify-center text-navy transition-colors cursor-pointer border-0 absolute left-1 z-10",
+        button_next: "h-8 w-8 bg-slate-100 hover:bg-gold hover:text-navy rounded-xl p-0 flex items-center justify-center text-navy transition-colors cursor-pointer border-0 absolute right-1 z-10",
         hidden: "invisible",
         ...classNames,
       }}
+      components={{
+        Chevron: ({ orientation }: { orientation?: string }) =>
+          orientation === "left" ? (
+            <IconChevronLeft className="h-4 w-4 stroke-[2.5]" />
+          ) : (
+            <IconChevronRight className="h-4 w-4 stroke-[2.5]" />
+          ),
+      } as Record<string, React.ComponentType<{ orientation?: string }>>}
       {...props}
     />
   );
 }
+
 Calendar.displayName = "Calendar";
 
 export { Calendar };

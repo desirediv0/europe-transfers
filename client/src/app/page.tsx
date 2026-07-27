@@ -1,16 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { api } from "@/lib/api";
 import type { Package, City } from "@/lib/types";
-import TransferSearchWidget from "@/components/TransferSearchWidget";
-import TestimonialsCarousel from "@/components/TestimonialsCarousel";
+import TeamShowcase from "@/components/ui/team-showcase";
+import CTASection from "@/components/CTASection";
+import { FullScreenScrollFX } from "@/components/ui/full-screen-scroll-fx";
+import PackageCard, { PackageCardSkeleton } from "@/components/PackageCard";
+import DestinationCard, { DestinationCardSkeleton } from "@/components/DestinationCard";
 import {
   IconCar,
   IconPackage,
@@ -21,8 +28,10 @@ import {
   IconCreditCard,
   IconHeadset,
   IconMapPin,
-  IconBuildingBank,
   IconCheck,
+  IconUsers,
+  IconChevronLeft,
+  IconChevronRight,
 } from "@tabler/icons-react";
 
 const HERO_IMAGES = [
@@ -64,14 +73,16 @@ function SectionHeading({
     <div className={align === "center" ? "text-center" : ""}>
       <div className={`flex items-center gap-2 mb-3 ${align === "center" ? "justify-center" : ""}`}>
         {Icon && (
-          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gold/10">
-            <Icon className="h-3.5 w-3.5 text-gold" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gold/10">
+            <Icon className="h-4 w-4 text-gold" />
           </div>
         )}
-        <span className="text-xs font-bold tracking-[0.15em] text-gold uppercase">{eyebrow}</span>
+        <span className="text-[11px] font-bold tracking-[0.2em] text-gold uppercase">{eyebrow}</span>
       </div>
-      <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">{title}</h2>
-      {subtitle && <p className="mt-3 text-base text-muted-foreground max-w-2xl leading-relaxed">{subtitle}</p>}
+      <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-navy">{title}</h2>
+      {subtitle && (
+        <p className="mt-3 text-base text-gray-500 max-w-2xl leading-relaxed">{subtitle}</p>
+      )}
     </div>
   );
 }
@@ -81,6 +92,20 @@ export default function HomePage() {
   const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const destinationsCarouselRef = useRef<HTMLDivElement>(null);
+
+  const scrollDestinationsLeft = () => {
+    if (destinationsCarouselRef.current) {
+      destinationsCarouselRef.current.scrollBy({ left: -340, behavior: "smooth" });
+    }
+  };
+
+  const scrollDestinationsRight = () => {
+    if (destinationsCarouselRef.current) {
+      destinationsCarouselRef.current.scrollBy({ left: 340, behavior: "smooth" });
+    }
+  };
 
   useEffect(() => {
     Promise.all([
@@ -104,353 +129,554 @@ export default function HomePage() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative bg-navy overflow-hidden min-h-[90vh] flex items-center">
-        <div className="absolute inset-0 z-0">
-          {HERO_IMAGES.map((src, index) => (
-            <div
-              key={src}
-              className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-                index === currentImageIndex ? "opacity-100 scale-100" : "opacity-0 scale-105"
-              }`}
-            >
-              <Image src={src} alt="Premium European Travel Background" fill priority={index === 0} className="object-cover" />
-            </div>
-          ))}
-          <div className="absolute inset-0 bg-gradient-to-r from-navy/95 via-navy/85 to-navy/60" />
-          <div className="absolute inset-0 bg-gradient-to-t from-navy via-transparent to-navy/40" />
-        </div>
-
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-20 left-10 h-96 w-96 rounded-full bg-gold/5 blur-[100px]" />
-          <div className="absolute bottom-20 right-10 h-[500px] w-[500px] rounded-full bg-navy-light/40 blur-[120px]" />
-        </div>
-
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-28 sm:py-32">
-          <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
-            <div className="lg:col-span-7 max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full bg-gold/15 backdrop-blur-md px-4 py-2 text-sm font-semibold text-gold mb-6 border border-gold/20">
-                <IconShieldCheck className="h-4 w-4" />
-                Trusted by 10,000+ travelers
+      <section className="relative overflow-hidden">
+        <FullScreenScrollFX
+          sections={[
+            {
+              id: "swiss-alps",
+              leftLabel: "Alps & Mountains",
+              title: <>SWISS ALPS</>,
+              rightLabel: "Luxury Transfers",
+              background: "/images/hero_swiss_alps.png",
+            },
+            {
+              id: "paris-twilight",
+              leftLabel: "City Escapes",
+              title: <>PARIS TWILIGHT</>,
+              rightLabel: "Chauffeur Service",
+              background: "/images/hero_paris_twilight.png",
+            },
+            {
+              id: "amalfi-coast",
+              leftLabel: "Coastal Journeys",
+              title: <>AMALFI COAST</>,
+              rightLabel: "Private Tours",
+              background: "/images/hero_amalfi_coast.png",
+            },
+          ]}
+          header={
+            <div className="flex flex-col items-center justify-center">
+              <div className="inline-flex items-center gap-2 rounded-full bg-black/40 backdrop-blur-md px-3.5 py-1 text-[11px] font-bold text-gold border border-gold/40 tracking-widest uppercase mb-2 shadow-lg">
+                <IconShieldCheck className="h-3.5 w-3.5 text-gold" />
+                The Europe Transfers
               </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.05]">
-                Travel Europe in{" "}
-                <span className="text-gold relative inline-block">
-                  Comfort
-                  <span className="absolute -bottom-2 left-0 h-1.5 w-full bg-gradient-to-r from-gold to-gold-light rounded-full" />
-                </span>
-              </h1>
-              <p className="mt-8 text-lg sm:text-xl text-white/65 leading-relaxed max-w-xl">
-                Premium airport transfers, city tours, and curated travel packages across Europe. Your journey begins with us.
+              <div className="text-[clamp(1.5rem,3.5vw,3.2rem)] font-extrabold text-white tracking-tight leading-tight drop-shadow-lg mb-1">
+                TRAVEL EUROPE IN STYLE
+              </div>
+            </div>
+          }
+          footer={
+            <div className="flex flex-col items-center gap-3 w-full px-4">
+              <div className="flex flex-col sm:flex-row justify-center items-center gap-3 w-full max-w-sm sm:max-w-none">
+                <Link href="/fleet" className="w-full sm:w-auto">
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto h-11 px-6 rounded-full text-xs sm:text-sm font-bold bg-gold hover:bg-gold-light text-navy shadow-lg shadow-gold/30 hover:shadow-gold/50 transition-all duration-300 pointer-events-auto"
+                  >
+                    <IconCar className="mr-2 h-4 w-4" /> View Fleet
+                  </Button>
+                </Link>
+                <Link href="/packages" className="w-full sm:w-auto">
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto h-11 px-6 rounded-full text-xs sm:text-sm font-bold bg-black/40 border border-white/40 text-white backdrop-blur-md hover:bg-black/60 transition-all duration-300 pointer-events-auto"
+                  >
+                    <IconPackage className="mr-2 h-4 w-4" /> Tour Packages
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          }
+          durations={{ change: 0.7, snap: 800 }}
+          colors={{
+            text: "#FFFFFF",
+            overlay: "linear-gradient(to bottom, rgba(5,10,20,0.5) 0%, rgba(5,10,20,0.1) 40%, rgba(5,10,20,0.1) 60%, rgba(5,10,20,0.6) 100%)",
+            pageBg: "#0B1426",
+            stageBg: "#050B14",
+          }}
+        />
+      </section>
+
+      {/* Features & Why Choose Us Section */}
+      <section className="bg-slate-50/70 py-12 lg:py-16 relative overflow-hidden">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Header Grid: Left title, Right description */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-end mb-14">
+            <div className="lg:col-span-7">
+
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-navy tracking-tight leading-[1.15]">
+                Elevate Your Journey With <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-500 to-yellow-600">Unmatched Luxury</span>
+              </h2>
+            </div>
+            <div className="lg:col-span-5">
+              <p className="text-base sm:text-lg text-gray-600 leading-relaxed font-normal">
+                Experience world-class transfer services featuring top-tier Mercedes vehicles, certified professional chauffeurs, and 24/7 concierge assistance across Europe.
               </p>
-              <div className="mt-10 flex flex-wrap gap-4">
+            </div>
+          </div>
+
+          {/* Modern Dribbble-style Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Card 1 */}
+            <div className="group relative bg-white border border-gray-200/80 rounded-[1rem] p-7 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-gold/10 to-transparent rounded-bl-[3rem] pointer-events-auto" />
+              <div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 mb-8 transition-transform duration-300 group-hover:scale-110">
+                  <IconCar className="h-6 w-6" strokeWidth={1.8} />
+                </div>
+                <div className="text-4xl sm:text-5xl font-black text-navy tracking-tight mb-2">
+                  100<span className="text-gold text-3xl sm:text-4xl">%</span>
+                </div>
+                <h3 className="text-lg font-bold text-navy">Premium Fleet</h3>
+              </div>
+              <p className="text-xs text-gray-500 mt-6 pt-4 border-t border-gray-100 leading-relaxed">
+                Hand-picked Mercedes S-Class, V-Class & VIP limousines.
+              </p>
+            </div>
+
+            {/* Card 2 */}
+            <div className="group relative bg-white border border-gray-200/80 rounded-[1rem] p-7 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-emerald-500/10 to-transparent rounded-bl-[3rem] pointer-events-auto" />
+              <div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 mb-8 transition-transform duration-300 group-hover:scale-110">
+                  <IconShieldCheck className="h-6 w-6" strokeWidth={1.8} />
+                </div>
+                <div className="text-4xl sm:text-5xl font-black text-navy tracking-tight mb-2">
+                  99.8<span className="text-emerald-500 text-3xl sm:text-4xl">%</span>
+                </div>
+                <h3 className="text-lg font-bold text-navy">On-Time Guarantee</h3>
+              </div>
+              <p className="text-xs text-gray-500 mt-6 pt-4 border-t border-gray-100 leading-relaxed">
+                Flight tracking & licensed professional chauffeurs.
+              </p>
+            </div>
+
+            {/* Card 3 */}
+            <div className="group relative bg-white border border-gray-200/80 rounded-[1rem] p-7 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-amber-500/10 to-transparent rounded-bl-[3rem] pointer-events-auto" />
+              <div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 mb-8 transition-transform duration-300 group-hover:scale-110">
+                  <IconCreditCard className="h-6 w-6" strokeWidth={1.8} />
+                </div>
+                <div className="text-4xl sm:text-5xl font-black text-navy tracking-tight mb-2">
+                  50<span className="text-amber-500 text-3xl sm:text-4xl">+</span>
+                </div>
+                <h3 className="text-lg font-bold text-navy">European Cities</h3>
+              </div>
+              <p className="text-xs text-gray-500 mt-6 pt-4 border-t border-gray-100 leading-relaxed">
+                Direct transfers across Swiss Alps, Paris & Amalfi Coast.
+              </p>
+            </div>
+
+            {/* Card 4 - Featured Gradient Accent Card */}
+            <div className="group relative bg-gradient-to-br from-navy via-[#0F1D38] to-gold/90 rounded-[1rem] p-7 sm:p-8 text-white shadow-xl shadow-navy/20 transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-bl-[3rem] pointer-events-auto backdrop-blur-sm" />
+              <div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 text-gold mb-8 backdrop-blur-md transition-transform duration-300 group-hover:scale-110">
+                  <IconHeadset className="h-6 w-6" strokeWidth={1.8} />
+                </div>
+                <div className="text-4xl sm:text-5xl font-black text-white tracking-tight mb-2">
+                  24<span className="text-gold text-3xl sm:text-4xl">/7</span>
+                </div>
+                <h3 className="text-lg font-bold text-white">VIP Support</h3>
+              </div>
+              <p className="text-xs text-gray-300 mt-6 pt-4 border-t border-white/10 leading-relaxed">
+                Dedicated concierge assistance anytime, anywhere.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Us Section */}
+      <section className="bg-white py-12 lg:py-16 relative overflow-hidden border-b border-gray-100">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            {/* Visual Showcase (Left Column) */}
+            <div className="lg:col-span-5 relative">
+              <div className="relative mx-auto max-w-md lg:max-w-none">
+                {/* Main Image Container */}
+                <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white ring-1 ring-black/5 bg-navy/5 aspect-[4/5]">
+                  <Image
+                    src="/images/about_luxury_chauffeur.png"
+                    alt="Europe Transfers Luxury Chauffeured Chauffeur"
+                    fill
+                    className="object-cover transition-transform duration-700 hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-navy/80 via-navy/20 to-transparent" />
+
+                  {/* Overlay Bottom Content */}
+                  <div className="absolute bottom-6 left-6 right-6 text-white">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-gold/90 px-3 py-1 text-[11px] font-bold text-navy uppercase tracking-widest mb-2 shadow-md">
+                      <IconShieldCheck className="h-3.5 w-3.5" /> Licensed & Certified
+                    </div>
+                    <p className="text-xl font-extrabold text-white tracking-tight">
+                      First-Class Chauffeured Services
+                    </p>
+                    <p className="text-xs text-white/80 mt-1">
+                      Swiss Alps • Paris • Amalfi Coast • Vienna
+                    </p>
+                  </div>
+                </div>
+
+                {/* Floating Experience Badge (Top Right) */}
+                <div className="absolute -top-6 -right-4 sm:-right-6 bg-navy text-white rounded-3xl p-5 shadow-2xl border border-gold/30 backdrop-blur-md max-w-[180px] sm:max-w-[200px] transform hover:scale-105 transition-transform duration-300">
+                  <div className="flex items-center gap-3 mb-1">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gold/20 text-gold">
+                      <IconStar className="h-5 w-5 fill-gold text-gold" />
+                    </div>
+                    <span className="text-2xl sm:text-3xl font-black text-white">10+</span>
+                  </div>
+                  <p className="text-[11px] font-semibold text-gray-300 leading-tight">
+                    Years of Premier Chauffeured Excellence
+                  </p>
+                </div>
+
+                {/* Floating Satisfaction Badge (Bottom Left) */}
+                <div className="absolute -bottom-6 -left-4 sm:-left-6 bg-white/95 text-navy rounded-3xl p-4 sm:p-5 shadow-xl border border-gray-200/80 backdrop-blur-md hidden sm:flex items-center gap-4 transform hover:scale-105 transition-transform duration-300">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gold/10 text-gold">
+                    <IconUsers className="h-6 w-6 text-gold" />
+                  </div>
+                  <div>
+                    <div className="text-lg font-black text-navy leading-none">15,000+</div>
+                    <div className="text-xs text-gray-500 font-medium mt-0.5">Happy Global Travelers</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Brand Story & Pillars (Right Column) */}
+            <div className="lg:col-span-7">
+              <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-xs font-bold text-gold uppercase tracking-widest mb-4">
+                <IconShieldCheck className="h-4 w-4 text-gold" />
+                About Europe Transfers
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-navy tracking-tight leading-[1.15] mb-6">
+                Redefining Private Chauffeured Travel <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-500 to-yellow-600">Across Europe</span>
+              </h2>
+
+              <p className="text-base sm:text-lg text-gray-600 leading-relaxed font-normal mb-8">
+                Founded with a commitment to uncompromised luxury and punctuality, Europe Transfers delivers bespoke private transfer solutions, airport chauffeuring, and scenic inter-city tours across Europe's most iconic destinations.
+              </p>
+
+              {/* 3 Core Pillars List */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
+                <div className="bg-slate-50 border border-gray-200/70 rounded-2xl p-5 hover:bg-slate-100/80 transition-colors">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-navy/10 text-navy mb-3">
+                    <IconCar className="h-5 w-5 text-navy" />
+                  </div>
+                  <h3 className="text-sm font-bold text-navy mb-1">Tailored Fleet</h3>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    Premium Mercedes S-Class, E-Class & V-Class vans.
+                  </p>
+                </div>
+
+                <div className="bg-slate-50 border border-gray-200/70 rounded-2xl p-5 hover:bg-slate-100/80 transition-colors">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gold/15 text-gold mb-3">
+                    <IconClock className="h-5 w-5 text-gold" />
+                  </div>
+                  <h3 className="text-sm font-bold text-navy mb-1">Flight Tracking</h3>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    Zero waiting times with live airport tracking.
+                  </p>
+                </div>
+
+                <div className="bg-slate-50 border border-gray-200/70 rounded-2xl p-5 hover:bg-slate-100/80 transition-colors">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 mb-3">
+                    <IconCheck className="h-5 w-5 text-emerald-600" />
+                  </div>
+                  <h3 className="text-sm font-bold text-navy mb-1">Fixed Pricing</h3>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    Transparent all-inclusive rates with zero hidden fees.
+                  </p>
+                </div>
+              </div>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-wrap items-center gap-4">
                 <Link href="/fleet">
                   <Button
-                    variant="gold"
                     size="lg"
-                    className="rounded-full px-8 py-6 text-base font-semibold shadow-xl shadow-gold/20 hover:shadow-gold/40 hover:-translate-y-0.5 transition-all duration-300"
+                    className="h-12 px-7 rounded-xl text-sm font-bold bg-navy hover:bg-navy/90 text-white shadow-xl shadow-navy/20 transition-all duration-300"
                   >
-                    <IconCar className="mr-2 h-5 w-5" /> View Fleet
+                    Explore Our Fleet <IconArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-                <Link href="/packages">
+                <Link href="/contact">
                   <Button
+                    variant="outline"
                     size="lg"
-                    className="rounded-full px-8 py-6 text-base font-semibold bg-white/10 border border-white/20 text-white backdrop-blur-md hover:bg-white/20 hover:-translate-y-0.5 transition-all duration-300"
+                    className="h-12 px-7 rounded-xl text-sm font-bold border-gray-300 text-navy hover:bg-gray-50 transition-all duration-300"
                   >
-                    <IconPackage className="mr-2 h-5 w-5" /> Tour Packages
+                    Contact Concierge
                   </Button>
                 </Link>
               </div>
-              <div className="mt-12 flex flex-wrap items-center gap-4 text-sm text-white/70">
-                {[
-                  { icon: IconClock, text: "24/7 Support" },
-                  { icon: IconCreditCard, text: "Secure Payment" },
-                  { icon: IconStar, text: "4.9 Rating" },
-                ].map((item) => (
-                  <div
-                    key={item.text}
-                    className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/10 backdrop-blur-sm"
-                  >
-                    <item.icon className="h-4 w-4 text-gold" />
-                    <span>{item.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="lg:col-span-5 flex justify-center lg:justify-end">
-              <div className="w-full max-w-md bg-navy/40 backdrop-blur-xl p-1 rounded-2xl border border-white/10 shadow-2xl">
-                <TransferSearchWidget />
-              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Bar */}
-      <section className="bg-white border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4">
-            {[
-              { icon: IconCar, label: "Premium Fleet", desc: "Luxury vehicles" },
-              { icon: IconShieldCheck, label: "Verified Drivers", desc: "Licensed & insured" },
-              { icon: IconCreditCard, label: "Easy Payment", desc: "Secure checkout" },
-              { icon: IconHeadset, label: "24/7 Support", desc: "Always available" },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="flex flex-col items-center text-center gap-3 py-8 px-4 border-b sm:border-b-0 lg:border-r last:border-r-0 border-border"
-              >
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/8">
-                  <item.icon className="h-7 w-7 text-gold" strokeWidth={1.5} />
-                </div>
-                <div>
-                  <p className="text-base font-semibold text-foreground">{item.label}</p>
-                  <p className="text-sm text-muted-foreground">{item.desc}</p>
-                </div>
+      {/* Featured Packages Section */}
+      <section className="bg-gradient-to-b from-slate-50/80 via-white to-slate-50/50 py-12 lg:py-16 relative overflow-hidden border-b border-gray-100">
+        {/* Subtle Ambient Glow Spheres */}
+        <div className="absolute top-1/3 left-0 w-96 h-96 bg-gold/5 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-10 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-[120px] pointer-events-none" />
+
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Header Layout */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-xs font-bold text-gold uppercase tracking-widest mb-4">
+                <IconPackage className="h-4 w-4 text-gold" />
+                Curated Travel Experiences
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-navy tracking-tight leading-[1.15]">
+                Exclusive <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-500 to-yellow-600">Tour Packages</span>
+              </h2>
+              <p className="mt-4 text-base sm:text-lg text-gray-600 leading-relaxed">
+                Hand-picked luxury travel itineraries across Europe, designed for uncompromised comfort, scenic beauty, and memorable journeys.
+              </p>
+            </div>
 
-      {/* Featured Packages */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <SectionHeading
-            eyebrow="Explore"
-            title="Featured Packages"
-            subtitle="Hand-picked travel experiences across Europe, crafted for comfort and adventure."
-            icon={IconPackage}
-          />
-          <Link
-            href="/packages"
-            className="hidden sm:inline-flex items-center gap-2 rounded-full bg-gold/10 px-5 py-2.5 text-sm font-semibold text-gold hover:bg-gold hover:text-navy transition-colors"
-          >
-            View All <IconArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-
-        <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {loading
-            ? Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i} className="overflow-hidden rounded-2xl border-border/50">
-                  <CardContent className="p-0">
-                    <Skeleton className="h-60 w-full" />
-                    <div className="p-6 space-y-4">
-                      <Skeleton className="h-5 w-3/4" />
-                      <Skeleton className="h-4 w-1/2" />
-                      <Skeleton className="h-4 w-2/3" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            : packages.map((pkg) => {
-                const fallback = hashGradient(pkg.title);
-                return (
-                  <Link key={pkg.id} href={`/packages/${pkg.slug}`}>
-                    <Card className="group overflow-hidden rounded-2xl border border-border/40 bg-white transition-all duration-300 hover:shadow-2xl hover:shadow-black/8 hover:-translate-y-1 hover:border-gold/30">
-                      <CardContent className="p-0">
-                        <div className="relative h-60 overflow-hidden">
-                          {pkg.coverImage ? (
-                            <Image
-                              src={pkg.coverImage}
-                              alt={pkg.title}
-                              fill
-                              className="object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
-                          ) : (
-                            <div
-                              className={`h-full w-full bg-gradient-to-br ${fallback[0]} ${fallback[1]} flex items-center justify-center`}
-                            >
-                              <span className="text-5xl font-bold text-white/30 uppercase">
-                                {pkg.title.charAt(0)}
-                              </span>
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                          <div className="absolute top-4 left-4 flex gap-2">
-                            <Badge variant="gold" className="rounded-md px-2.5 py-1 text-xs font-bold">
-                              {pkg.durationDays} Days
-                            </Badge>
-                            {pkg.country && (
-                              <Badge variant="outline" className="rounded-md bg-white/95 text-foreground border-0 px-2.5 py-1 text-xs font-semibold">
-                                {pkg.country.name}
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold text-navy shadow-lg">
-                              <IconArrowRight className="h-5 w-5" />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-6">
-                          <h3 className="text-xl font-bold group-hover:text-gold transition-colors">{pkg.title}</h3>
-                          <p className="mt-2 text-sm text-muted-foreground line-clamp-2 leading-relaxed">{pkg.summary}</p>
-                          {pkg.priceFrom && (
-                            <div className="mt-5 pt-5 border-t border-border/50 flex items-baseline justify-between">
-                              <div className="flex items-baseline gap-1.5">
-                                <span className="text-sm text-muted-foreground">From</span>
-                                <span className="text-2xl font-bold text-gold">€{Number(pkg.priceFrom).toFixed(0)}</span>
-                                <span className="text-xs text-muted-foreground">/person</span>
-                              </div>
-                              <span className="text-xs font-medium text-gold group-hover:underline">View details</span>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                );
-              })}
-        </div>
-        <div className="mt-10 text-center sm:hidden">
-          <Link
-            href="/packages"
-            className="inline-flex items-center gap-2 rounded-full bg-gold/10 px-5 py-2.5 text-sm font-semibold text-gold"
-          >
-            View All Packages <IconArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
-
-      {/* Cities */}
-      <section className="bg-navy relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-navy via-navy to-navy-light/30" />
-        <div className="absolute top-0 right-0 h-[500px] w-[500px] rounded-full bg-gold/5 blur-[120px]" />
-
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24">
-          <SectionHeading
-            eyebrow="Destinations"
-            title="Popular Destinations"
-            subtitle="Explore Europe's most sought-after cities with our premium transfer services."
-            align="center"
-            icon={IconMapPin}
-          />
-
-          <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {loading
-              ? Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-64 w-full rounded-3xl bg-white/5" />
-                ))
-              : cities.map((city) => {
-                  const fallback = hashGradient(city.name);
-                  return (
-                    <Link key={city.id} href={`/rates/${city.slug}`}>
-                      <div className="group relative h-64 overflow-hidden rounded-3xl border border-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-gold/10 hover:border-gold/30">
-                        {city.image ? (
-                          <Image
-                            src={city.image}
-                            alt={city.name}
-                            fill
-                            className="object-cover transition-transform duration-700 group-hover:scale-110"
-                          />
-                        ) : (
-                          <div
-                            className={`h-full w-full bg-gradient-to-br ${fallback[0]} ${fallback[1]} flex items-center justify-center`}
-                          >
-                            <span className="text-6xl font-bold text-white/20">{city.name.charAt(0)}</span>
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                        <div className="absolute bottom-0 left-0 right-0 p-6">
-                          <h3 className="text-2xl font-bold text-white">{city.name}</h3>
-                          {city.country && <p className="text-sm text-white/60 mt-1">{city.country.name}</p>}
-                        </div>
-                        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white">
-                            <IconArrowRight className="h-5 w-5" />
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Us */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24">
-        <SectionHeading
-          eyebrow="Why Us"
-          title="Why Choose Us"
-          subtitle="We combine premium service, safety, and flexibility to deliver unforgettable European journeys."
-          align="center"
-          icon={IconCheck}
-        />
-
-        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            {
-              icon: IconCar,
-              title: "Premium Fleet",
-              desc: "Luxury vehicles for every group size, maintained to the highest standards.",
-            },
-            {
-              icon: IconStar,
-              title: "Verified Drivers",
-              desc: "Professional, licensed chauffeurs with deep local knowledge.",
-            },
-            {
-              icon: IconPackage,
-              title: "Custom Packages",
-              desc: "Tailored itineraries designed around your interests and schedule.",
-            },
-            {
-              icon: IconBuildingBank,
-              title: "Safe & Secure",
-              desc: "Fully insured transfers with round-the-clock customer support.",
-            },
-          ].map((item) => (
-            <div
-              key={item.title}
-              className="group relative overflow-hidden rounded-2xl border border-border/40 bg-white p-8 text-center transition-all duration-300 hover:shadow-xl hover:shadow-black/5 hover:-translate-y-1 hover:border-gold/30"
+            <Link
+              href="/packages"
+              className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-gold hover:bg-gold-light text-navy px-6 py-3.5 text-sm font-bold shadow-lg shadow-gold/25 hover:shadow-gold/40 hover:-translate-y-0.5 transition-all duration-300 self-start md:self-auto flex-shrink-0"
             >
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gold via-gold-light to-gold opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-gold/10 to-gold/5 transition-all duration-300 group-hover:scale-110 group-hover:from-gold/20">
-                <item.icon className="h-10 w-10 text-gold" strokeWidth={1.5} />
-              </div>
-              <h3 className="mt-6 text-lg font-bold">{item.title}</h3>
-              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <TestimonialsCarousel />
-
-      {/* CTA */}
-      <section className="bg-navy relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-navy via-navy to-navy-light/50" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-gold/5 blur-[120px]" />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">Ready to Start Your Journey?</h2>
-          <p className="mt-4 text-lg text-white/50 max-w-xl mx-auto">
-            Book your premium transfer today or explore our curated tour packages across Europe.
-          </p>
-          <div className="mt-10 flex flex-wrap justify-center gap-4">
-            <Link href="/fleet">
-              <Button
-                variant="gold"
-                size="lg"
-                className="rounded-full px-10 py-6 text-base font-semibold shadow-xl shadow-gold/20 hover:shadow-gold/40 hover:-translate-y-0.5 transition-all"
-              >
-                Book a Transfer
-              </Button>
+              Explore All Packages <IconArrowRight className="h-4 w-4" />
             </Link>
-            <Link href="/contact">
-              <Button
-                size="lg"
-                className="rounded-full px-10 py-6 text-base font-semibold bg-white/10 border border-white/20 text-white hover:bg-white/20 hover:-translate-y-0.5 transition-all"
-              >
-                Contact Us
+          </div>
+
+          {/* Cards Carousel Container: 2 cards visible on mobile (basis-1/2), 3 cards on desktop (basis-1/3) */}
+          <Carousel opts={{ align: "start", loop: true }} className="w-full relative px-1 sm:px-0">
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {loading
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <CarouselItem key={i} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3">
+                      <PackageCardSkeleton />
+                    </CarouselItem>
+                  ))
+                : packages.map((pkg) => (
+                    <CarouselItem key={pkg.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3">
+                      <PackageCard package={pkg} />
+                    </CarouselItem>
+                  ))}
+            </CarouselContent>
+
+            {/* Navigation Arrows for Carousel */}
+            <div className="flex items-center justify-end gap-2 mt-6">
+              <CarouselPrevious className="static translate-y-0 h-10 w-10 rounded-xl bg-white border border-gray-200 text-navy hover:bg-gold hover:border-gold transition-all shadow-md cursor-pointer" />
+              <CarouselNext className="static translate-y-0 h-10 w-10 rounded-xl bg-white border border-gray-200 text-navy hover:bg-gold hover:border-gold transition-all shadow-md cursor-pointer" />
+            </div>
+          </Carousel>
+
+          {/* Bottom Custom Multi-City Banner */}
+          <div className="mt-16 bg-navy text-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-gold/30 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 text-center sm:text-left">
+              <span className="inline-block rounded-full bg-gold/20 text-gold px-3 py-1 text-xs font-bold uppercase tracking-wider mb-2">
+                Custom Itineraries
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black text-white">Need a Multi-City Private Transfer Package?</h3>
+              <p className="text-xs sm:text-sm text-gray-300 mt-1 max-w-xl">
+                Our concierge team crafts custom multi-country European routes tailored to your schedule and preferences.
+              </p>
+            </div>
+            <Link href="/contact" className="relative z-10 flex-shrink-0">
+              <Button size="lg" className="rounded-xl px-7 py-3 text-xs sm:text-sm font-bold bg-gold hover:bg-gold-light text-navy shadow-md">
+                Request Custom Itinerary
               </Button>
             </Link>
           </div>
         </div>
       </section>
+
+      {/* Top Destinations Carousel Section */}
+      <section className="bg-slate-100/60 py-12 lg:py-16 relative overflow-hidden border-b border-gray-100">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Header Layout (Top Left: Heading, Top Right: Subtitle) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-end mb-14">
+            <div className="lg:col-span-6">
+              <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 px-3.5 py-1 text-xs font-bold text-gold uppercase tracking-widest mb-3">
+                <IconMapPin className="h-4 w-4 text-gold" />
+                Featured Cities
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-navy tracking-tight leading-[1.15]">
+                Top Destinations
+              </h2>
+            </div>
+            <div className="lg:col-span-6">
+              <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
+                From alpine retreats to historic European capitals, discover where your next private chauffeured journey will take you.
+              </p>
+            </div>
+          </div>
+
+          {/* Carousel Slider Track: 2 cards visible on mobile (basis-1/2), 4 cards on desktop (basis-1/4) */}
+          <Carousel opts={{ align: "start", loop: true }} className="w-full relative px-1 sm:px-0">
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {loading
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <CarouselItem key={i} className="pl-2 md:pl-4 basis-1/2 sm:basis-1/3 lg:basis-1/4">
+                      <DestinationCardSkeleton />
+                    </CarouselItem>
+                  ))
+                : cities.map((city) => (
+                    <CarouselItem key={city.id} className="pl-2 md:pl-4 basis-1/2 sm:basis-1/3 lg:basis-1/4">
+                      <DestinationCard city={city} />
+                    </CarouselItem>
+                  ))}
+            </CarouselContent>
+
+            {/* Bottom Controls Row */}
+            <div className="flex items-center justify-between pt-6 mt-2">
+              <Link href="/rates">
+                <Button
+                  size="lg"
+                  className="h-11 sm:h-12 px-5 sm:px-7 rounded-xl text-xs sm:text-sm font-bold bg-navy hover:bg-gold hover:text-navy text-white shadow-lg shadow-navy/15 transition-all duration-300 cursor-pointer"
+                >
+                  View More <IconArrowRight className="ml-1.5 h-4 w-4" />
+                </Button>
+              </Link>
+
+              {/* Navigation Arrow Controls */}
+              <div className="flex items-center gap-2">
+                <CarouselPrevious className="static translate-y-0 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white border border-gray-200 text-navy shadow-md hover:bg-navy hover:text-white transition-all cursor-pointer" />
+                <CarouselNext className="static translate-y-0 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white border border-gray-200 text-navy shadow-md hover:bg-navy hover:text-white transition-all cursor-pointer" />
+              </div>
+            </div>
+          </Carousel>
+        </div>
+      </section>
+
+      {/* Why Choose Us Section (Bento Grid Layout) */}
+      <section className="bg-white py-12 lg:py-16 relative overflow-hidden border-b border-gray-100">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+          {/* Header Layout */}
+          <div className="max-w-3xl mb-14">
+            <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 px-3.5 py-1 text-xs font-bold text-gold uppercase tracking-widest mb-3">
+              <IconShieldCheck className="h-4 w-4 text-gold" />
+              Unmatched Quality
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-navy tracking-tight leading-[1.15]">
+              Why Choose us
+            </h2>
+            <p className="mt-3 text-base sm:text-lg text-gray-600 leading-relaxed font-normal">
+              Dedicated chauffeurs, luxury fleet, flight tracking, and 24/7 concierge assistance to ensure your European journey is effortless.
+            </p>
+          </div>
+
+          {/* Bento Asymmetric Cards Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+
+            {/* Left Bento Cards (8 columns) */}
+            <div className="lg:col-span-7 xl:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+              {/* Card 1 - Solid Royal Blue Card */}
+              <div className="group relative bg-gradient-to-br from-[#2563EB] via-[#1D4ED8] to-navy rounded-[2rem] p-7 sm:p-8 text-white shadow-xl shadow-blue-500/10 transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-bl-[3rem] pointer-events-none" />
+                <div>
+                  <div className="text-4xl sm:text-5xl font-black tracking-tight text-white mb-2">
+                    99.8%
+                  </div>
+                </div>
+                <div className="pt-6 border-t border-white/20 mt-8">
+                  <p className="text-sm font-bold text-white/95">Client Satisfaction</p>
+                </div>
+              </div>
+
+              {/* Card 2 - Light Soft Stat Card */}
+              <div className="group relative bg-slate-50 border border-gray-200/80 rounded-[2rem] p-7 sm:p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden">
+                <div>
+                  <div className="text-4xl sm:text-5xl font-black tracking-tight text-navy mb-2">
+                    120<span className="text-gold">+</span>
+                  </div>
+                </div>
+                <div className="pt-6 border-t border-gray-200/80 mt-8">
+                  <p className="text-sm font-bold text-navy">European Cities Covered</p>
+                </div>
+              </div>
+
+              {/* Card 3 - Light Soft 24/7 Support Card */}
+              <div className="group relative bg-slate-50 border border-gray-200/80 rounded-[2rem] p-7 sm:p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden">
+                <div>
+                  <div className="text-4xl sm:text-5xl font-black tracking-tight text-blue-600 mb-2">
+                    24/7
+                  </div>
+                </div>
+                <div className="pt-6 border-t border-gray-200/80 mt-8">
+                  <p className="text-sm font-bold text-navy">Concierge Support Available</p>
+                </div>
+              </div>
+
+              {/* Card 4 - Quote / Mission Statement Card */}
+              <div className="group relative bg-slate-50 border border-gray-200/80 rounded-[2rem] p-7 sm:p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden">
+                <div>
+                  <p className="text-xs font-bold text-navy uppercase tracking-wider mb-2">
+                    Building Lasting Journeys
+                  </p>
+                  <p className="text-xs text-gray-600 leading-relaxed font-medium italic">
+                    &ldquo;Your comfort is our mission — we don&apos;t just deliver transfers, we craft luxury travel memories.&rdquo;
+                  </p>
+                </div>
+                <div className="pt-4 border-t border-gray-200/80 mt-4">
+                  <p className="text-xs font-bold text-gray-400">Europe Transfers Concierge</p>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Right Column - Tall Vertical Photo Card (5 columns) */}
+            <div className="lg:col-span-5 xl:col-span-4 min-h-[380px] lg:min-h-full">
+              <div className="group relative h-full min-h-[380px] w-full rounded-[2rem] overflow-hidden border border-gray-200/80 shadow-xl transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
+                <img
+                  src="/images/why_choose_us_chauffeur.png"
+                  alt="Professional VIP Chauffeur"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-navy/90 via-navy/30 to-transparent" />
+
+                {/* Overlay Content */}
+                <div className="absolute bottom-0 left-0 right-0 p-7 text-white">
+                  <span className="inline-block rounded-full bg-gold/90 text-navy px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest mb-2 shadow-md">
+                    First-Class Chauffeurs
+                  </span>
+                  <h3 className="text-2xl font-black text-white tracking-tight">
+                    Dedicated VIP Chauffeurs
+                  </h3>
+                  <p className="text-xs text-gray-300 mt-1.5 leading-relaxed font-normal">
+                    Licensed & certified professionals trained in luxury hospitality, flight tracking, and English fluency.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* Leadership & Chauffeur Team Showcase Section */}
+      <section className="bg-slate-50/70 py-12 lg:py-16 relative overflow-hidden border-b border-gray-100">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center mb-10">
+          <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-xs font-bold text-gold uppercase tracking-widest mb-3">
+            <IconUsers className="h-4 w-4 text-gold" />
+            Meet Our Leadership & Chauffeurs
+          </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-navy tracking-tight">
+            The Experts Behind Your Journey
+          </h2>
+          <p className="mt-3 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+            From executive concierge planners to licensed VIP chauffeurs, our team guarantees first-class luxury travel across Europe.
+          </p>
+        </div>
+
+        <TeamShowcase />
+      </section>
+
+      {/* Reusable Dribbble-Style CTA Section */}
+      <CTASection />
     </div>
   );
 }

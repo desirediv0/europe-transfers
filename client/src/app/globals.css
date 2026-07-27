@@ -29,7 +29,7 @@
   --color-gold-light: #d4b44a;
   --color-gold-muted: #C9A22715;
 
-  --font-sans: "Jost", system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-geist), "Geist", system-ui, -apple-system, sans-serif;
 }
 
 @layer base {
@@ -38,9 +38,41 @@
   *::after {
     border-color: var(--color-border);
   }
+  html {
+    font-family: var(--font-sans);
+  }
   body {
+    font-family: var(--font-sans);
     background-color: var(--color-background);
     color: var(--color-foreground);
+    line-height: 1.6;
+    font-weight: 400;
+  }
+  h1 {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+  }
+  h2 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  h3, h4, h5, h6 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  button, [role="button"], a {
+    cursor: pointer;
+  }
+  button, nav a, nav button, .nav-link {
+    font-weight: 500;
+  }
+  p, span, label, input, textarea {
+    font-family: var(--font-sans);
   }
   .maplibregl-popup-content {
     @apply bg-transparent! shadow-none! p-0! rounded-none!;
@@ -57,5 +89,12 @@
   .glass {
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

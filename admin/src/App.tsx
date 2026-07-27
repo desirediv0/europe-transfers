@@ -31,12 +31,12 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <DataProvider>
-          <Toaster position="top-right" />
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/*" element={
-              <ProtectedRoute>
+        <Toaster position="top-right" />
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/*" element={
+            <ProtectedRoute>
+              <DataProvider>
                 <AdminLayout>
                   <Routes>
                     <Route path="/" element={<DashboardPage />} />
@@ -50,10 +50,10 @@ export default function App() {
                     <Route path="/uploads" element={<UploadsPage />} />
                   </Routes>
                 </AdminLayout>
-              </ProtectedRoute>
-            } />
-          </Routes>
-        </DataProvider>
+              </DataProvider>
+            </ProtectedRoute>
+          } />
+        </Routes>
       </AuthProvider>
     </BrowserRouter>
   );

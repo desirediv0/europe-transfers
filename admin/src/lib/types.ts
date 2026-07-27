@@ -13,6 +13,7 @@ export interface User {
   idDocumentUrl?: string;
   idDocumentStatus: "PENDING" | "VERIFIED" | "REJECTED";
   isEmailVerified: boolean;
+  rejectionReason?: string;
   createdAt: string;
 }
 

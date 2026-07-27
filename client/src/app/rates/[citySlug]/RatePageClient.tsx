@@ -24,6 +24,7 @@ import {
   IconClock,
   IconUsers,
   IconTag,
+  IconSparkles,
 } from "@tabler/icons-react";
 
 interface Props {
@@ -32,28 +33,13 @@ interface Props {
   citySlug: string;
 }
 
-const gradientPairs = [
-  ["from-blue-500", "to-cyan-500"],
-  ["from-violet-500", "to-purple-500"],
-  ["from-emerald-500", "to-teal-500"],
-  ["from-amber-500", "to-orange-500"],
-  ["from-rose-500", "to-pink-500"],
-  ["from-indigo-500", "to-blue-500"],
-];
-
-function hashGradient(text: string) {
-  let hash = 0;
-  for (let i = 0; i < text.length; i++) hash = text.charCodeAt(i) + ((hash << 5) - hash);
-  return gradientPairs[Math.abs(hash) % gradientPairs.length];
-}
-
 function FeatureBadge({ active, icon: Icon, label }: { active: boolean; icon: React.ElementType; label: string }) {
   return (
     <div
-      className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full border ${
+      className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg border ${
         active
-          ? "bg-navy/5 border-navy/10 text-navy"
-          : "bg-muted/50 border-transparent text-muted-foreground/60 line-through"
+          ? "bg-navy/5 border-navy/15 text-navy font-semibold"
+          : "bg-slate-100/70 border-transparent text-gray-400 line-through"
       }`}
     >
       <Icon className="h-3 w-3" />
@@ -70,41 +56,44 @@ function VehicleCard({
   route: Route & { routePrices: RoutePrice[] };
 }) {
   return (
-    <Card className="group overflow-hidden border-border/50 bg-white transition-all hover:shadow-xl hover:shadow-black/5 hover:border-gold/40 hover:-translate-y-0.5">
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-gold/10 to-gold/5 shrink-0">
-            <IconCar className="h-5 w-5 text-gold" strokeWidth={1.5} />
+    <Card className="group overflow-hidden border border-gray-200/80 bg-white rounded-2xl transition-all hover:shadow-xl hover:shadow-navy/10 hover:border-gold/50 hover:-translate-y-1">
+      <CardContent className="p-5 flex flex-col justify-between h-full space-y-4">
+        <div>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10 text-navy shrink-0 group-hover:bg-navy group-hover:text-gold transition-colors">
+              <IconCar className="h-6 w-6" strokeWidth={1.5} />
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-black text-navy tracking-tight">€{Number(rp.price).toFixed(2)}</p>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Fixed Total Price</p>
+            </div>
           </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold text-navy">€{Number(rp.price).toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground">Fixed total price</p>
+
+          <div className="mt-4">
+            <h4 className="font-extrabold text-base text-navy">{rp.carType?.name || "Standard Luxury Sedan"}</h4>
+            <p className="text-xs text-gray-500 font-medium mt-0.5">
+              Up to {rp.carType?.seats || "4"} passengers
+            </p>
           </div>
-        </div>
 
-        <div className="mt-4">
-          <p className="font-semibold text-base">{rp.carType?.name || "Standard Car"}</p>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Up to {rp.carType?.seats || "—"} passengers
-          </p>
-        </div>
-
-        <div className="mt-4 flex flex-wrap gap-1.5">
-          <FeatureBadge active={rp.carType?.isAC || false} icon={IconSnowflake} label="AC" />
-          <FeatureBadge active={rp.carType?.isWiFi || false} icon={IconWifi} label="WiFi" />
-          <FeatureBadge active={rp.carType?.isLuggage || false} icon={IconLuggage} label="Luggage" />
-          <FeatureBadge active={rp.carType?.isChildSeat || false} icon={IconBabyCarriage} label="Child Seat" />
-          <FeatureBadge active={rp.carType?.isVIP || false} icon={IconCrown} label="VIP" />
-          <FeatureBadge active={rp.carType?.isPetFriendly || false} icon={IconPaw} label="Pets" />
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            <FeatureBadge active={rp.carType?.isAC ?? true} icon={IconSnowflake} label="AC" />
+            <FeatureBadge active={rp.carType?.isWiFi ?? true} icon={IconWifi} label="WiFi" />
+            <FeatureBadge active={rp.carType?.isLuggage ?? true} icon={IconLuggage} label="Luggage" />
+            <FeatureBadge active={rp.carType?.isChildSeat ?? false} icon={IconBabyCarriage} label="Child Seat" />
+            <FeatureBadge active={rp.carType?.isVIP ?? false} icon={IconCrown} label="VIP" />
+            <FeatureBadge active={rp.carType?.isPetFriendly ?? false} icon={IconPaw} label="Pets" />
+          </div>
         </div>
 
         <Link
           href={`/checkout?routeId=${route.id}&carTypeId=${rp.carType?.id}&routePriceId=${rp.routePriceId}&from=${encodeURIComponent(
             route.fromLocation?.name || ""
           )}&to=${encodeURIComponent(route.toLocation?.name || "")}`}
+          className="block pt-2"
         >
-          <Button variant="gold" className="w-full mt-5 rounded-full group-hover:shadow-md transition-all">
-            Book Now <IconArrowRight className="ml-2 h-4 w-4" />
+          <Button variant="gold" className="w-full rounded-xl py-3 text-xs font-black shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2">
+            Book Now <IconArrowRight className="h-4 w-4" />
           </Button>
         </Link>
       </CardContent>
@@ -113,146 +102,153 @@ function VehicleCard({
 }
 
 export function RatePageClient({ locations, routes, citySlug }: Props) {
-  const cityLocations = locations.filter((l) => l.city.toLowerCase().replace(/\s+/g, "-") === citySlug);
-  const cityName = cityLocations[0]?.city || citySlug;
+  const formattedSlug = citySlug.replace(/-/g, " ");
+  const capitalizedCity = formattedSlug.charAt(0).toUpperCase() + formattedSlug.slice(1);
+
+  const cityLocations = locations.filter(
+    (l) => l.city.toLowerCase().replace(/\s+/g, "-") === citySlug.toLowerCase()
+  );
+  
+  const cityName = cityLocations[0]?.city || capitalizedCity;
 
   const cityRoutes = routes.filter(
-    (r) => r.fromLocation && cityLocations.some((l) => l.id === r.fromLocationId) && r.isActive
+    (r) =>
+      r.fromLocation &&
+      (cityLocations.some((l) => l.id === r.fromLocationId) ||
+        r.fromLocation.city.toLowerCase().replace(/\s+/g, "-") === citySlug.toLowerCase()) &&
+      r.isActive
   );
 
-  const heroGradient = hashGradient(cityName);
-
-  if (cityLocations.length === 0) {
-    return (
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
-          <IconMapPin className="h-8 w-8 text-muted-foreground" />
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-bold">City Not Found</h1>
-        <p className="mt-3 text-muted-foreground">No routes found for {citySlug}. Please explore our home page.</p>
-        <Link href="/" className="mt-6 inline-block">
-          <Button variant="gold">Back to Home</Button>
-        </Link>
-      </div>
-    );
-  }
-
   return (
-    <div>
-      {/* Hero */}
+    <div className="bg-slate-50/50 min-h-screen">
+      {/* Hero Banner */}
       <section className="relative bg-navy overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-navy via-navy to-navy-light/30" />
-        <div className={`absolute top-0 right-0 h-[500px] w-[500px] rounded-full bg-gradient-to-br ${heroGradient[0]} ${heroGradient[1]} opacity-10 blur-[120px]`} />
-        <div className="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-navy/90 to-black/80" />
+        <div className="absolute top-10 right-20 h-96 w-96 rounded-full bg-gold/10 blur-[120px] pointer-events-none" />
 
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm font-medium text-white/60 hover:bg-white/10 hover:text-white transition-colors mb-6"
+            className="inline-flex items-center gap-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 px-4 py-2 text-xs font-semibold text-white/90 hover:bg-gold hover:text-navy transition-all duration-300 mb-8 cursor-pointer shadow-md"
           >
             <IconArrowLeft className="h-4 w-4" /> Back to Home
           </Link>
 
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-sm font-semibold text-gold mb-4">
-                <IconMapPin className="h-4 w-4" />
-                {cityLocations.length} pickup location{cityLocations.length > 1 ? "s" : ""} in {cityName}
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+            <div className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 rounded-full bg-gold/15 px-4 py-1.5 text-xs font-black text-gold uppercase tracking-wider mb-4 border border-gold/30">
+                <IconMapPin className="h-3.5 w-3.5 text-gold" />
+                {cityLocations.length > 0
+                  ? `${cityLocations.length} Pickup Locations in ${cityName}`
+                  : `Chauffeured Transfers in ${cityName}`}
               </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight">
-                Transfers from <span className="text-gold">{cityName}</span>
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1]">
+                Transfers & Chauffeuring from <span className="text-gold">{cityName}</span>
               </h1>
-              <p className="mt-4 text-base sm:text-lg text-white/50 max-w-xl leading-relaxed">
-                Premium private transfers from {cityName} to top destinations. Fixed prices, professional drivers, and instant booking.
+              <p className="mt-4 text-base sm:text-lg text-gray-300 max-w-2xl leading-relaxed font-normal">
+                First-class private chauffeured transfers from {cityName} to airports, luxury hotels, and top European cities. Fixed pricing with professional English-speaking drivers.
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-3 text-sm">
-              <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/10 text-white/70">
+
+            <div className="flex flex-wrap items-center gap-3 text-xs font-semibold">
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/15 text-white shadow-sm">
                 <IconRoute className="h-4 w-4 text-gold" />
-                <span>{cityRoutes.length} routes available</span>
+                <span>{cityRoutes.length} Direct Routes</span>
               </div>
-              <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/10 text-white/70">
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/15 text-white shadow-sm">
                 <IconTag className="h-4 w-4 text-gold" />
-                <span>No hidden fees</span>
+                <span>Zero Hidden Fees</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Pickup Locations */}
-      <section className="bg-white border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-            <IconMapPin className="h-4 w-4 text-gold" />
-            <span className="font-medium text-foreground">Pickup locations in {cityName}:</span>
+      {/* Pickup Locations Bar */}
+      {cityLocations.length > 0 && (
+        <section className="bg-white border-b border-gray-200/80 shadow-xs">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5">
+            <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+              <IconMapPin className="h-4 w-4 text-gold" />
+              <span>Verified Pickup Locations in {cityName}:</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {cityLocations.map((loc) => (
+                <Badge
+                  key={loc.id}
+                  className="rounded-xl px-4 py-2 text-xs font-extrabold border border-gold/30 text-navy bg-gold/10 hover:bg-gold hover:text-navy transition-all cursor-pointer"
+                >
+                  {loc.name}
+                </Badge>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {cityLocations.map((loc) => (
-              <Badge key={loc.id} variant="outline" className="rounded-full px-4 py-1.5 text-sm font-medium border-gold/20 text-foreground bg-gold/5 hover:bg-gold/10">
-                {loc.name}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* Routes */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+      {/* Routes & Rates Grid */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
         <div className="mb-10">
-          <span className="text-xs font-bold tracking-[0.15em] text-gold uppercase">Pricing</span>
-          <h2 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">Available Routes from {cityName}</h2>
-          <p className="mt-2 text-sm sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
-            Choose your destination and vehicle. All prices are fixed with no hidden fees and include meet & greet, luggage, and waiting time.
+          <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 px-3.5 py-1 text-xs font-extrabold text-gold uppercase tracking-widest mb-3">
+            <IconSparkles className="h-3.5 w-3.5" />
+            Transparent Pricing
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-black text-navy tracking-tight">Available Routes from {cityName}</h2>
+          <p className="mt-2 text-sm sm:text-base text-gray-600 max-w-2xl leading-relaxed">
+            Select your destination and vehicle class. All rates are fixed with complimentary waiting time, luggage assistance, and flight tracking included.
           </p>
         </div>
 
         <div className="space-y-8">
           {cityRoutes.length === 0 ? (
-            <Card className="border-dashed border-2 border-border/50">
-              <CardContent className="py-16 text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
-                  <IconRoute className="h-8 w-8 text-muted-foreground" />
+            <Card className="border border-dashed border-gray-300 bg-white rounded-3xl p-8 sm:p-12 text-center shadow-sm">
+              <CardContent className="p-0 max-w-md mx-auto space-y-4">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gold/10 text-gold">
+                  <IconRoute className="h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-semibold">No routes available</h3>
-                <p className="mt-2 text-muted-foreground max-w-md mx-auto">
-                  We don&apos;t have any active routes from {cityName} yet. Contact us for a custom quote.
+                <h3 className="text-2xl font-black text-navy">Custom Transfers for {cityName}</h3>
+                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-normal">
+                  We provide bespoke chauffeured transfers to and from any airport, hotel, or city in {cityName}. Contact our concierge for an instant quote.
                 </p>
-                <Link href="/contact" className="mt-6 inline-block">
-                  <Button variant="gold">Request a Route</Button>
-                </Link>
+                <div className="pt-2">
+                  <Link href={`/contact?city=${encodeURIComponent(cityName)}`}>
+                    <Button variant="gold" size="lg" className="rounded-xl px-8 py-3.5 text-xs sm:text-sm font-extrabold shadow-md hover:shadow-lg cursor-pointer">
+                      Request Custom Quote for {cityName}
+                    </Button>
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           ) : (
             cityRoutes.map((route) => (
               <Card
                 key={route.id}
-                className="overflow-hidden border-border/40 bg-white transition-all hover:shadow-xl hover:shadow-black/5 hover:border-gold/20"
+                className="overflow-hidden border border-gray-200/80 bg-white rounded-3xl shadow-md transition-all hover:shadow-xl hover:border-gold/30"
               >
                 <CardContent className="p-0">
                   {/* Route Header */}
-                  <div className="bg-muted/30 px-5 sm:px-6 py-5 border-b border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="bg-slate-50 px-6 py-5 border-b border-gray-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gold/10 shrink-0">
-                        <IconRoute className="h-5 w-5 text-gold" strokeWidth={1.5} />
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-navy text-gold shrink-0 shadow-sm">
+                        <IconRoute className="h-5 w-5" strokeWidth={1.5} />
                       </div>
                       <div>
-                        <h3 className="text-base sm:text-lg font-bold">
-                          {route.fromLocation?.name} <span className="text-gold mx-1">→</span> {route.toLocation?.name}
+                        <h3 className="text-lg sm:text-xl font-black text-navy">
+                          {route.fromLocation?.name} <span className="text-gold mx-1.5">→</span> {route.toLocation?.name}
                         </h3>
-                        <p className="text-sm text-muted-foreground">{route.routePrices.length} vehicle options</p>
+                        <p className="text-xs font-semibold text-gray-500 mt-0.5">
+                          {route.routePrices.length} Luxury Fleet Options
+                        </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="w-fit rounded-full px-3 py-1 border-gold/20 text-gold bg-gold/5">
-                        Fixed Price
-                      </Badge>
-                    </div>
+                    <Badge className="w-fit rounded-full px-4 py-1.5 border border-gold/30 text-navy bg-gold/15 font-extrabold text-xs">
+                      Fixed All-Inclusive Rate
+                    </Badge>
                   </div>
 
-                  {/* Vehicle Options */}
-                  <div className="p-5 sm:p-6">
-                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {/* Vehicle Grid */}
+                  <div className="p-6 sm:p-8">
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                       {route.routePrices.map((rp, idx) => (
                         <VehicleCard key={`${route.id}-${rp.routePriceId || idx}`} rp={rp} route={route} />
                       ))}
@@ -265,23 +261,23 @@ export function RatePageClient({ locations, routes, citySlug }: Props) {
         </div>
       </section>
 
-      {/* Info Section */}
-      <section className="bg-muted/30 border-t border-border">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+      {/* Trust & Guarantee Highlights */}
+      <section className="bg-white border-t border-gray-200/80 py-16 sm:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { icon: IconCheck, title: "Fixed Pricing", desc: "No surprise charges. The price you see is the price you pay." },
-              { icon: IconUsers, title: "Professional Drivers", desc: "Licensed, insured, and punctual chauffeurs." },
-              { icon: IconClock, title: "Free Waiting Time", desc: "Airport pickups include complimentary waiting time." },
-              { icon: IconCalendar, title: "24/7 Availability", desc: "Book anytime, day or night, with instant confirmation." },
+              { icon: IconCheck, title: "Fixed All-Inclusive Rates", desc: "No surprise charges or meter surge pricing. The quote you see is what you pay." },
+              { icon: IconUsers, title: "Licensed Chauffeurs", desc: "Professional, English-speaking, fully vetted local drivers." },
+              { icon: IconClock, title: "Free Airport Waiting", desc: "Includes 60 minutes complimentary wait time for flight arrivals." },
+              { icon: IconCalendar, title: "24/7 Concierge Support", desc: "Book anytime online or speak with our live travel support desk." },
             ].map((item) => (
-              <div key={item.title} className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold/10 shrink-0">
-                  <item.icon className="h-5 w-5 text-gold" />
+              <div key={item.title} className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-gray-100">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gold/15 text-navy shrink-0">
+                  <item.icon className="h-5.5 w-5.5 text-navy" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-sm">{item.title}</h4>
-                  <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                  <h4 className="font-extrabold text-sm text-navy">{item.title}</h4>
+                  <p className="mt-1 text-xs text-gray-600 leading-relaxed font-normal">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -289,28 +285,29 @@ export function RatePageClient({ locations, routes, citySlug }: Props) {
         </div>
       </section>
 
-      {/* Contact CTA */}
-      <section className="bg-white border-t border-border">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 rounded-3xl bg-navy px-6 sm:px-10 py-8 sm:py-10">
-            <div>
-              <h3 className="text-xl sm:text-2xl font-bold text-white">Need a custom route?</h3>
-              <p className="mt-2 text-sm sm:text-base text-white/60 max-w-lg">
-                Can&apos;t find your destination? Reach out and we&apos;ll prepare a personalized quote for your trip from {cityName}.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Link href="/contact">
-                <Button variant="gold" className="rounded-full">
-                  <IconInfoCircle className="mr-2 h-4 w-4" /> Request a Quote
-                </Button>
-              </Link>
-              <Link href="tel:+49123456789">
-                <Button variant="outline" className="rounded-full border-white/20 text-white hover:bg-white/10 hover:text-white">
-                  <IconPhone className="mr-2 h-4 w-4" /> Call Us
-                </Button>
-              </Link>
-            </div>
+      {/* Custom Quote CTA */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 rounded-3xl bg-navy p-8 sm:p-12 border border-gold/30 shadow-2xl relative overflow-hidden">
+          <div className="relative z-10">
+            <span className="inline-block rounded-full bg-gold/20 text-gold px-3.5 py-1 text-xs font-bold uppercase tracking-wider mb-3">
+              Need a Custom Route?
+            </span>
+            <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tight">Travelling Beyond {cityName}?</h3>
+            <p className="mt-2 text-xs sm:text-sm text-gray-300 max-w-xl leading-relaxed font-normal">
+              Our concierge team arranges custom intercity routes, hourly chauffeuring, and multi-day travel itineraries.
+            </p>
+          </div>
+          <div className="relative z-10 flex flex-col sm:flex-row gap-3.5 flex-shrink-0">
+            <Link href={`/contact?city=${encodeURIComponent(cityName)}`}>
+              <Button variant="gold" size="lg" className="rounded-xl px-7 py-3.5 text-xs sm:text-sm font-extrabold shadow-md cursor-pointer">
+                <IconInfoCircle className="mr-2 h-4 w-4" /> Request Custom Quote
+              </Button>
+            </Link>
+            <Link href="tel:+41441234567">
+              <Button variant="outline" size="lg" className="rounded-xl border-white/20 text-white hover:bg-white/10 hover:text-white px-7 py-3.5 text-xs sm:text-sm font-bold cursor-pointer">
+                <IconPhone className="mr-2 h-4 w-4" /> Speak with Concierge
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

@@ -17,12 +17,20 @@ import {
   IconPhone,
   IconInfoCircle,
   IconHome,
+  IconLogin,
+  IconUserCircle,
+  IconClock,
+  IconCompass,
+  IconArrowRight,
+  IconHeadset,
 } from "@tabler/icons-react";
 
 const navLinks = [
   { label: "Home", href: "/", icon: IconHome },
   { label: "Fleet", href: "/fleet", icon: IconCar },
+  { label: "Vehicle at Disposal", href: "/rates", icon: IconClock },
   { label: "Packages", href: "/packages", icon: IconPackage },
+  { label: "Sightseeing", href: "/packages?category=sightseeing", icon: IconCompass },
   { label: "About", href: "/about", icon: IconInfoCircle },
   { label: "Contact", href: "/contact", icon: IconPhone },
 ];
@@ -37,64 +45,74 @@ function MobileNav() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden text-white/80 hover:text-white hover:bg-white/10">
+        <Button variant="ghost" size="icon" className="xl:hidden h-9 w-9 text-navy hover:bg-navy/5 p-0">
           <IconMenu2 className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-80 p-0 bg-navy border-navy-lighter">
-        <div className="flex items-center gap-3 px-6 py-5 border-b border-white/10">
-          <Link
-            href="/"
-            onClick={handleNav}
-            className="relative flex h-12 w-44 items-center justify-center rounded-xl bg-white px-3 py-1 shadow-sm"
-          >
-            <Image
-              src="/logo.png"
-              alt="The Europe Transfers"
-              fill
-              className="object-contain p-1"
-              priority
-            />
+      <SheetContent side="left" className="w-80 p-0 bg-white">
+        <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
+          <Link href="/" onClick={handleNav} className="relative h-10 w-40 shrink-0">
+            <Image src="/logo-2.jpeg" alt="The Europe Transfers" fill className="object-contain" priority />
           </Link>
         </div>
         <nav className="flex flex-col gap-1 p-4">
           {navLinks.map((link) => (
             <Link
-              key={link.href}
+              key={link.label}
               href={link.href}
               onClick={handleNav}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm font-medium transition-all",
+                "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all",
                 pathname === link.href
-                  ? "bg-gold/10 text-gold"
-                  : "text-white/60 hover:bg-white/5 hover:text-white"
+                  ? "bg-gold/15 text-gold font-extrabold"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-navy"
               )}
             >
-              <link.icon className="h-4 w-4" />
+              <link.icon className="h-4.5 w-4.5 text-gold" />
               {link.label}
             </Link>
           ))}
-          <div className="my-3 h-px bg-white/10" />
+
+          <div className="my-3 h-px bg-gray-100" />
+
+          <a
+            href="tel:+41441234567"
+            className="flex items-center gap-3 rounded-xl px-4 py-3 text-xs font-bold text-navy bg-slate-50 border border-gray-100"
+          >
+            <IconHeadset className="h-4.5 w-4.5 text-gold" />
+            <span>Call Now: +41 44 123 4567</span>
+          </a>
+
           {user ? (
             <>
               <Link
                 href="/account"
                 onClick={handleNav}
-                className="flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm font-medium text-white/60 hover:bg-white/5 hover:text-white"
+                className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-extrabold text-navy hover:bg-gray-50"
               >
-                <IconUser className="h-4 w-4" /> My Account
+                <IconUserCircle className="h-4.5 w-4.5 text-gold" /> My Bookings
               </Link>
               <button
                 onClick={() => { logout(); handleNav(); }}
-                className="flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm font-medium text-white/60 hover:bg-white/5 hover:text-white"
+                className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-gray-600 hover:bg-red-50 hover:text-red-600"
               >
-                <IconLogout className="h-4 w-4" /> Logout
+                <IconLogout className="h-4.5 w-4.5" /> Logout
               </button>
             </>
           ) : (
-            <Link href="/auth/login" onClick={handleNav}>
-              <Button variant="gold" className="w-full mt-1">Login</Button>
-            </Link>
+            <div className="space-y-2 pt-2">
+              <Link href="/auth/login" onClick={handleNav} className="block">
+                <Button className="w-full h-11 rounded-xl bg-navy hover:bg-navy-light font-extrabold text-white">
+                  <IconLogin className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/contact" onClick={handleNav} className="block">
+                <Button className="w-full h-11 rounded-xl bg-gold hover:bg-gold-light font-extrabold text-navy">
+                  Book Now <IconArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              </Link>
+            </div>
           )}
         </nav>
       </SheetContent>
@@ -116,14 +134,18 @@ export function Header() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-navy",
-        scrolled && "glass shadow-lg shadow-black/10 border-b border-white/5"
+        "fixed left-0 right-0 z-50 transition-all duration-300 mx-auto",
+        scrolled
+          ? "top-2 sm:top-4 w-[95%] sm:w-[90%] max-w-7xl bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-gray-100"
+          : "top-0 w-full bg-white border-b border-gray-100/60"
       )}
     >
-      <div className="mx-auto flex h-16 sm:h-18 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-6 lg:gap-8">
+      <div className="mx-auto flex h-14 sm:h-18 max-w-7xl items-center justify-between px-2.5 sm:px-6 lg:px-8">
+        
+        {/* Left: Logo & Mobile Menu */}
+        <div className="flex items-center gap-1.5 sm:gap-3">
           <MobileNav />
-          <Link href="/" className="relative h-10 sm:h-12 w-32 sm:w-44 shrink-0">
+          <Link href="/" className="relative h-8 sm:h-10 w-28 sm:w-40 shrink-0">
             <Image
               src="/logo-2.jpeg"
               alt="The Europe Transfers"
@@ -132,56 +154,83 @@ export function Header() {
               priority
             />
           </Link>
-          <nav className="hidden md:flex items-center gap-0.5">
-            {navLinks.map((link) => (
+        </div>
+
+        {/* Center Navigation Menu */}
+        <nav className="hidden xl:flex items-center gap-1 bg-slate-50/80 rounded-2xl px-2 py-1.5 border border-gray-100">
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href;
+            return (
               <Link
-                key={link.href}
+                key={link.label}
                 href={link.href}
                 className={cn(
-                  "relative rounded-lg px-3 py-2 text-sm font-medium transition-all",
-                  pathname === link.href
-                    ? "text-gold"
-                    : "text-white/60 hover:text-white hover:bg-white/5"
+                  "relative rounded-xl px-3 py-1.5 text-xs font-bold transition-all duration-200 cursor-pointer whitespace-nowrap",
+                  isActive
+                    ? "bg-navy text-gold shadow-sm"
+                    : "text-gray-600 hover:text-navy hover:bg-white"
                 )}
               >
                 {link.label}
-                {pathname === link.href && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-gold" />
-                )}
               </Link>
-            ))}
-          </nav>
-        </div>
+            );
+          })}
+        </nav>
 
-        <div className="flex items-center gap-2">
+        {/* Right Side Actions */}
+        <div className="flex items-center gap-1.5 sm:gap-3">
+          
+          {/* Call Now Button Pill */}
+          <a
+            href="tel:+41441234567"
+            className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-gray-200/80 bg-white px-3.5 py-2 text-xs font-bold text-navy hover:border-gold transition-all"
+            title="Call Support"
+          >
+            <IconHeadset className="h-4 w-4 text-gold" />
+            <span className="hidden lg:inline">+41 44 123 4567</span>
+            <span className="lg:hidden">Call</span>
+          </a>
+
+          {/* User Auth or Sign In / Book Now */}
           {user ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <Link
                 href="/account"
-                className="hidden sm:flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-all"
+                className="flex items-center gap-1.5 sm:gap-2 rounded-xl px-2.5 py-1.5 sm:px-3.5 sm:py-2 text-[11px] sm:text-xs font-black text-navy bg-gold/15 hover:bg-gold/30 border border-gold/30 transition-all"
               >
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10">
-                  <IconUser className="h-3.5 w-3.5" />
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gold text-navy font-black text-[10px]">
+                  {user.name.charAt(0).toUpperCase()}
                 </div>
-                <span className="max-w-[100px] truncate">{user.name}</span>
+                <span className="hidden sm:inline">My Bookings</span>
               </Link>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-white/50 hover:text-white hover:bg-white/10"
+                className="h-8 w-8 sm:h-9 sm:w-9 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl cursor-pointer"
                 onClick={logout}
+                title="Logout"
               >
                 <IconLogout className="h-4 w-4" />
               </Button>
             </div>
           ) : (
-            <Link href="/auth/login">
-              <Button variant="gold" size="sm" className="rounded-lg px-4">
-                Sign In
-              </Button>
-            </Link>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Link href="/auth/login" className="hidden sm:inline-block">
+                <Button variant="ghost" className="h-8 sm:h-10 rounded-xl px-2.5 sm:px-3.5 text-xs font-bold text-navy hover:bg-slate-100">
+                  Sign In
+                </Button>
+              </Link>
+
+              <Link href="/contact">
+                <Button className="h-8 sm:h-10 rounded-xl px-3 sm:px-5 bg-gold hover:bg-gold-light font-extrabold text-navy shadow-md transition-all cursor-pointer text-[11px] sm:text-xs whitespace-nowrap">
+                  Book Now
+                </Button>
+              </Link>
+            </div>
           )}
+
         </div>
+
       </div>
     </header>
   );

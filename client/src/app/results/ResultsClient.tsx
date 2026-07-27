@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Map, MapMarker, MarkerContent, MarkerTooltip, MapControls, MapRoute } from "@/components/ui/map";
 import { api } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
+import maplibregl from "maplibre-gl";
 import type { SearchResult, SearchData } from "./page";
 import {
   IconUsers,
@@ -38,11 +40,15 @@ import {
   IconLuggage,
   IconCreditCard,
   IconCheck,
+  IconLock,
+  IconFile,
 } from "@tabler/icons-react";
 
 interface ResultsClientProps {
-  searchData: SearchData | null;
+  demoData: SearchData;
+  realData: SearchData | null;
   error: string | null;
+  isLoggedIn: boolean;
   searchParams: {
     from: string;
     to: string;
@@ -67,19 +73,23 @@ function VehicleCard({
   selected,
   onSelect,
   index,
+  isLocked,
 }: {
   item: SearchResult;
   selected: boolean;
   onSelect: () => void;
   index: number;
+  isLocked?: boolean;
 }) {
   return (
     <Card
       onClick={onSelect}
       className={`group overflow-hidden transition-all duration-300 cursor-pointer border-border/40 ${
-        selected
-          ? "ring-2 ring-gold shadow-xl shadow-gold/10 border-gold"
-          : "hover:shadow-xl hover:shadow-black/5 hover:border-gold/30 hover:-translate-y-0.5"
+        isLocked
+          ? "border-blue-200 bg-blue-50/30 opacity-80"
+          : selected
+            ? "ring-2 ring-gold shadow-xl shadow-gold/10 border-gold"
+            : "hover:shadow-xl hover:shadow-black/5 hover:border-gold/30 hover:-translate-y-0.5"
       }`}
     >
       <CardContent className="p-0">
@@ -100,7 +110,7 @@ function VehicleCard({
               </div>
             )}
             <div className="absolute top-3 left-3">
-              <Badge className="rounded-full bg-white/95 text-navy font-semibold border-0 shadow-sm">
+              <Badge className={`rounded-full font-semibold border-0 shadow-sm ${isLocked ? "bg-blue-100 text-blue-700" : "bg-white/95 text-navy"}`}>
                 #{index + 1}
               </Badge>
             </div>
@@ -147,12 +157,16 @@ function VehicleCard({
                   onSelect();
                 }}
                 className={`rounded-full px-5 ${
-                  selected
-                    ? "bg-navy text-white hover:bg-navy/90"
-                    : "bg-gold text-navy hover:bg-gold-light font-semibold"
+                  isLocked
+                    ? "bg-blue-600 text-white hover:bg-blue-700 font-semibold"
+                    : selected
+                      ? "bg-navy text-white hover:bg-navy/90"
+                      : "bg-gold text-navy hover:bg-gold-light font-semibold"
                 }`}
               >
-                {selected ? (
+                {isLocked ? (
+                  "Login to Book"
+                ) : selected ? (
                   <span className="flex items-center gap-1">
                     <IconCheck className="h-4 w-4" /> Selected
                   </span>
@@ -188,17 +202,21 @@ function ResultsSkeleton() {
 function EmptyState({ onGoBack }: { onGoBack: () => void }) {
   return (
     <div className="mx-auto max-w-7xl px-4 py-16">
-      <Card className="max-w-lg mx-auto border-border/40 rounded-2xl">
-        <CardContent className="py-16 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-            <IconSearch className="h-8 w-8 text-muted-foreground" />
+      <Card className="max-w-xl mx-auto border-gray-100 rounded-3xl overflow-hidden shadow-2xl bg-white">
+        <CardContent className="py-14 px-8 text-center flex flex-col items-center">
+          <div className="w-full max-w-sm h-56 relative mb-6">
+            <img
+              src="/images/no_vehicles_route_found.png"
+              alt="No vehicles available"
+              className="w-full h-full object-contain mx-auto drop-shadow-md"
+            />
           </div>
-          <h2 className="mt-6 text-xl font-bold">No vehicles available for this route</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <h2 className="text-2xl font-black text-navy tracking-tight">No vehicles available for this route</h2>
+          <p className="mt-3 text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
             We don&apos;t service this route yet. Try a different route or contact us for assistance.
           </p>
-          <Button onClick={onGoBack} variant="gold" className="mt-6 rounded-full">
-            <IconArrowLeft className="mr-2 h-4 w-4" /> Back to Search
+          <Button onClick={onGoBack} variant="gold" className="mt-8 rounded-2xl font-black text-sm px-8 py-3.5 shadow-lg shadow-gold/20 hover:scale-105 transition-all">
+            <IconArrowLeft className="mr-2 h-4 w-4 stroke-[3]" /> Back to Search
           </Button>
         </CardContent>
       </Card>
@@ -230,35 +248,111 @@ function ErrorState({ message, onRetry, onGoBack }: { message: string; onRetry: 
   );
 }
 
+function AuthOverlay({ type, onLogin, onVerify }: { type: "login" | "verify"; onLogin: () => void; onVerify: () => void }) {
+  if (type === "login") {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <Card className="w-[90%] max-w-md mx-4 border-border/40 overflow-hidden shadow-2xl">
+          <div className="h-2 bg-gradient-to-r from-blue-400 to-blue-600" />
+          <CardContent className="py-10 px-8 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
+              <IconLock className="h-8 w-8 text-blue-600" />
+            </div>
+            <h2 className="mt-5 text-xl font-bold">Login to Continue</h2>
+            <p className="mt-2 text-sm text-muted-foreground max-w-xs mx-auto">
+              Login to see real prices, book transfers, and manage your trips.
+            </p>
+            <div className="mt-6 flex flex-col gap-3">
+              <Button onClick={onLogin} className="w-full h-11 rounded-full bg-blue-600 hover:bg-blue-700 font-semibold text-white">
+                Login Now
+              </Button>
+              <Button onClick={onVerify} variant="ghost" className="w-full h-11 rounded-full text-muted-foreground">
+                Go Back
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <Card className="w-[90%] max-w-md mx-4 border-border/40 overflow-hidden shadow-2xl">
+        <div className="h-2 bg-gradient-to-r from-amber-400 to-amber-600" />
+        <CardContent className="py-10 px-8 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+            <IconFile className="h-8 w-8 text-amber-600" />
+          </div>
+          <h2 className="mt-5 text-xl font-bold">Verify Your Document</h2>
+          <p className="mt-2 text-sm text-muted-foreground max-w-xs mx-auto">
+            Upload your government ID and get verified to access real prices and book transfers.
+          </p>
+          <div className="mt-6 flex flex-col gap-3">
+            <Button onClick={onVerify} className="w-full h-11 rounded-full bg-amber-600 hover:bg-amber-700 font-semibold text-white">
+              Verify Now
+            </Button>
+            <Button onClick={onLogin} variant="ghost" className="w-full h-11 rounded-full text-muted-foreground">
+              Go Back
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function ResultsClient({
-  searchData: initialData,
+  demoData,
+  realData,
   error: initialError,
+  isLoggedIn,
   searchParams: sp,
 }: ResultsClientProps) {
   const router = useRouter();
+  const { user, verificationStep, loading: authLoading } = useAuth();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
-  const [searchData, setSearchData] = useState(initialData);
+  const [passenger, setPassenger] = useState({
+    name: user?.name || "",
+    phone: user?.phone || "",
+    email: user?.email || "",
+  });
   const [error, setError] = useState(initialError);
-  const [passenger, setPassenger] = useState({ name: "", phone: "", email: "" });
+
+  useEffect(() => {
+    if (user) {
+      setPassenger({
+        name: user.name || "",
+        phone: user.phone || "",
+        email: user.email || "",
+      });
+    }
+  }, [user]);
+
+  const isVerified = verificationStep === "VERIFIED";
+  const showRealData = isLoggedIn && isVerified && realData;
+  const searchData = showRealData ? realData : demoData;
+  const isLocked = !showRealData;
 
   const fetchData = useCallback(async () => {
     setError(null);
     try {
-      const data = await api.post<SearchData>("/search", {
+      await api.post<SearchData>("/search", {
         fromLocationId: sp.fromId,
         toLocationId: sp.toId,
         passengers: sp.pax,
       });
-      setSearchData(data);
+      router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load results");
       toast.error("Could not load results. Please try again.");
     }
-  }, [sp]);
+  }, [sp, router]);
 
   const [routeCoords, setRouteCoords] = useState<[number, number][]>([]);
   const [routeInfo, setRouteInfo] = useState<{ distance: number; duration: number } | null>(null);
   const [mapTheme, setMapTheme] = useState<"light" | "dark">("light");
+  const mapRef = useRef<maplibregl.Map | null>(null);
 
   const selected = selectedIdx !== null && searchData ? searchData.cars[selectedIdx] : null;
 
@@ -281,7 +375,24 @@ export default function ResultsClient({
       .catch(() => {});
   }, [searchData]);
 
+  useEffect(() => {
+    if (!mapRef.current || routeCoords.length < 2) return;
+    const bounds = new maplibregl.LngLatBounds();
+    routeCoords.forEach((coord) => bounds.extend(coord));
+    mapRef.current.fitBounds(bounds, { padding: 60, maxZoom: 14, duration: 0 });
+  }, [routeCoords]);
+
+  const handleCarSelect = (idx: number) => {
+    if (isLocked) {
+      return;
+    }
+    setSelectedIdx(idx);
+  };
+
   const handleContinue = () => {
+    if (isLocked) {
+      return;
+    }
     if (!selected) {
       toast.error("Please select a vehicle first");
       return;
@@ -328,6 +439,13 @@ export default function ResultsClient({
 
   return (
     <div className="min-h-screen bg-muted/20">
+      {!authLoading && isLocked && !isLoggedIn && (
+        <AuthOverlay type="login" onLogin={() => router.push("/auth/login")} onVerify={() => router.back()} />
+      )}
+      {!authLoading && isLocked && isLoggedIn && !isVerified && (
+        <AuthOverlay type="verify" onLogin={() => router.back()} onVerify={() => router.push("/account")} />
+      )}
+
       {/* Header */}
       <div className="bg-navy text-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
@@ -367,23 +485,24 @@ export default function ResultsClient({
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6">
           <Card className="overflow-hidden rounded-2xl border-border/40">
             <div className="h-[300px] sm:h-[400px] relative">
-              <Map center={mapCenter} zoom={routeCoords.length > 0 ? undefined : 7} theme={mapTheme}>
+              <Map ref={mapRef} center={mapCenter} zoom={routeCoords.length > 0 ? undefined : 7} theme={mapTheme}>
                 <MapControls showZoom={true} position="bottom-right" />
 
                 {routeCoords.length > 0 && <MapRoute coordinates={routeCoords} color="#C9A227" width={5} opacity={1} />}
 
                 <MapMarker longitude={searchData.route.from.longitude!} latitude={searchData.route.from.latitude!}>
                   <MarkerContent>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-navy text-sm font-bold text-white shadow-lg ring-4 ring-white">
-                      A
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-navy text-sm font-bold text-white shadow-xl ring-4 ring-white">
+                      <IconMapPin className="h-5 w-5" />
                     </div>
                   </MarkerContent>
                   <MarkerTooltip>{searchData.route.from.name} - Pickup</MarkerTooltip>
                 </MapMarker>
+
                 <MapMarker longitude={searchData.route.to.longitude!} latitude={searchData.route.to.latitude!}>
                   <MarkerContent>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold text-sm font-bold text-navy shadow-lg ring-4 ring-white">
-                      B
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gold text-sm font-bold text-navy shadow-xl ring-4 ring-white">
+                      <IconMapPin className="h-5 w-5" />
                     </div>
                   </MarkerContent>
                   <MarkerTooltip>{searchData.route.to.name} - Drop-off</MarkerTooltip>
@@ -441,7 +560,8 @@ export default function ResultsClient({
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold">Available Cars ({searchData.cars.length})</h2>
-                <span className="text-sm text-muted-foreground">Sorted by price</span>
+                {isLocked && <Badge className="bg-blue-100 text-blue-700 border-0">Demo Prices</Badge>}
+                {!isLocked && <span className="text-sm text-muted-foreground">Sorted by price</span>}
               </div>
               <div className="space-y-4">
                 {searchData.cars.map((car, idx) => (
@@ -449,8 +569,9 @@ export default function ResultsClient({
                     key={car.routePriceId}
                     item={car}
                     selected={selectedIdx === idx}
-                    onSelect={() => setSelectedIdx(idx)}
+                    onSelect={() => handleCarSelect(idx)}
                     index={idx}
+                    isLocked={isLocked}
                   />
                 ))}
               </div>
@@ -532,7 +653,9 @@ export default function ResultsClient({
                     <p className="text-xs text-muted-foreground">Fixed price in {selected.currency}</p>
                   </div>
                 ) : (
-                  <p className="text-center text-sm text-muted-foreground py-2">Select a car to see the price</p>
+                  <p className="text-center text-sm text-muted-foreground py-2">
+                    {isLocked ? "Login to see real prices" : "Select a car to see the price"}
+                  </p>
                 )}
 
                 <Separator />
@@ -548,6 +671,7 @@ export default function ResultsClient({
                       value={passenger.name}
                       onChange={(e) => setPassenger({ ...passenger, name: e.target.value })}
                       placeholder="John Doe"
+                      disabled={isLocked}
                       className="h-10 rounded-lg"
                     />
                   </div>
@@ -557,6 +681,7 @@ export default function ResultsClient({
                       value={passenger.phone}
                       onChange={(e) => setPassenger({ ...passenger, phone: e.target.value })}
                       placeholder="+39 123 456 7890"
+                      disabled={isLocked}
                       className="h-10 rounded-lg"
                     />
                   </div>
@@ -567,6 +692,7 @@ export default function ResultsClient({
                       value={passenger.email}
                       onChange={(e) => setPassenger({ ...passenger, email: e.target.value })}
                       placeholder="john@example.com"
+                      disabled={isLocked}
                       className="h-10 rounded-lg"
                     />
                   </div>
@@ -585,11 +711,15 @@ export default function ResultsClient({
 
                 <Button
                   className="w-full h-12 text-base font-semibold rounded-full"
-                  variant="gold"
-                  disabled={!selected}
+                  variant={isLocked ? "outline" : "gold"}
+                  disabled={!selected && !isLocked}
                   onClick={handleContinue}
                 >
-                  {selected ? (
+                  {isLocked ? (
+                    <span className="flex items-center gap-2">
+                      <IconLock className="h-4 w-4" /> Login to Book
+                    </span>
+                  ) : selected ? (
                     <span className="flex items-center gap-2">
                       Continue <IconArrowRight className="h-4 w-4" />
                     </span>

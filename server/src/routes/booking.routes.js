@@ -1,13 +1,16 @@
 import { Router } from "express";
 import {
+  getMyBookings,
   getBookings,
   getBookingById,
   getBookingByPhone,
   createBooking,
+  cancelBooking,
   updateBooking,
   deleteBooking,
 } from "../controllers/booking.controller.js";
 import protectAdmin from "../middlewares/adminAuth.middleware.js";
+import protectUser from "../middlewares/auth.middleware.js";
 import { bookingRateLimiter } from "../middlewares/rateLimiter.js";
 import validate from "../middlewares/validate.middleware.js";
 import { z } from "zod";
@@ -36,7 +39,9 @@ const updateBookingSchema = z.object({
 });
 
 router.post("/", bookingRateLimiter, validate(bookingSchema), createBooking);
+router.get("/my", protectUser, getMyBookings);
 router.get("/find", getBookingByPhone);
+router.post("/:id/cancel", protectUser, cancelBooking);
 router.get("/", protectAdmin, getBookings);
 router.get("/:id", protectAdmin, getBookingById);
 router.put("/:id", protectAdmin, validate(updateBookingSchema), updateBooking);

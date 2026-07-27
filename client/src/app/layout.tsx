@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { Jost } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-const jost = Jost({
+const geist = Geist({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-jost",
+  variable: "--font-geist",
   display: "swap",
 });
 
@@ -17,7 +16,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={jost.variable}>
+    <html lang="en" className={geist.variable}>
       <body className="min-h-screen bg-background font-sans antialiased">
         <Providers>{children}</Providers>
       </body>
