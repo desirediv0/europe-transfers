@@ -456,23 +456,23 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
     }, []);
 
     // CSS vars
-    const cssVars: CSSProperties = {
-      ["--fx-font" as any]: fontFamily,
-      ["--fx-text" as any]: colors.text ?? "rgba(255,255,255,0.95)",
-      ["--fx-overlay" as any]: colors.overlay ?? "linear-gradient(to bottom, rgba(5,10,20,0.55) 0%, rgba(5,10,20,0.15) 40%, rgba(5,10,20,0.15) 60%, rgba(5,10,20,0.65) 100%)",
-      ["--fx-page-bg" as any]: colors.pageBg ?? "#fff",
-      ["--fx-stage-bg" as any]: colors.stageBg ?? "#000",
-      ["--fx-gap" as any]: `${gap}rem`,
-      ["--fx-grid-px" as any]: `${gridPaddingX}rem`,
-      ["--fx-row-gap" as any]: "8px",
+    const cssVars: CSSProperties & Record<string, string> = {
+      "--fx-font": fontFamily ?? "inherit",
+      "--fx-text": colors.text ?? "rgba(255,255,255,0.95)",
+      "--fx-overlay": colors.overlay ?? "linear-gradient(to bottom, rgba(5,10,20,0.55) 0%, rgba(5,10,20,0.15) 40%, rgba(5,10,20,0.15) 60%, rgba(5,10,20,0.65) 100%)",
+      "--fx-page-bg": colors.pageBg ?? "#fff",
+      "--fx-stage-bg": colors.stageBg ?? "#000",
+      "--fx-gap": `${gap}rem`,
+      "--fx-grid-px": `${gridPaddingX}rem`,
+      "--fx-row-gap": "8px",
     };
 
     return (
       <div
         ref={(node) => {
-          (rootRef as any).current = node;
+          if (rootRef && "current" in rootRef) rootRef.current = node;
           if (typeof ref === "function") ref(node);
-          else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+          else if (ref && "current" in ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
         }}
         className={["fx", className].filter(Boolean).join(" ")}
         style={{ ...cssVars, ...style }}

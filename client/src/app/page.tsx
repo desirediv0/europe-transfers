@@ -357,7 +357,7 @@ export default function HomePage() {
               </h2>
 
               <p className="text-base sm:text-lg text-gray-600 leading-relaxed font-normal mb-8">
-                Founded with a commitment to uncompromised luxury and punctuality, Europe Transfers delivers bespoke private transfer solutions, airport chauffeuring, and scenic inter-city tours across Europe's most iconic destinations.
+                Founded with a commitment to uncompromised luxury and punctuality, Europe Transfers delivers bespoke private transfer solutions, airport chauffeuring, and scenic inter-city tours across Europe&apos;s most iconic destinations.
               </p>
 
               {/* 3 Core Pillars List */}
