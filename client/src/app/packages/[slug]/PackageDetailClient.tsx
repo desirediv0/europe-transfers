@@ -47,12 +47,14 @@ export function PackageDetailClient({ pkg }: Props) {
       <section className="relative bg-[#060C17] text-white overflow-hidden border-b border-white/10">
         
         {/* Background Image with Dark Gradient Overlays */}
-        <img
-          src={imageSrc}
-          alt={pkg.title}
-          className="absolute inset-0 h-full w-full object-cover opacity-35 mix-blend-overlay transition-transform duration-1000 hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-[#0B1426]/90 to-black/80" />
+        {imageSrc && (
+          <img
+            src={imageSrc}
+            alt={pkg.title}
+            className="absolute inset-0 h-full w-full object-cover opacity-60"
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#060C17] via-[#060C17]/60 to-black/70" />
         <div className="absolute top-10 right-20 h-96 w-96 rounded-full bg-gold/10 blur-[120px] pointer-events-none" />
 
         <div className="relative z-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-28">

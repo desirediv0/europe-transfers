@@ -163,30 +163,110 @@ async function main() {
   await prisma.routePrice.createMany({ data: priceData, skipDuplicates: true });
   console.log("Route prices seeded:", priceData.length);
 
-  // Seed a package
-  const pkg = await prisma.package.upsert({
-    where: { slug: "rome-highlights" },
-    update: {},
-    create: {
-      title: "Rome Highlights",
-      slug: "rome-highlights",
-      countryId: (await prisma.country.upsert({ where: { slug: "italy" }, update: {}, create: { name: "Italy", slug: "italy" } })).id,
-      durationDays: 3,
-      summary: "Explore the Eternal City's top attractions",
-      priceFrom: 299,
-      isActive: true,
-    },
-  });
+  // Delete old packages & itineraries to avoid stale entries
+  await prisma.itineraryDay.deleteMany({});
+  await prisma.package.deleteMany({});
 
-  await prisma.itineraryDay.createMany({
-    data: [
-      { packageId: pkg.id, dayNumber: 1, title: "Colosseum & Roman Forum", description: "Visit the iconic Colosseum and ancient Roman Forum" },
-      { packageId: pkg.id, dayNumber: 2, title: "Vatican City", description: "St. Peter's Basilica, Vatican Museums, Sistine Chapel" },
-      { packageId: pkg.id, dayNumber: 3, title: "Trastevere & Departure", description: "Morning stroll through Trastevere, afternoon departure" },
-    ],
-    skipDuplicates: true,
-  });
-  console.log("Package seeded:", pkg.title);
+  // Seed 5 Real Luxury Tour Packages with High Quality Unsplash Images
+  const italyCountry = await prisma.country.upsert({ where: { slug: "italy" }, update: {}, create: { name: "Italy", slug: "italy" } });
+  const franceCountry = await prisma.country.upsert({ where: { slug: "france" }, update: {}, create: { name: "France", slug: "france" } });
+  const switzerlandCountry = await prisma.country.upsert({ where: { slug: "switzerland" }, update: {}, create: { name: "Switzerland", slug: "switzerland" } });
+  const spainCountry = await prisma.country.upsert({ where: { slug: "spain" }, update: {}, create: { name: "Spain", slug: "spain" } });
+
+  const packagesData = [
+    {
+      title: "Rome & Vatican Eternal Journey",
+      slug: "rome-vatican-eternal-journey",
+      countryId: italyCountry.id,
+      durationDays: 3,
+      summary: "Explore the Colosseum, Sistine Chapel, and authentic Trastevere cuisine in uncompromised luxury.",
+      priceFrom: 349,
+      coverImage: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1000&auto=format&fit=crop",
+      isActive: true,
+      itineraries: [
+        { dayNumber: 1, title: "Imperial Rome & Colosseum VIP", description: "Private luxury transfer to the Colosseum, Roman Forum, and Palatine Hill with skip-the-line access." },
+        { dayNumber: 2, title: "Vatican Museums & Sistine Chapel", description: "Guided private tour of Vatican treasures, St. Peter's Basilica, and Piazza Navona." },
+        { dayNumber: 3, title: "Trastevere & Scenic Departure", description: "Morning stroll in Trastevere, wine tasting, followed by private airport transfer." },
+      ],
+    },
+    {
+      title: "Amalfi Coast & Positano Escaped Tour",
+      slug: "amalfi-coast-positano-escaped",
+      countryId: italyCountry.id,
+      durationDays: 4,
+      summary: "Breathtaking coastal drives, Ravello cliffside gardens, and crystal-clear Mediterranean sea views.",
+      priceFrom: 599,
+      coverImage: "https://images.unsplash.com/photo-1533105079780-92b9be482077?q=80&w=1000&auto=format&fit=crop",
+      isActive: true,
+      itineraries: [
+        { dayNumber: 1, title: "Naples to Sorrento Chauffeur Drive", description: "Panoramic coast drive along the Bay of Naples to Sorrento luxury hotel." },
+        { dayNumber: 2, title: "Positano Cliffside & Private Boat", description: "Explore pastel houses in Positano and private yacht tour along Capri grottoes." },
+        { dayNumber: 3, title: "Ravello Gardens & Historic Villas", description: "Visit Villa Cimbrone's infinity terrace and Ravello cathedral square." },
+        { dayNumber: 4, title: "Pompeii Ruins & Departure", description: "Private guided tour of ancient Pompeii ruins before luxury transfer to airport." },
+      ],
+    },
+    {
+      title: "Paris Lights & Riviera Luxury Express",
+      slug: "paris-lights-riviera-luxury",
+      countryId: franceCountry.id,
+      durationDays: 5,
+      summary: "Eiffel Tower VIP access, Louvre masterpieces, and private chauffeur transfers across the French Riviera.",
+      priceFrom: 799,
+      coverImage: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=1000&auto=format&fit=crop",
+      isActive: true,
+      itineraries: [
+        { dayNumber: 1, title: "Parisian Arrival & Seine Cruise", description: "Private airport transfer, hotel check-in, and sunset Champagne cruise on the River Seine." },
+        { dayNumber: 2, title: "Louvre Museum & Champs-Élysées", description: "Private art expert tour of Louvre, Arc de Triomphe, and luxury shopping." },
+        { dayNumber: 3, title: "Palace of Versailles Private Tour", description: "Chauffeured journey to Versailles, Hall of Mirrors, and Royal Gardens." },
+        { dayNumber: 4, title: "Nice & Cannes Promenade VIP", description: "Fly to Nice with private V-Class Mercedes transfer to Cannes Boulevard de la Croisette." },
+        { dayNumber: 5, title: "Monaco & Monte Carlo Casino", description: "Scenic Grand Prix road drive to Monaco, Palace Square, and Monte Carlo nightlife." },
+      ],
+    },
+    {
+      title: "Swiss Alpine Wonders & Glacier Tour",
+      slug: "swiss-alpine-wonders-glacier",
+      countryId: switzerlandCountry.id,
+      durationDays: 4,
+      summary: "Zurich lakefront, Interlaken mountain passes, and spectacular Matterhorn vistas in Zermatt.",
+      priceFrom: 899,
+      coverImage: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?q=80&w=1000&auto=format&fit=crop",
+      isActive: true,
+      itineraries: [
+        { dayNumber: 1, title: "Zurich Old Town & Lake Chauffeur", description: "Private pickup from Zurich airport, Bahnofstrasse luxury walk, and lakeside dining." },
+        { dayNumber: 2, title: "Interlaken & Grindelwald First", description: "Alpine drive through Lauterbrunnen waterfalls to Interlaken mountain valley." },
+        { dayNumber: 3, title: "Zermatt & Matterhorn Viewpoint", description: "Gornergrat cogwheel train, Matterhorn glacier paradise, and alpine village stroll." },
+        { dayNumber: 4, title: "Lucerne Chapel Bridge & Departure", description: "Panoramic drive to Lucerne, Lake Lucerne cruise, and airport drop-off." },
+      ],
+    },
+    {
+      title: "Barcelona & Catalonia Heritage Safari",
+      slug: "barcelona-catalonia-heritage",
+      countryId: spainCountry.id,
+      durationDays: 3,
+      summary: "Gaudí's Sagrada Família, Gothic Quarter tapas, and scenic Montserrat monastery drives.",
+      priceFrom: 449,
+      coverImage: "https://images.unsplash.com/photo-1583422409516-2895a771deda?q=80&w=1000&auto=format&fit=crop",
+      isActive: true,
+      itineraries: [
+        { dayNumber: 1, title: "Gaudí Masterpieces & Park Güell", description: "VIP private tour of Sagrada Família, Casa Batlló, and panoramic Park Güell." },
+        { dayNumber: 2, title: "Gothic Quarter & Gourmet Tapas", description: "Historic walking tour through El Born, La Boqueria market, and Michelin tapas experience." },
+        { dayNumber: 3, title: "Montserrat Monastery & Coastal Drop", description: "Chauffeured mountain journey to Montserrat Abbey and private transfer to El Prat airport." },
+      ],
+    },
+  ];
+
+  for (const item of packagesData) {
+    const { itineraries, ...pkgFields } = item;
+    const createdPkg = await prisma.package.create({
+      data: pkgFields,
+    });
+    if (itineraries && itineraries.length > 0) {
+      await prisma.itineraryDay.createMany({
+        data: itineraries.map(it => ({ ...it, packageId: createdPkg.id })),
+      });
+    }
+    console.log("Package created:", createdPkg.title);
+  }
 
   // Seed testimonials
   const testimonialsExist = await prisma.testimonial.count();
