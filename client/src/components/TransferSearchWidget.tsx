@@ -46,17 +46,25 @@ function LocationPicker({
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const selected = locations.find((l) => l.id === value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [query]);
 
   const filtered = locations.filter((l) => {
     if (l.id === excludeId) return false;
-    if (!query) return true;
-    const q = query.toLowerCase();
+    if (!debouncedQuery) return true;
+    const q = debouncedQuery.toLowerCase().trim();
     return l.name.toLowerCase().includes(q) || l.city.toLowerCase().includes(q);
   });
 
   return (
-    <Popover open={open} onOpenChange={(o) => { setOpen(o); if (!o) setQuery(""); }}>
+    <Popover open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setQuery(""); setDebouncedQuery(""); } }}>
       <PopoverTrigger asChild>
         <button
           type="button"
@@ -104,6 +112,7 @@ function LocationPicker({
                     onChange(loc.id, loc.name);
                     setOpen(false);
                     setQuery("");
+                    setDebouncedQuery("");
                   }}
                   className={`flex w-full items-start rounded-lg px-3 py-2.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground text-left transition-colors ${value === loc.id ? "bg-accent" : ""}`}
                 >
@@ -190,7 +199,7 @@ export default function TransferSearchWidget() {
   };
 
   return (
-    <Card className="w-full max-w-md p-6 sm:p-7 shadow-2xl border-0 rounded-3xl overflow-visible bg-white">
+    <Card className="w-full max-w-xl p-6 sm:p-8 shadow-2xl border border-gray-100 rounded-3xl overflow-visible bg-white text-navy">
       {/* Header */}
       <div className="flex items-center gap-2 mb-6">
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy text-gold">
@@ -326,18 +335,18 @@ export default function TransferSearchWidget() {
 
         {/* CTA */}
         <Button
-          className="w-full h-13 bg-navy hover:bg-navy/90 text-white font-semibold text-base rounded-full shadow-lg shadow-navy/20 transition-all"
+          className="w-full h-14 bg-gold hover:bg-gold-light text-navy font-black text-base rounded-2xl shadow-xl shadow-gold/20 transition-all cursor-pointer uppercase tracking-wider"
           onClick={handleSubmit}
           disabled={searching || !search.fromLocationId || !search.toLocationId || !search.pickupDate || !search.pickupTime}
         >
           {searching ? (
             <span className="flex items-center gap-2">
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-navy/30 border-t-navy" />
               Searching...
             </span>
           ) : (
             <>
-              <IconSearch className="mr-2 h-5 w-5" />
+              <IconSearch className="mr-2 h-5 w-5 stroke-[2.5]" />
               See Prices
             </>
           )}

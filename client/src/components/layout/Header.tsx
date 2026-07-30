@@ -27,11 +27,10 @@ import {
 
 const navLinks = [
   { label: "Home", href: "/", icon: IconHome },
-  { label: "Fleet", href: "/fleet", icon: IconCar },
-  { label: "Vehicle at Disposal", href: "/rates", icon: IconClock },
+  { label: "PRIVATE TRANSFERS", href: "/fleet", icon: IconCar },
+  { label: "VAN & COACH", href: "/rates", icon: IconClock },
   { label: "Packages", href: "/packages", icon: IconPackage },
   { label: "Sightseeing", href: "/packages?category=sightseeing", icon: IconCompass },
-  { label: "About", href: "/about", icon: IconInfoCircle },
   { label: "Contact", href: "/contact", icon: IconPhone },
 ];
 
@@ -196,12 +195,12 @@ export function Header() {
             <div className="flex items-center gap-1.5 sm:gap-2">
               <Link
                 href="/account"
-                className="flex items-center gap-1.5 sm:gap-2 rounded-xl px-2.5 py-1.5 sm:px-3.5 sm:py-2 text-[11px] sm:text-xs font-black text-navy bg-gold/15 hover:bg-gold/30 border border-gold/30 transition-all"
+                className="flex items-center gap-1.5 sm:gap-2 rounded-xl px-2.5 py-1.5 sm:px-3.5 sm:py-2 text-[11px] sm:text-xs font-black text-navy bg-gold/15 hover:bg-gold/30 border border-gold/30 transition-all shadow-sm"
               >
                 <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gold text-navy font-black text-[10px]">
                   {user.name.charAt(0).toUpperCase()}
                 </div>
-                <span className="hidden sm:inline">My Bookings</span>
+                <span>My Bookings</span>
               </Link>
               <Button
                 variant="ghost"
@@ -215,7 +214,7 @@ export function Header() {
             </div>
           ) : (
             <div className="flex items-center gap-1 sm:gap-2">
-              <Link href="/auth/login" className="hidden sm:inline-block">
+              <Link href="/auth/login">
                 <Button variant="ghost" className="h-8 sm:h-10 rounded-xl px-2.5 sm:px-3.5 text-xs font-bold text-navy hover:bg-slate-100">
                   Sign In
                 </Button>

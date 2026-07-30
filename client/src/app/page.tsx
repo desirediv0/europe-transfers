@@ -167,21 +167,21 @@ export default function HomePage() {
           }
           footer={
             <div className="flex flex-col items-center gap-3 w-full px-4">
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-3 w-full max-w-sm sm:max-w-none">
+              <div className="flex flex-col sm:flex-row justify-center items-center gap-3.5 w-full max-w-md sm:max-w-none">
                 <Link href="/fleet" className="w-full sm:w-auto">
                   <Button
                     size="lg"
-                    className="w-full sm:w-auto h-11 px-6 rounded-full text-xs sm:text-sm font-bold bg-gold hover:bg-gold-light text-navy shadow-lg shadow-gold/30 hover:shadow-gold/50 transition-all duration-300 pointer-events-auto"
+                    className="w-full sm:w-auto h-12 px-8 rounded-full text-sm font-extrabold bg-gold hover:bg-gold-light text-navy shadow-xl shadow-gold/30 hover:shadow-gold/50 transition-all duration-300 pointer-events-auto uppercase tracking-wide border-2 border-gold"
                   >
-                    <IconCar className="mr-2 h-4 w-4" /> View Fleet
+                    <IconCar className="mr-2 h-5 w-5" /> PRIVATE TRANSFERS
                   </Button>
                 </Link>
-                <Link href="/packages" className="w-full sm:w-auto">
+                <Link href="/rates" className="w-full sm:w-auto">
                   <Button
                     size="lg"
-                    className="w-full sm:w-auto h-11 px-6 rounded-full text-xs sm:text-sm font-bold bg-black/40 border border-white/40 text-white backdrop-blur-md hover:bg-black/60 transition-all duration-300 pointer-events-auto"
+                    className="w-full sm:w-auto h-12 px-8 rounded-full text-sm font-extrabold bg-black/60 border-2 border-white/80 text-white backdrop-blur-md hover:bg-white hover:text-navy transition-all duration-300 pointer-events-auto uppercase tracking-wide shadow-xl"
                   >
-                    <IconPackage className="mr-2 h-4 w-4" /> Tour Packages
+                    <IconClock className="mr-2 h-5 w-5 text-gold" /> VAN & COACH
                   </Button>
                 </Link>
               </div>
@@ -289,7 +289,7 @@ export default function HomePage() {
       </section>
 
       {/* About Us Section */}
-      <section className="bg-white py-12 lg:py-16 relative overflow-hidden border-b border-gray-100">
+      <section id="about" className="bg-white py-12 lg:py-16 relative overflow-hidden border-b border-gray-100">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             {/* Visual Showcase (Left Column) */}

@@ -288,17 +288,21 @@ function FleetGallery({ carTypes, loading }: { carTypes: CarType[]; loading: boo
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-[#0B1426]/90 to-black/80 z-10" />
         <div className="absolute top-10 right-20 h-96 w-96 rounded-full bg-gold/10 blur-[120px] pointer-events-none" />
 
-        <div className="relative z-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full bg-gold/15 px-4 py-1.5 text-xs font-black text-gold uppercase tracking-wider mb-6 border border-gold/30">
+        <div className="relative z-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-20 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full bg-gold/15 px-4 py-1.5 text-xs font-black text-gold uppercase tracking-wider mb-4 border border-gold/30">
             <IconCar className="h-4 w-4 text-gold" />
             First-Class European Fleet
           </div>
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1]">
-            Vehicle Fleet & <span className="text-gold">Fixed Pricing</span>
+            PRIVATE TRANSFERS: <span className="text-gold">SEARCH ENGINE</span>
           </h1>
-          <p className="mt-4 text-base sm:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed font-normal">
-            Select from current-model Mercedes-Benz executive sedans, spacious minivans, and VIP coaches for private transfers across Europe.
+          <p className="mt-3 text-sm sm:text-base text-gray-300 max-w-2xl mx-auto leading-relaxed font-normal mb-8">
+            Select your pickup & drop-off locations across 120+ European cities for instant all-inclusive fixed pricing.
           </p>
+
+          <div className="flex justify-center max-w-xl mx-auto text-left">
+            <TransferSearchWidget />
+          </div>
         </div>
       </section>
 
@@ -320,74 +324,52 @@ function FleetGallery({ carTypes, loading }: { carTypes: CarType[]; loading: boo
         </div>
       </section>
 
-      {/* Step 01: 2-Column Search Engine & Luxury Chauffeur Photo Showcase */}
+      {/* Step 01: Process Flow & Highlights */}
       <section className="bg-slate-50 border-b border-gray-200/80 py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="relative rounded-3xl overflow-hidden shadow-2xl min-h-[380px] group border border-gray-200/80">
+            <img
+              src="/images/about_luxury_chauffeur.png"
+              alt="Luxury Chauffeured Transfer Europe"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
 
-          <div className="text-center mb-10">
-            <span className="text-xs font-bold tracking-widest text-gold uppercase">Step 01: Search Engine</span>
-            <h2 className="text-2xl sm:text-4xl font-black text-navy mt-1">Search Your Chauffeured Route</h2>
-            <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto mt-1">
-              Select your pickup & drop-off locations across 120+ European cities for instant pricing.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-
-            {/* Left Search Form (5 Cols) */}
-            <div className="lg:col-span-5 flex flex-col justify-center">
-              <TransferSearchWidget />
+            <div className="absolute top-6 right-6 z-10">
+              <Badge className="rounded-full bg-gold text-navy border-0 px-4 py-1.5 text-xs font-black shadow-md">
+                All-Inclusive Fixed Rates
+              </Badge>
             </div>
 
-            {/* Right Luxury Chauffeur Showcase Photo Card (7 Cols) */}
-            <div className="lg:col-span-7 relative rounded-3xl overflow-hidden shadow-2xl min-h-[420px] group border border-gray-200/80">
-              <img
-                src="/images/about_luxury_chauffeur.png"
-                alt="Luxury Chauffeured Transfer Europe"
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
-
-              {/* Top Floating Badge */}
-              <div className="absolute top-6 right-6 z-10">
-                <Badge className="rounded-full bg-gold text-navy border-0 px-4 py-1.5 text-xs font-black shadow-md">
-                  All-Inclusive Fixed Rates
-                </Badge>
+            <div className="absolute bottom-6 left-6 right-6 text-white z-10 space-y-3">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md px-3.5 py-1 text-xs font-bold text-white border border-white/30">
+                <IconSparkles className="h-3.5 w-3.5 text-gold" /> Guaranteed Mercedes-Benz Fleet
               </div>
 
-              {/* Bottom Feature Pill Overlay */}
-              <div className="absolute bottom-6 left-6 right-6 text-white z-10 space-y-3">
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md px-3.5 py-1 text-xs font-bold text-white border border-white/30">
-                  <IconSparkles className="h-3.5 w-3.5 text-gold" /> Guaranteed Mercedes-Benz Fleet
+              <h3 className="text-xl sm:text-3xl font-black text-white leading-tight">
+                First-Class Chauffeured Journeys
+              </h3>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 text-xs font-semibold text-gray-200">
+                <div className="flex items-center gap-2">
+                  <IconCheck className="h-4 w-4 text-gold flex-shrink-0" />
+                  <span>60 Min Free Airport Wait</span>
                 </div>
-
-                <h3 className="text-xl sm:text-3xl font-black text-white leading-tight">
-                  First-Class Chauffeured Journeys
-                </h3>
-
-                <div className="grid grid-cols-2 gap-2 pt-2 text-xs font-semibold text-gray-200">
-                  <div className="flex items-center gap-2">
-                    <IconCheck className="h-4 w-4 text-gold flex-shrink-0" />
-                    <span>60 Min Free Airport Wait</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <IconCheck className="h-4 w-4 text-gold flex-shrink-0" />
-                    <span>Real-Time Flight Tracking</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <IconCheck className="h-4 w-4 text-gold flex-shrink-0" />
-                    <span>Non-Smoking Luxury Fleet</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <IconCheck className="h-4 w-4 text-gold flex-shrink-0" />
-                    <span>24/7 Live Concierge Team</span>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <IconCheck className="h-4 w-4 text-gold flex-shrink-0" />
+                  <span>Real-Time Flight Tracking</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <IconCheck className="h-4 w-4 text-gold flex-shrink-0" />
+                  <span>Non-Smoking Luxury Fleet</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <IconCheck className="h-4 w-4 text-gold flex-shrink-0" />
+                  <span>24/7 Live Concierge Team</span>
                 </div>
               </div>
             </div>
-
           </div>
-
         </div>
       </section>
 
