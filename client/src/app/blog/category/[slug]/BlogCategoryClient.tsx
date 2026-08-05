@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import type { BlogCategory, BlogPost } from "@/lib/types";
-import { ArrowLeft, Calendar, Clock, ArrowRight } from "lucide-react";
+import { ArrowLeft, Calendar, ArrowRight } from "lucide-react";
+
 
 interface Props {
   category: BlogCategory;

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import type { BlogPost } from "@/lib/types";
 import {
-  ArrowLeft,
   Calendar,
   Tag,
   Clock,
@@ -16,9 +15,9 @@ import {
   Phone,
   MessageSquare,
   Sparkles,
-  List,
   Bookmark,
 } from "lucide-react";
+
 
 interface Props {
   post: BlogPost;
@@ -46,13 +45,8 @@ export default function BlogPostDetailClient({ post }: Props) {
     });
   };
 
-  const getExcerpt = (text?: string, maxLen = 140) => {
-    if (!text) return "Read the full story on Europe Transfers blog...";
-    const cleanText = text.replace(/<[^>]*>?/gm, "");
-    return cleanText.length > maxLen ? cleanText.substring(0, maxLen) + "..." : cleanText;
-  };
-
   const articleJsonLd = {
+
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: post.title,

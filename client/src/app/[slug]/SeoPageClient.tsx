@@ -5,20 +5,17 @@ import Link from "next/link";
 import type { SeoPage, FaqItem } from "@/lib/types";
 import {
   ChevronDown,
-  CheckCircle2,
   Shield,
   Car,
   MapPin,
   Award,
   PhoneCall,
   Clock,
-  Send,
-  Users,
   Sparkles,
   ChevronRight,
   Home,
-  Check,
 } from "lucide-react";
+
 
 interface Props {
   pageData: SeoPage;
