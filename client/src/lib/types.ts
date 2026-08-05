@@ -131,3 +131,71 @@ export interface Pagination {
   total: number;
   pages: number;
 }
+
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+export interface SeoPage {
+  id: string;
+  title: string;
+  slug: string;
+  linkedCategory?: string;
+  pageDescription?: string;
+  cityContent?: string;
+  additionalSeoContent?: string;
+  faqs?: FaqItem[];
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  status: "ACTIVE" | "INACTIVE";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  postsCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogTag {
+  id: string;
+  name: string;
+  slug: string;
+  postsCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogPostTagRelation {
+  postId: string;
+  tagId: string;
+  tag?: BlogTag;
+}
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  content?: string;
+  coverImage?: string;
+  categoryId?: string;
+  category?: BlogCategory;
+  tags?: BlogPostTagRelation[];
+  status: "DRAFT" | "PUBLISHED";
+  publishedAt?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+

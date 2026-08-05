@@ -1,7 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { api } from "@/lib/api";
+import type { SeoPage } from "@/lib/types";
 import {
   IconMail,
   IconBrandTwitter,
@@ -63,6 +66,8 @@ const navigation = {
         { name: "Leadership Team", href: "/about" },
         { name: "Fleet Standards", href: "/fleet" },
         { name: "Tour Packages", href: "/packages" },
+        { name: "Europe Transfers Blog", href: "/blog" },
+
       ],
     },
     {
@@ -91,6 +96,16 @@ const navigation = {
 const Underline = "hover:-translate-y-1 border border-dotted border-gray-300 rounded-xl p-2.5 transition-all text-navy hover:text-gold hover:border-gold bg-white shadow-sm flex items-center justify-center cursor-pointer";
 
 export function Footer() {
+  const [seoPages, setSeoPages] = useState<SeoPage[]>([]);
+
+  useEffect(() => {
+    api.get<{ items: SeoPage[] }>("/seo-pages?status=ACTIVE")
+      .then((res) => {
+        if (res && res.items) setSeoPages(res.items);
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <footer className="w-full border-t border-gray-200 bg-white text-navy px-2 sm:px-4 pt-10 pb-8 font-sans">
 
@@ -141,7 +156,42 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-b border-dotted border-gray-300" />
+        {/* Dynamic Regional SEO Dynamic Landing Pages Links */}
+        {seoPages.length > 0 && (
+          <div className="pt-6 border-t border-dotted border-gray-300">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-xs font-black uppercase tracking-wider text-navy border-b border-gold/40 pb-1 inline-block">
+                Popular Regional DMC Pages
+              </h4>
+              <Link
+                href="/seo-pages"
+                className="text-xs font-bold text-navy hover:text-gold transition-colors underline"
+              >
+                View All Regional Pages ({seoPages.length}) →
+              </Link>
+            </div>
+            <div className="flex flex-wrap gap-2 pt-1">
+              {seoPages.slice(0, 8).map((page) => (
+                <Link
+                  key={page.id}
+                  href={`/${page.slug}`}
+                  className="text-xs font-semibold text-gray-600 hover:text-navy hover:border-gold bg-slate-50 border border-gray-200 px-3 py-1.5 rounded-lg transition-all"
+                >
+                  {page.title}
+                </Link>
+              ))}
+              <Link
+                href="/seo-pages"
+                className="text-xs font-extrabold text-[#0F1A2E] bg-[#C9A227]/20 border border-[#C9A227]/40 px-3 py-1.5 rounded-lg hover:bg-[#C9A227] hover:text-[#0F1A2E] transition-all"
+              >
+                + View Directory ({seoPages.length})
+              </Link>
+            </div>
+          </div>
+        )}
+
+
+        <div className="mt-6 border-b border-dotted border-gray-300" />
       </div>
 
       {/* Dotted Social Icon Pills & Back To Top Control Bar */}

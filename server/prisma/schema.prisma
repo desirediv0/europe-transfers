@@ -229,3 +229,73 @@ model Testimonial {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+// ─── SEO Pages ──────────────────────────────────────────
+
+model SeoPage {
+  id                   String   @id @default(cuid())
+  title                String
+  slug                 String   @unique
+  linkedCategory       String?
+  pageDescription      String?
+  cityContent          String?
+  additionalSeoContent String?
+  faqs                 Json?
+  metaTitle            String?
+  metaDescription      String?
+  metaKeywords         String?
+  status               String   @default("ACTIVE")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+// ─── Blog System ────────────────────────────────────────
+
+model BlogCategory {
+  id              String     @id @default(cuid())
+  name            String
+  slug            String     @unique
+  description     String?
+  metaTitle       String?
+  metaDescription String?
+  posts           BlogPost[]
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model BlogTag {
+  id        String        @id @default(cuid())
+  name      String
+  slug      String        @unique
+  posts     BlogPostTag[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model BlogPost {
+  id              String        @id @default(cuid())
+  title           String
+  slug            String        @unique
+  content         String?
+  coverImage      String?
+  categoryId      String?
+  category        BlogCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags            BlogPostTag[]
+  status          String        @default("DRAFT")
+  publishedAt     DateTime?
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model BlogPostTag {
+  postId String
+  post   BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tagId  String
+  tag    BlogTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+}
+

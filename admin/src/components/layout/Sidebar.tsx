@@ -19,9 +19,13 @@ import {
   LogOut,
   Menu,
   ChevronLeft,
+  FileSearch,
+  FileText,
+  FolderTree,
+  Tag,
 } from "lucide-react";
 
-const navItems = [
+const mainNavItems = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/" },
   { label: "Locations", icon: MapPin, href: "/locations" },
   { label: "Car Types", icon: Car, href: "/car-types" },
@@ -33,9 +37,38 @@ const navItems = [
   { label: "Uploads", icon: Upload, href: "/uploads" },
 ];
 
+const blogNavItems = [
+  { label: "SEO Pages", icon: FileSearch, href: "/seo-pages" },
+  { label: "All Posts", icon: FileText, href: "/blog/posts" },
+  { label: "Categories", icon: FolderTree, href: "/blog/categories" },
+  { label: "Tags", icon: Tag, href: "/blog/tags" },
+];
+
+
 function SidebarContent({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   const location = useLocation();
   const { logout } = useAuth();
+
+  const renderLink = (item: { label: string; icon: any; href: string }) => {
+    const isActive =
+      location.pathname === item.href ||
+      (item.href !== "/" && location.pathname.startsWith(item.href));
+    return (
+      <Link
+        key={item.href}
+        to={item.href}
+        className={cn(
+          "flex items-center gap-3 rounded-md mx-2 px-3 py-2 text-sm font-medium transition-colors",
+          isActive
+            ? "bg-[#C9A227] text-[#1B2A4A]"
+            : "text-white/70 hover:bg-white/10 hover:text-white"
+        )}
+      >
+        <item.icon className="h-4 w-4 shrink-0" />
+        {!collapsed && <span>{item.label}</span>}
+      </Link>
+    );
+  };
 
   return (
     <div className="flex h-full flex-col bg-[#1B2A4A]">
@@ -47,23 +80,22 @@ function SidebarContent({ collapsed, onToggle }: { collapsed: boolean; onToggle:
       </div>
       <Separator className="bg-white/10" />
       <ScrollArea className="flex-1 py-2">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.href || (item.href !== "/" && location.pathname.startsWith(item.href));
-          return (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-md mx-2 px-3 py-2 text-sm font-medium transition-colors",
-                isActive ? "bg-[#C9A227] text-[#1B2A4A]" : "text-white/70 hover:bg-white/10 hover:text-white"
-              )}
-            >
-              <item.icon className="h-4 w-4 shrink-0" />
-              {!collapsed && <span>{item.label}</span>}
-            </Link>
-          );
-        })}
+        <div className="space-y-1">
+          {mainNavItems.map(renderLink)}
+        </div>
+
+        <div className="mt-4 pt-4 border-t border-white/10">
+          {!collapsed && (
+            <div className="px-5 mb-2 text-[11px] font-semibold tracking-wider text-white/40 uppercase">
+              BLOG
+            </div>
+          )}
+          <div className="space-y-1">
+            {blogNavItems.map(renderLink)}
+          </div>
+        </div>
       </ScrollArea>
+
       <Separator className="bg-white/10" />
       <div className="p-2">
         <Button

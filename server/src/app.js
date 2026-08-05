@@ -25,6 +25,10 @@ import userRoutes from "./routes/user.routes.js";
 import searchRoutes from "./routes/search.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
+import seoPageRoutes from "./routes/seoPage.routes.js";
+import blogCategoryRoutes from "./routes/blogCategory.routes.js";
+import blogTagRoutes from "./routes/blogTag.routes.js";
+import blogPostRoutes from "./routes/blogPost.routes.js";
 
 const app = express();
 
@@ -59,6 +63,11 @@ app.use("/api/v1/testimonials", testimonialRoutes);
 app.use("/api/v1/upload", uploadRoutes);
 app.use("/api/v1/search", searchRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
+app.use("/api/v1/seo-pages", seoPageRoutes);
+app.use("/api/v1/blog/categories", blogCategoryRoutes);
+app.use("/api/v1/blog/tags", blogTagRoutes);
+app.use("/api/v1/blog/posts", blogPostRoutes);
+
 
 // Webhook needs raw body for signature verification — mount BEFORE json parser
 app.post("/api/v1/payments/webhook", express.raw({ type: "application/json" }), (req, res, next) => {

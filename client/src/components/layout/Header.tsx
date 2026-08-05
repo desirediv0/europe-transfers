@@ -30,9 +30,11 @@ const navLinks = [
   { label: "PRIVATE TRANSFERS", href: "/fleet", icon: IconCar },
   { label: "VAN & COACH", href: "/rates", icon: IconClock },
   { label: "Packages", href: "/packages", icon: IconPackage },
+  { label: "Blog", href: "/blog", icon: IconInfoCircle },
   { label: "Sightseeing", href: "/packages?category=sightseeing", icon: IconCompass },
   { label: "Contact", href: "/contact", icon: IconPhone },
 ];
+
 
 function MobileNav() {
   const pathname = usePathname();
