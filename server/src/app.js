@@ -29,6 +29,9 @@ import seoPageRoutes from "./routes/seoPage.routes.js";
 import blogCategoryRoutes from "./routes/blogCategory.routes.js";
 import blogTagRoutes from "./routes/blogTag.routes.js";
 import blogPostRoutes from "./routes/blogPost.routes.js";
+import vanCoachRoutes from "./routes/vanCoach.routes.js";
+import privateTransferRoutes from "./routes/privateTransfer.routes.js";
+import sightseeingRoutes from "./routes/sightseeing.routes.js";
 
 const app = express();
 
@@ -55,6 +58,9 @@ app.use("/api/v1/countries", countryRoutes);
 app.use("/api/v1/cities", cityRoutes);
 app.use("/api/v1/locations", locationRoutes);
 app.use("/api/v1/car-types", carTypeRoutes);
+app.use("/api/v1/van-coach", vanCoachRoutes);
+app.use("/api/v1/private-transfers", privateTransferRoutes);
+app.use("/api/v1/sightseeing", sightseeingRoutes);
 app.use("/api/v1/routes", routeRoutes);
 app.use("/api/v1/route-prices", routePriceRoutes);
 app.use("/api/v1/packages", packageRoutes);

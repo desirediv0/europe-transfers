@@ -33,6 +33,8 @@ const navigation = {
       items: [
         { name: "Airport Transfers", href: "/fleet" },
         { name: "Intercity Transfers", href: "/fleet" },
+        { name: "Private Hire (UK)", href: "/private-transfers" },
+        { name: "Van & Coach Disposal", href: "/van-coach" },
         { name: "Chauffeur By Hour", href: "/fleet" },
         { name: "Private VIP Tours", href: "/packages" },
       ],
@@ -41,11 +43,11 @@ const navigation = {
       id: "destinations",
       name: "Destinations",
       items: [
-        { name: "Paris & France", href: "/rates" },
-        { name: "Swiss Alps & Zurich", href: "/rates" },
-        { name: "Amalfi & Rome", href: "/rates" },
-        { name: "Milan & Venice", href: "/rates" },
-        { name: "Vienna & Prague", href: "/rates" },
+        { name: "Paris & France", href: "/rates/paris-france" },
+        { name: "Swiss Alps & Zurich", href: "/rates/swiss-zurich" },
+        { name: "Amalfi & Rome", href: "/rates/amalfi-rome" },
+        { name: "Milan & Venice", href: "/rates/milan-venice" },
+        { name: "Vienna & Prague", href: "/rates/vienna-prague" },
       ],
     },
     {

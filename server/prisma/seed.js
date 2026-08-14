@@ -281,6 +281,153 @@ async function main() {
     console.log("Testimonials seeded");
   }
 
+  // Seed Van & Coach vehicles (Alphard, Hiace, V-Class, S-Class)
+  const vanCoachVehicles = [
+    { id: "vc-alphard", name: "Alphard", seats: 6, order: 0, rate8h: 500, rate10h: 600, overtimeRate: 100 },
+    { id: "vc-hiace", name: "Hiace", seats: 10, order: 1, rate8h: 580, rate10h: 700, overtimeRate: 110 },
+    { id: "vc-vclass", name: "V-Class", seats: 7, order: 2, rate8h: 740, rate10h: 900, overtimeRate: 130 },
+    { id: "vc-sclass", name: "S-Class", seats: 3, order: 3, rate8h: 900, rate10h: 1100, overtimeRate: 150 },
+  ];
+
+  const vanCoachRoutePrices = {
+    "vc-alphard": [
+      { group: "AIRPORT_TRANSFER", label: "Haneda Airport to Tokyo City", price: 150 },
+      { group: "AIRPORT_TRANSFER", label: "Narita Airport to Tokyo City", price: 160 },
+      { group: "AIRPORT_TRANSFER", label: "Kansai Airport to Osaka City", price: 160 },
+      { group: "AIRPORT_TRANSFER", label: "Kansai Airport to Kyoto City", price: 240 },
+      { group: "AIRPORT_TRANSFER", label: "Itami Airport to Osaka City", price: 150 },
+      { group: "POINT_TO_POINT", label: "Osaka to Kyoto City Transfer", price: 160 },
+      { group: "POINT_TO_POINT", label: "Tokyo Train Station to Tokyo City", price: 120 },
+      { group: "POINT_TO_POINT", label: "Tokyo City to Disneyland", price: 120 },
+      { group: "TOUR_PACKAGE", label: "Osaka - Kyoto - Osaka", price: 650 },
+      { group: "TOUR_PACKAGE", label: "Tokyo - Mount Fuji", price: 800 },
+    ],
+    "vc-hiace": [
+      { group: "AIRPORT_TRANSFER", label: "Haneda Airport to Tokyo City", price: 200 },
+      { group: "AIRPORT_TRANSFER", label: "Narita Airport to Tokyo City", price: 220 },
+      { group: "AIRPORT_TRANSFER", label: "Kansai Airport to Osaka City", price: 220 },
+      { group: "AIRPORT_TRANSFER", label: "Kansai Airport to Kyoto City", price: 270 },
+      { group: "AIRPORT_TRANSFER", label: "Itami Airport to Osaka City", price: 200 },
+      { group: "POINT_TO_POINT", label: "Osaka to Kyoto City Transfer", price: 210 },
+      { group: "POINT_TO_POINT", label: "Tokyo Train Station to Tokyo City", price: 140 },
+      { group: "POINT_TO_POINT", label: "Tokyo City to Disneyland", price: 140 },
+      { group: "TOUR_PACKAGE", label: "Osaka - Kyoto - Osaka", price: 750 },
+      { group: "TOUR_PACKAGE", label: "Tokyo - Mount Fuji", price: 900 },
+    ],
+    "vc-vclass": [
+      { group: "AIRPORT_TRANSFER", label: "Haneda Airport to Tokyo City", price: 320 },
+      { group: "AIRPORT_TRANSFER", label: "Narita Airport to Tokyo City", price: 370 },
+      { group: "AIRPORT_TRANSFER", label: "Kansai Airport to Osaka City", price: 370 },
+      { group: "AIRPORT_TRANSFER", label: "Kansai Airport to Kyoto City", price: 450 },
+      { group: "AIRPORT_TRANSFER", label: "Itami Airport to Osaka City", price: 350 },
+      { group: "POINT_TO_POINT", label: "Osaka to Kyoto City Transfer", price: 370 },
+      { group: "POINT_TO_POINT", label: "Tokyo Train Station to Tokyo City", price: 270 },
+      { group: "POINT_TO_POINT", label: "Tokyo City to Disneyland", price: 270 },
+      { group: "TOUR_PACKAGE", label: "Osaka - Kyoto - Osaka", price: 950 },
+      { group: "TOUR_PACKAGE", label: "Tokyo - Mount Fuji", price: 1100 },
+    ],
+    "vc-sclass": [
+      { group: "AIRPORT_TRANSFER", label: "Haneda Airport to Tokyo City", price: 370 },
+      { group: "AIRPORT_TRANSFER", label: "Narita Airport to Tokyo City", price: 420 },
+      { group: "AIRPORT_TRANSFER", label: "Kansai Airport to Osaka City", price: 420 },
+      { group: "AIRPORT_TRANSFER", label: "Kansai Airport to Kyoto City", price: 550 },
+      { group: "AIRPORT_TRANSFER", label: "Itami Airport to Osaka City", price: 400 },
+      { group: "POINT_TO_POINT", label: "Osaka to Kyoto City Transfer", price: 420 },
+      { group: "POINT_TO_POINT", label: "Tokyo Train Station to Tokyo City", price: 320 },
+      { group: "POINT_TO_POINT", label: "Tokyo City to Disneyland", price: 320 },
+      { group: "TOUR_PACKAGE", label: "Osaka - Kyoto - Osaka", price: 1150 },
+      { group: "TOUR_PACKAGE", label: "Tokyo - Mount Fuji", price: 1300 },
+    ],
+  };
+
+  for (const v of vanCoachVehicles) {
+    await prisma.vanCoachVehicle.upsert({
+      where: { id: v.id },
+      update: {},
+      create: { ...v, currency: "USD" },
+    });
+
+    const existingPrices = await prisma.vanCoachRoutePrice.count({ where: { vehicleId: v.id } });
+    if (existingPrices === 0) {
+      await prisma.vanCoachRoutePrice.createMany({
+        data: vanCoachRoutePrices[v.id].map((rp, i) => ({ ...rp, vehicleId: v.id, order: i })),
+      });
+    }
+  }
+  console.log("Van & Coach vehicles seeded:", vanCoachVehicles.length);
+
+  // ─── Private Transfers (City-wise Sedan/Minivan Pricing) ────
+  const privateTransferCities = [
+    {
+      id: "pt-london",
+      name: "London",
+      slug: "london",
+      order: 0,
+      routes: [
+        { description: "London Station – Central London Hotel or vice versa", sedanPrice: 65, minivanPrice: 95 },
+        { description: "Heathrow Airport – Central London Hotel", sedanPrice: 75, minivanPrice: 110 },
+        { description: "Vehicle for 10 hrs", sedanPrice: 550, minivanPrice: 650 },
+      ],
+    },
+    {
+      id: "pt-edinburgh",
+      name: "Edinburgh",
+      slug: "edinburgh",
+      order: 1,
+      routes: [
+        { description: "Train Station (Waverley) – Edinburgh Hotel or vice versa", sedanPrice: 75, minivanPrice: 95 },
+        { description: "Edinburgh Airport – Edinburgh Hotel", sedanPrice: 75, minivanPrice: 95 },
+      ],
+    },
+    {
+      id: "pt-glasgow",
+      name: "Glasgow",
+      slug: "glasgow",
+      order: 2,
+      routes: [
+        { description: "Glasgow Train Station – Glasgow Hotel", sedanPrice: 75, minivanPrice: 95 },
+        { description: "Glasgow Airport – Glasgow Hotel", sedanPrice: 75, minivanPrice: 95 },
+      ],
+    },
+    {
+      id: "pt-inverness",
+      name: "Inverness",
+      slug: "inverness",
+      order: 3,
+      routes: [
+        { description: "Inverness Station – Inverness Hotel or vice versa", sedanPrice: 75, minivanPrice: 95 },
+        { description: "Inverness Airport – Inverness Hotel or vice versa", sedanPrice: 75, minivanPrice: 95 },
+      ],
+    },
+    {
+      id: "pt-manchester",
+      name: "Manchester",
+      slug: "manchester",
+      order: 4,
+      routes: [
+        { description: "Manchester City Stadium – Manchester Hotel or vice versa", sedanPrice: 90, minivanPrice: 110 },
+        { description: "Manchester Airport – Manchester Hotel or vice versa", sedanPrice: 90, minivanPrice: 110 },
+      ],
+    },
+  ];
+
+  for (const city of privateTransferCities) {
+    const { routes, ...cityData } = city;
+    await prisma.privateTransferCity.upsert({
+      where: { id: cityData.id },
+      update: {},
+      create: cityData,
+    });
+
+    const existingRoutes = await prisma.privateTransferRoute.count({ where: { cityId: cityData.id } });
+    if (existingRoutes === 0) {
+      await prisma.privateTransferRoute.createMany({
+        data: routes.map((r, i) => ({ ...r, cityId: cityData.id, currency: "GBP", order: i })),
+      });
+    }
+  }
+  console.log("Private transfer cities seeded:", privateTransferCities.length);
+
   console.log("Seed complete!");
 }
 

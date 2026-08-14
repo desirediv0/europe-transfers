@@ -23,6 +23,9 @@ import {
   FileText,
   FolderTree,
   Tag,
+  Bus,
+  Map,
+  Compass,
 } from "lucide-react";
 
 const mainNavItems = [
@@ -30,7 +33,10 @@ const mainNavItems = [
   { label: "Locations", icon: MapPin, href: "/locations" },
   { label: "Car Types", icon: Car, href: "/car-types" },
   { label: "Routes & Prices", icon: Route, href: "/routes" },
+  { label: "Van & Coach", icon: Bus, href: "/van-coach" },
+  { label: "Private Transfers", icon: Map, href: "/private-transfers" },
   { label: "Packages", icon: Package, href: "/packages" },
+  { label: "Sightseeing", icon: Compass, href: "/sightseeing" },
   { label: "Bookings", icon: CalendarCheck, href: "/bookings" },
   { label: "Users", icon: Users, href: "/users" },
   { label: "Testimonials", icon: Star, href: "/testimonials" },

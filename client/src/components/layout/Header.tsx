@@ -23,15 +23,17 @@ import {
   IconCompass,
   IconArrowRight,
   IconHeadset,
+  IconRoute,
 } from "@tabler/icons-react";
 
 const navLinks = [
   { label: "Home", href: "/", icon: IconHome },
-  { label: "PRIVATE TRANSFERS", href: "/fleet", icon: IconCar },
-  { label: "VAN & COACH", href: "/rates", icon: IconClock },
+  { label: "Private Transfers", href: "/private-transfers", icon: IconCar },
+  { label: "Fleet & Rates", href: "/fleet", icon: IconRoute },
+  { label: "Van & Coach", href: "/van-coach", icon: IconClock },
   { label: "Packages", href: "/packages", icon: IconPackage },
+  { label: "Sightseeing", href: "/sightseeing", icon: IconCompass },
   { label: "Blog", href: "/blog", icon: IconInfoCircle },
-  { label: "Sightseeing", href: "/packages?category=sightseeing", icon: IconCompass },
   { label: "Contact", href: "/contact", icon: IconPhone },
 ];
 
@@ -46,7 +48,7 @@ function MobileNav() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="xl:hidden h-9 w-9 text-navy hover:bg-navy/5 p-0">
+        <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9 text-navy hover:bg-navy/5 p-0">
           <IconMenu2 className="h-5 w-5" />
         </Button>
       </SheetTrigger>
@@ -65,7 +67,7 @@ function MobileNav() {
               className={cn(
                 "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all",
                 pathname === link.href
-                  ? "bg-gold/15 text-gold font-extrabold"
+                  ? "bg-gold/15 text-navy font-black border border-gold/30"
                   : "text-gray-600 hover:bg-gray-50 hover:text-navy"
               )}
             >
@@ -137,16 +139,16 @@ export function Header() {
       className={cn(
         "fixed left-0 right-0 z-50 transition-all duration-300 mx-auto",
         scrolled
-          ? "top-2 sm:top-4 w-[95%] sm:w-[90%] max-w-7xl bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-gray-100"
+          ? "top-2 sm:top-4 w-[95%] sm:w-[92%] max-w-7xl bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-gray-100"
           : "top-0 w-full bg-white border-b border-gray-100/60"
       )}
     >
-      <div className="mx-auto flex h-14 sm:h-18 max-w-7xl items-center justify-between px-2.5 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-14 sm:h-18 max-w-7xl items-center justify-between px-2.5 sm:px-5 lg:px-6">
         
         {/* Left: Logo & Mobile Menu */}
         <div className="flex items-center gap-1.5 sm:gap-3">
           <MobileNav />
-          <Link href="/" className="relative h-8 sm:h-10 w-28 sm:w-40 shrink-0">
+          <Link href="/" className="relative h-8 sm:h-10 w-28 sm:w-36 shrink-0">
             <Image
               src="/logo-2.jpeg"
               alt="The Europe Transfers"
@@ -158,7 +160,7 @@ export function Header() {
         </div>
 
         {/* Center Navigation Menu */}
-        <nav className="hidden xl:flex items-center gap-1 bg-slate-50/80 rounded-2xl px-2 py-1.5 border border-gray-100">
+        <nav className="hidden lg:flex items-center gap-0.5 bg-slate-50/90 rounded-2xl px-1.5 py-1 border border-gray-100">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -166,9 +168,9 @@ export function Header() {
                 key={link.label}
                 href={link.href}
                 className={cn(
-                  "relative rounded-xl px-3 py-1.5 text-xs font-bold transition-all duration-200 cursor-pointer whitespace-nowrap",
+                  "relative rounded-xl px-2.5 py-1.5 text-xs font-bold transition-all duration-200 cursor-pointer whitespace-nowrap",
                   isActive
-                    ? "bg-navy text-gold shadow-sm"
+                    ? "bg-navy text-gold shadow-sm font-extrabold"
                     : "text-gray-600 hover:text-navy hover:bg-white"
                 )}
               >

@@ -8,8 +8,11 @@ import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
 import LocationsPage from "@/pages/LocationsPage";
 import CarTypesPage from "@/pages/CarTypesPage";
+import VanCoachPage from "@/pages/VanCoachPage";
+import PrivateTransfersPage from "@/pages/PrivateTransfersPage";
 import RoutesPage from "@/pages/RoutesPage";
 import PackagesPage from "@/pages/PackagesPage";
+import SightseeingPage from "@/pages/SightseeingPage";
 import BookingsPage from "@/pages/BookingsPage";
 import UsersPage from "@/pages/UsersPage";
 import TestimonialsPage from "@/pages/TestimonialsPage";
@@ -73,8 +76,11 @@ export default function App() {
 
                       <Route path="/locations" element={<LocationsPage />} />
                       <Route path="/car-types" element={<CarTypesPage />} />
+                      <Route path="/van-coach" element={<VanCoachPage />} />
+                      <Route path="/private-transfers" element={<PrivateTransfersPage />} />
                       <Route path="/routes" element={<RoutesPage />} />
                       <Route path="/packages" element={<PackagesPage />} />
+                      <Route path="/sightseeing" element={<SightseeingPage />} />
                       <Route path="/bookings" element={<BookingsPage />} />
                       <Route path="/users" element={<UsersPage />} />
                       <Route path="/testimonials" element={<TestimonialsPage />} />

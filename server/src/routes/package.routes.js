@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   getPackages, getPackageById, createPackage, updatePackage, deletePackage,
   getItinerary, createItinerary, updateItinerary, deleteItinerary,
+  submitPackageEnquiry, getPackageEnquiries,
 } from "../controllers/package.controller.js";
 import protectAdmin from "../middlewares/adminAuth.middleware.js";
 import validate from "../middlewares/validate.middleware.js";
@@ -26,6 +27,24 @@ const itinerarySchema = z.object({
   description: z.string().min(1),
 });
 
+const enquirySchema = z.object({
+  packageId: z.string().optional(),
+  packageTitle: z.string().min(1),
+  countryName: z.string().optional(),
+  priceDisplay: z.string().optional(),
+  name: z.string().min(1),
+  phone: z.string().min(1),
+  email: z.string().email(),
+  travelDate: z.string().optional(),
+  pax: z.union([z.number(), z.string()]).optional(),
+  message: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+// Enquiry routes (public submit & admin list)
+router.post("/enquire", validate(enquirySchema), submitPackageEnquiry);
+router.get("/enquiries", protectAdmin, getPackageEnquiries);
+
 router.get("/", getPackages);
 router.get("/:id", getPackageById);
 router.post("/", protectAdmin, validate(packageSchema), createPackage);
@@ -38,3 +57,4 @@ router.put("/:id/itinerary/:dayId", protectAdmin, validate(itinerarySchema.parti
 router.delete("/:id/itinerary/:dayId", protectAdmin, deleteItinerary);
 
 export default router;
+

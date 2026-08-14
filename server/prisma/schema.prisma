@@ -131,6 +131,65 @@ model ItineraryDay {
   updatedAt   DateTime @updatedAt
 }
 
+model PackageEnquiry {
+  id           String   @id @default(cuid())
+  packageId    String?
+  packageTitle String
+  countryName  String?
+  priceDisplay String?
+  customerName String
+  phone        String
+  email        String
+  travelDate   String?
+  pax          Int      @default(1)
+  notes        String?
+  status       String   @default("PENDING")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SightseeingTour {
+  id             String   @id @default(cuid())
+  title          String
+  slug           String   @unique
+  cityName       String?
+  countryName    String?
+  duration       String
+  priceFrom      Decimal  @db.Decimal(10, 2)
+  coverImage     String?
+  galleryImages  String?  // JSON stringified array of URLs
+  summary        String?
+  description    String?  @db.Text
+  highlights     String?  // JSON stringified array of highlight bullet points
+  includes       String?  // JSON stringified array of included items
+  options        String?  // JSON stringified array of options [{ name, price, duration }]
+  schedule       String?  // JSON stringified schedule [{ type, address, metro, time }]
+  seoTitle       String?
+  seoDescription String?
+  isActive       Boolean  @default(true)
+  order          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model SightseeingEnquiry {
+  id               String   @id @default(cuid())
+  sightseeingId    String?
+  sightseeingTitle String
+  optionSelected   String?
+  cityName         String?
+  priceDisplay     String?
+  customerName     String
+  phone            String
+  email            String
+  travelDate       String?
+  pax              Int      @default(1)
+  notes            String?
+  status           String   @default("PENDING")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
 // ─── Transfer Booking System (new) ──────────────────────
 
 model Location {
@@ -191,6 +250,90 @@ model RoutePrice {
   updatedAt DateTime @updatedAt
 
   @@unique([routeId, carTypeId])
+}
+
+// ─── Van & Coach (Vehicle at Disposal) ──────────────────
+
+model VanCoachVehicle {
+  id              String               @id @default(cuid())
+  name            String
+  seats           Int
+  image           String?
+  category        String?
+  description     String?
+  rate8h          Decimal              @db.Decimal(10, 2)
+  rate10h         Decimal              @db.Decimal(10, 2)
+  overtimeRate    Decimal              @db.Decimal(10, 2)
+  currency        String               @default("USD")
+  isActive        Boolean              @default(true)
+  order           Int                  @default(0)
+  routePrices     VanCoachRoutePrice[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+}
+
+enum VanCoachPriceGroup {
+  AIRPORT_TRANSFER
+  POINT_TO_POINT
+  TOUR_PACKAGE
+}
+
+model VanCoachRoutePrice {
+  id        String              @id @default(cuid())
+  vehicleId String
+  vehicle   VanCoachVehicle     @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  group     VanCoachPriceGroup
+  label     String
+  price     Decimal             @db.Decimal(10, 2)
+  order     Int                 @default(0)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+}
+
+// ─── Private Transfers (City-wise Sedan/Minivan Pricing) ────
+
+model PrivateTransferCity {
+  id        String                 @id @default(cuid())
+  name      String
+  slug      String                 @unique
+  coverImage String?
+  isActive  Boolean                @default(true)
+  order     Int                    @default(0)
+  routes    PrivateTransferRoute[]
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+}
+
+model PrivateTransferRoute {
+  id          String              @id @default(cuid())
+  cityId      String
+  city        PrivateTransferCity @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  description String
+  sedanPrice  Decimal             @db.Decimal(10, 2)
+  minivanPrice Decimal            @db.Decimal(10, 2)
+  currency    String              @default("GBP")
+  isActive    Boolean             @default(true)
+  order       Int                 @default(0)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model PrivateTransferEnquiry {
+  id               String   @id @default(cuid())
+  cityName         String
+  routeDescription String
+  vehicleType      String
+  price            Decimal  @db.Decimal(10, 2)
+  currency         String   @default("GBP")
+  customerName     String
+  phone            String
+  email            String
+  pickupDate       String?
+  pickupTime       String?
+  notes            String?
+  status           String   @default("PENDING")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model Booking {

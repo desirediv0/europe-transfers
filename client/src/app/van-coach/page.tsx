@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import { format } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,9 +20,6 @@ import {
   IconMapPin,
   IconCalendar,
   IconUsers,
-  IconCheck,
-  IconArrowRight,
-  IconSparkles,
   IconShieldCheck,
   IconSend,
   IconPhoneCall,
@@ -40,6 +35,27 @@ import {
   IconChecklist,
 } from "@tabler/icons-react";
 
+interface VanCoachRoutePrice {
+  id: string;
+  group: "AIRPORT_TRANSFER" | "POINT_TO_POINT" | "TOUR_PACKAGE";
+  label: string;
+  price: number;
+}
+
+interface VanCoachVehicle {
+  id: string;
+  name: string;
+  category: string | null;
+  seats: number;
+  image: string | null;
+  description: string | null;
+  rate8h: number;
+  rate10h: number;
+  overtimeRate: number;
+  currency: string;
+  routePrices: VanCoachRoutePrice[];
+}
+
 interface DisposalVehicle {
   id: string;
   name: string;
@@ -54,60 +70,21 @@ interface DisposalVehicle {
   description: string;
 }
 
-const DISPOSAL_FLEET: DisposalVehicle[] = [
-  {
-    id: "disposal-e-class",
-    name: "Mercedes-Benz E-Class",
-    category: "Executive Business Sedan",
-    seats: 3,
-    hourlyRate: 65,
+function mapToDisposalVehicle(v: VanCoachVehicle): DisposalVehicle {
+  return {
+    id: v.id,
+    name: v.name,
+    category: v.category || "Van & Coach",
+    seats: v.seats,
+    hourlyRate: Math.round((Number(v.rate8h) / 8) * 100) / 100,
     minHours: 4,
     includedKmPerHour: 25,
-    extraKmRate: 1.8,
-    image: "/images/about_luxury_chauffeur.png",
-    features: ["Air Conditioning", "Free High-Speed Wi-Fi", "Leather Interior", "Complimentary Water"],
-    description: "Ideal for executive business meetings, city shopping trips, and private city tours with full chauffeur flexibility.",
-  },
-  {
-    id: "disposal-s-class",
-    name: "Mercedes-Benz S-Class",
-    category: "First-Class VIP Sedan",
-    seats: 3,
-    hourlyRate: 95,
-    minHours: 4,
-    includedKmPerHour: 25,
-    extraKmRate: 2.5,
-    image: "/images/hero_swiss_alps.png",
-    features: ["VIP Rear Reclining Seats", "Privacy Glass", "Bespoke Refreshments", "Panoramic Sunroof"],
-    description: "The pinnacle of luxury travel. Premium comfort, sound isolation, and dedicated English-speaking chauffeur.",
-  },
-  {
-    id: "disposal-v-class",
-    name: "Mercedes-Benz V-Class",
-    category: "Luxury Business Minivan",
-    seats: 7,
-    hourlyRate: 85,
-    minHours: 4,
-    includedKmPerHour: 30,
-    extraKmRate: 2.0,
-    image: "/images/why_choose_us_chauffeur.png",
-    features: ["Conference Seating", "Extensive Luggage Room", "Dual Climate Control", "Free Wi-Fi & Charging"],
-    description: "Spacious luxury for group roadshows, family sightseeing tours, and multi-destination city itineraries.",
-  },
-  {
-    id: "disposal-coach",
-    name: "Mercedes-Benz Sprinter VIP Coach",
-    category: "Executive VIP Mini-Coach",
-    seats: 16,
-    hourlyRate: 140,
-    minHours: 6,
-    includedKmPerHour: 35,
-    extraKmRate: 3.0,
-    image: "/images/hero_amalfi_coast.png",
-    features: ["16 Reclining Leather Seats", "PA Microphone System", "Panoramic Windows", "Large Luggage Bay"],
-    description: "First-class group charter for corporate events, delegation roadshows, and multi-city European tours.",
-  },
-];
+    extraKmRate: Number(v.overtimeRate) || 0,
+    image: v.image || "/images/about_luxury_chauffeur.png",
+    features: ["Air Conditioning", "Professional Chauffeur", "Free Waiting Time", "Meet & Greet"],
+    description: v.description || `${v.name} available for hourly disposal with dedicated English-speaking chauffeur.`,
+  };
+}
 
 const PROCESS_STEPS = [
   { step: "01", title: "Search Engine", desc: "Select city & disposal hours", icon: IconClock },
@@ -190,9 +167,8 @@ function LocationPicker({
                     setOpen(false);
                     setQuery("");
                   }}
-                  className={`flex w-full items-start rounded-lg px-3 py-2.5 text-xs text-left transition-colors hover:bg-slate-100 ${
-                    value === loc.id || value === loc.name ? "bg-slate-100 font-bold" : ""
-                  }`}
+                  className={`flex w-full items-start rounded-lg px-3 py-2.5 text-xs text-left transition-colors hover:bg-slate-100 ${value === loc.id || value === loc.name ? "bg-slate-100 font-bold" : ""
+                    }`}
                 >
                   <div className="flex flex-col">
                     <span className="font-bold text-navy">{loc.name}</span>
@@ -210,6 +186,7 @@ function LocationPicker({
 }
 
 export default function VehicleAtDisposalPage() {
+  const [fleet, setFleet] = useState<DisposalVehicle[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocationId, setSelectedLocationId] = useState("");
   const [selectedLocationName, setSelectedLocationName] = useState("Milan, Italy");
@@ -234,7 +211,11 @@ export default function VehicleAtDisposalPage() {
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
 
   useEffect(() => {
-    api.get<Location[]>("/search/locations").then(setLocations).catch(() => {});
+    api.get<Location[]>("/search/locations").then(setLocations).catch(() => { });
+    api
+      .get<VanCoachVehicle[]>("/van-coach/all")
+      .then((vehicles) => setFleet(vehicles.map(mapToDisposalVehicle)))
+      .catch(() => { });
   }, []);
 
   // Time slots (Formatted as "09:00 AM", "09:30 AM", etc.)
@@ -277,7 +258,7 @@ export default function VehicleAtDisposalPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans pb-20">
-      
+
       {/* Hero Banner */}
       <section className="relative bg-[#060C17] text-white overflow-hidden border-b border-white/10">
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-[#0B1426]/90 to-black/80 z-10" />
@@ -324,7 +305,7 @@ export default function VehicleAtDisposalPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            
+
             {/* Location Picker Popover */}
             <div className="space-y-1.5">
               <Label className="text-xs font-bold text-navy flex items-center gap-1.5 uppercase">
@@ -424,7 +405,7 @@ export default function VehicleAtDisposalPage() {
 
         {/* 2-Column Mobile Grid: grid-cols-2 lg:grid-cols-4 */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
-          {DISPOSAL_FLEET.map((v) => {
+          {fleet.map((v) => {
             const totalPrice = v.hourlyRate * numericHours;
             const totalKm = v.includedKmPerHour * numericHours;
 
@@ -492,7 +473,7 @@ export default function VehicleAtDisposalPage() {
             </div>
 
             <form onSubmit={handleFormSubmit} className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
-              
+
               {/* Product Specs Detail Box */}
               <div className="p-4 rounded-2xl bg-slate-50 border border-gray-200/80 space-y-2">
                 <div className="flex items-center justify-between">

@@ -1,0 +1,319 @@
+import { useState, useEffect, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+import { api } from "@/lib/api";
+import { ImageUpload } from "@/components/ImageUpload";
+import type { VanCoachVehicle, VanCoachRoutePrice, VanCoachPriceGroup, Pagination } from "@/lib/types";
+import { Plus, Pencil, Trash2, Users } from "lucide-react";
+
+const GROUP_LABELS: Record<VanCoachPriceGroup, string> = {
+  AIRPORT_TRANSFER: "Airport Transfers",
+  POINT_TO_POINT: "Point-to-Point Transfers",
+  TOUR_PACKAGE: "Local Classic Tour Packages",
+};
+
+type PriceRow = { group: VanCoachPriceGroup; label: string; price: string };
+
+const emptyForm = {
+  name: "",
+  seats: "",
+  image: "",
+  category: "",
+  description: "",
+  rate8h: "",
+  rate10h: "",
+  overtimeRate: "",
+  currency: "USD",
+};
+
+export default function VanCoachPage() {
+  const [items, setItems] = useState<VanCoachVehicle[]>([]);
+  const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, pages: 0 });
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<VanCoachVehicle | null>(null);
+  const [form, setForm] = useState(emptyForm);
+  const [priceRows, setPriceRows] = useState<PriceRow[]>([]);
+  const [saving, setSaving] = useState(false);
+
+  const load = useCallback(async (page = 1) => {
+    setLoading(true);
+    try {
+      const data = await api.get<{ items: VanCoachVehicle[]; pagination: Pagination }>(`/van-coach?page=${page}&limit=20`);
+      setItems(data.items);
+      setPagination(data.pagination);
+    } catch {
+      toast.error("Failed to load Van & Coach vehicles");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const openCreate = () => {
+    setEditing(null);
+    setForm(emptyForm);
+    setPriceRows([]);
+    setDialogOpen(true);
+  };
+
+  const openEdit = (item: VanCoachVehicle) => {
+    setEditing(item);
+    setForm({
+      name: item.name,
+      seats: item.seats.toString(),
+      image: item.image || "",
+      category: item.category || "",
+      description: item.description || "",
+      rate8h: item.rate8h.toString(),
+      rate10h: item.rate10h.toString(),
+      overtimeRate: item.overtimeRate.toString(),
+      currency: item.currency,
+    });
+    setPriceRows(
+      (item.routePrices || []).map((rp) => ({ group: rp.group, label: rp.label, price: rp.price.toString() }))
+    );
+    setDialogOpen(true);
+  };
+
+  const addPriceRow = (group: VanCoachPriceGroup) => {
+    setPriceRows((rows) => [...rows, { group, label: "", price: "" }]);
+  };
+
+  const updatePriceRow = (index: number, patch: Partial<PriceRow>) => {
+    setPriceRows((rows) => rows.map((r, i) => (i === index ? { ...r, ...patch } : r)));
+  };
+
+  const removePriceRow = (index: number) => {
+    setPriceRows((rows) => rows.filter((_, i) => i !== index));
+  };
+
+  const handleSave = async () => {
+    if (!form.name || !form.seats || !form.rate8h || !form.rate10h || !form.overtimeRate) {
+      toast.error("Name, seats, and 8h/10h/overtime rates are required");
+      return;
+    }
+    setSaving(true);
+    try {
+      const payload = {
+        name: form.name,
+        seats: parseInt(form.seats),
+        image: form.image || null,
+        category: form.category || null,
+        description: form.description || null,
+        rate8h: parseFloat(form.rate8h),
+        rate10h: parseFloat(form.rate10h),
+        overtimeRate: parseFloat(form.overtimeRate),
+        currency: form.currency || "USD",
+        routePrices: priceRows
+          .filter((r) => r.label && r.price !== "")
+          .map((r, i) => ({ group: r.group, label: r.label, price: parseFloat(r.price), order: i })),
+      };
+      if (editing) {
+        await api.put(`/van-coach/${editing.id}`, payload);
+        toast.success("Vehicle updated");
+      } else {
+        await api.post("/van-coach", payload);
+        toast.success("Vehicle created");
+      }
+      setDialogOpen(false);
+      load(pagination.page);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this Van & Coach vehicle?")) return;
+    try {
+      await api.del(`/van-coach/${id}`);
+      toast.success("Vehicle deleted");
+      load(pagination.page);
+    } catch {
+      toast.error("Failed to delete");
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Van & Coach</h1>
+        <Button onClick={openCreate} className="bg-[#1B2A4A] hover:bg-[#1B2A4A]/90">
+          <Plus className="mr-2 h-4 w-4" /> Add Vehicle
+        </Button>
+      </div>
+
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Image</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Seats</TableHead>
+                <TableHead>8h Rate</TableHead>
+                <TableHead>10h Rate</TableHead>
+                <TableHead>Overtime/hr</TableHead>
+                <TableHead>Prices</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="w-24">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i}><TableCell colSpan={9}><Skeleton className="h-4 w-full" /></TableCell></TableRow>
+                ))
+              ) : items.length === 0 ? (
+                <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No Van & Coach vehicles found</TableCell></TableRow>
+              ) : (
+                items.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      {item.image ? (
+                        <img src={item.image} alt={item.name} className="h-10 w-14 rounded object-cover" />
+                      ) : (
+                        <div className="h-10 w-14 rounded bg-muted flex items-center justify-center text-xs text-muted-foreground">No img</div>
+                      )}
+                    </TableCell>
+                    <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell><span className="flex items-center gap-1"><Users className="h-3 w-3" />{item.seats}</span></TableCell>
+                    <TableCell>{item.currency} {item.rate8h}</TableCell>
+                    <TableCell>{item.currency} {item.rate10h}</TableCell>
+                    <TableCell>{item.currency} {item.overtimeRate}</TableCell>
+                    <TableCell><Badge variant="outline">{item.routePrices?.length || 0} prices</Badge></TableCell>
+                    <TableCell><Badge variant={item.isActive ? "default" : "secondary"}>{item.isActive ? "Active" : "Inactive"}</Badge></TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => openEdit(item)}><Pencil className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {pagination.pages > 1 && (
+        <div className="flex justify-center gap-2">
+          {Array.from({ length: pagination.pages }, (_, i) => (
+            <Button key={i} variant={pagination.page === i + 1 ? "default" : "outline"} size="sm" onClick={() => load(i + 1)}>
+              {i + 1}
+            </Button>
+          ))}
+        </div>
+      )}
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editing ? "Edit Vehicle" : "Add Vehicle"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Name</Label>
+                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Alphard" />
+              </div>
+              <div className="space-y-2">
+                <Label>Seats</Label>
+                <Input type="number" min="1" value={form.seats} onChange={(e) => setForm({ ...form, seats: e.target.value })} placeholder="e.g. 6" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="e.g. Luxury Minivan" />
+              </div>
+              <div className="space-y-2">
+                <Label>Currency</Label>
+                <Input value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} placeholder="USD" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Image</Label>
+              <ImageUpload value={form.image} onChange={(url) => setForm({ ...form, image: url })} />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Short description" />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>8 Hours Rate</Label>
+                <Input type="number" min="0" value={form.rate8h} onChange={(e) => setForm({ ...form, rate8h: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>10 Hours Rate</Label>
+                <Input type="number" min="0" value={form.rate10h} onChange={(e) => setForm({ ...form, rate10h: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Overtime Fee (per hour)</Label>
+                <Input type="number" min="0" value={form.overtimeRate} onChange={(e) => setForm({ ...form, overtimeRate: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="space-y-3 border-t pt-4">
+              <Label>Route & Package Prices</Label>
+              {(Object.keys(GROUP_LABELS) as VanCoachPriceGroup[]).map((group) => (
+                <div key={group} className="space-y-2 rounded-lg border p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold">{GROUP_LABELS[group]}</span>
+                    <Button type="button" variant="outline" size="sm" onClick={() => addPriceRow(group)}>
+                      <Plus className="mr-1 h-3 w-3" /> Add
+                    </Button>
+                  </div>
+                  {priceRows.map((row, i) =>
+                    row.group === group ? (
+                      <div key={i} className="flex items-center gap-2">
+                        <Input
+                          placeholder="e.g. Haneda Airport to Tokyo City"
+                          value={row.label}
+                          onChange={(e) => updatePriceRow(i, { label: e.target.value })}
+                          className="flex-1"
+                        />
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="Price"
+                          value={row.price}
+                          onChange={(e) => updatePriceRow(i, { price: e.target.value })}
+                          className="w-28"
+                        />
+                        <Button type="button" variant="ghost" size="icon" onClick={() => removePriceRow(i)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    ) : null
+                  )}
+                </div>
+              ))}
+            </div>
+
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

@@ -61,6 +61,34 @@ export interface CarType {
   createdAt: string;
 }
 
+export type VanCoachPriceGroup = "AIRPORT_TRANSFER" | "POINT_TO_POINT" | "TOUR_PACKAGE";
+
+export interface VanCoachRoutePrice {
+  id: string;
+  vehicleId: string;
+  group: VanCoachPriceGroup;
+  label: string;
+  price: number;
+  order: number;
+}
+
+export interface VanCoachVehicle {
+  id: string;
+  name: string;
+  seats: number;
+  image?: string;
+  category?: string;
+  description?: string;
+  rate8h: number;
+  rate10h: number;
+  overtimeRate: number;
+  currency: string;
+  isActive: boolean;
+  order: number;
+  routePrices?: VanCoachRoutePrice[];
+  createdAt: string;
+}
+
 export interface Route {
   id: string;
   fromLocationId: string;
@@ -151,6 +179,104 @@ export interface Pagination {
   limit: number;
   total: number;
   pages: number;
+}
+
+// ─── Private Transfers ────────────────────────────
+
+export interface PrivateTransferRoute {
+  id: string;
+  cityId: string;
+  description: string;
+  sedanPrice: number;
+  minivanPrice: number;
+  currency: string;
+  isActive: boolean;
+  order: number;
+  createdAt: string;
+}
+
+export interface PrivateTransferCity {
+  id: string;
+  name: string;
+  slug: string;
+  coverImage?: string;
+  isActive: boolean;
+  order: number;
+  routes?: PrivateTransferRoute[];
+  createdAt: string;
+}
+
+export interface PrivateTransferEnquiry {
+  id: string;
+  cityName: string;
+  routeDescription: string;
+  vehicleType: string;
+  price: number;
+  currency: string;
+  customerName: string;
+  phone: string;
+  email: string;
+  pickupDate?: string;
+  pickupTime?: string;
+  notes?: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface PackageEnquiry {
+  id: string;
+  packageId?: string;
+  packageTitle: string;
+  countryName?: string;
+  priceDisplay?: string;
+  customerName: string;
+  phone: string;
+  email: string;
+  travelDate?: string;
+  pax: number;
+  notes?: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface SightseeingTour {
+  id: string;
+  title: string;
+  slug: string;
+  cityName?: string;
+  countryName?: string;
+  duration: string;
+  priceFrom: number;
+  coverImage?: string;
+  galleryImages?: string;
+  summary?: string;
+  description?: string;
+  highlights?: string;
+  includes?: string;
+  options?: string;
+  schedule?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  isActive: boolean;
+  order: number;
+  createdAt: string;
+}
+
+export interface SightseeingEnquiry {
+  id: string;
+  sightseeingId?: string;
+  sightseeingTitle: string;
+  optionSelected?: string;
+  cityName?: string;
+  priceDisplay?: string;
+  customerName: string;
+  phone: string;
+  email: string;
+  travelDate?: string;
+  pax: number;
+  notes?: string;
+  status: string;
+  createdAt: string;
 }
 
 export interface FaqItem {

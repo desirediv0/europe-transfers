@@ -1,10 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { toast } from "sonner";
+import { api } from "@/lib/api";
 import type { Package } from "@/lib/types";
 import {
   IconCalendar,
@@ -20,6 +26,10 @@ import {
   IconStar,
   IconSparkles,
   IconArrowRight,
+  IconSend,
+  IconLoader2,
+  IconBrandWhatsapp,
+  IconPhoneCall,
 } from "@tabler/icons-react";
 
 interface Props {
@@ -39,6 +49,50 @@ export function PackageDetailClient({ pkg }: Props) {
   const imageSrc = pkg.coverImage || "/images/hero_swiss_alps.png";
   const countryName = pkg.country?.name || "Europe";
   const priceDisplay = pkg.priceFrom ? Number(pkg.priceFrom).toFixed(0) : "1,195";
+
+  const [enquiryOpen, setEnquiryOpen] = useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    travelDate: "",
+    pax: "2",
+    message: "",
+  });
+
+  const handleEnquireSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name || !form.email || !form.phone) {
+      toast.error("Please enter your name, email, and phone number.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await api.post("/packages/enquire", {
+        packageId: pkg.id,
+        packageTitle: pkg.title,
+        countryName,
+        priceDisplay,
+        name: form.name,
+        phone: form.phone,
+        email: form.email,
+        travelDate: form.travelDate || undefined,
+        pax: parseInt(form.pax, 10) || 2,
+        message: form.message || undefined,
+      });
+
+      setSubmitting(false);
+      setEnquiryOpen(false);
+      setSuccessOpen(true);
+      toast.success("Package enquiry submitted successfully! Check your email for confirmation.");
+    } catch (err: any) {
+      setSubmitting(false);
+      toast.error(err?.response?.data?.message || err?.message || "Failed to submit enquiry. Please try again.");
+    }
+  };
 
   return (
     <div className="bg-slate-50/50 min-h-screen font-sans pb-24 md:pb-0">
@@ -241,11 +295,14 @@ export function PackageDetailClient({ pkg }: Props) {
                     </div>
                   </div>
 
-                  <Link href={`/contact?package=${encodeURIComponent(pkg.title)}`} className="block">
-                    <Button variant="gold" size="lg" className="w-full rounded-xl py-3.5 text-sm font-extrabold shadow-lg shadow-gold/20 hover:shadow-gold/40 transition-all cursor-pointer">
-                      Enquire & Book Package <IconArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
+                  <Button
+                    onClick={() => setEnquiryOpen(true)}
+                    variant="gold"
+                    size="lg"
+                    className="w-full rounded-xl py-3.5 text-sm font-extrabold shadow-lg shadow-gold/20 hover:shadow-gold/40 transition-all cursor-pointer"
+                  >
+                    Enquire & Book Package <IconArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -274,7 +331,7 @@ export function PackageDetailClient({ pkg }: Props) {
         </div>
       </section>
 
-      {/* Sticky Bottom Booking Bar for Mobile Screens (md:hidden) */}
+      {/* Sticky Bottom Booking Bar for Mobile Screens */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[#060C17]/95 backdrop-blur-xl border-t border-gold/30 p-3.5 shadow-2xl flex items-center justify-between">
         <div>
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Total Price</span>
@@ -284,13 +341,166 @@ export function PackageDetailClient({ pkg }: Props) {
           </div>
         </div>
 
-        <Link href={`/contact?package=${encodeURIComponent(pkg.title)}`}>
-          <button className="rounded-xl bg-gold hover:bg-gold-light text-navy px-5 py-2.5 text-xs font-extrabold shadow-md flex items-center gap-1.5 cursor-pointer">
-            Book Package <IconArrowRight className="h-3.5 w-3.5" />
-          </button>
-        </Link>
+        <button
+          onClick={() => setEnquiryOpen(true)}
+          className="rounded-xl bg-gold hover:bg-gold-light text-navy px-5 py-2.5 text-xs font-extrabold shadow-md flex items-center gap-1.5 cursor-pointer"
+        >
+          Book Package <IconArrowRight className="h-3.5 w-3.5" />
+        </button>
       </div>
+
+      {/* Package Booking / Enquiry Modal */}
+      <Dialog open={enquiryOpen} onOpenChange={setEnquiryOpen}>
+        <DialogContent className="sm:max-w-lg rounded-3xl p-0 overflow-hidden bg-white border border-gray-200">
+          <div className="bg-[#060C17] p-6 text-white relative">
+            <div className="flex items-center gap-2 mb-2">
+              <IconMapPin className="h-4 w-4 text-gold" />
+              <Badge className="rounded-full bg-gold text-navy font-black text-xs px-3">{countryName}</Badge>
+            </div>
+            <h2 className="text-lg font-black text-white leading-snug">{pkg.title}</h2>
+            <div className="flex items-center gap-3 mt-2 text-xs">
+              <span className="text-gray-300 font-medium">{pkg.durationDays} Days / {pkg.durationDays - 1} Nights</span>
+              <span className="text-gold font-black text-sm">€{priceDisplay} / person</span>
+            </div>
+          </div>
+
+          <form onSubmit={handleEnquireSubmit} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs font-bold text-navy">Full Name *</Label>
+                <Input
+                  required
+                  placeholder="John Doe"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="h-11 rounded-xl border-gray-200 text-xs font-semibold mt-1"
+                />
+              </div>
+              <div>
+                <Label className="text-xs font-bold text-navy">Phone / WhatsApp *</Label>
+                <Input
+                  type="tel"
+                  required
+                  placeholder="+41 44 123 4567"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  className="h-11 rounded-xl border-gray-200 text-xs font-semibold mt-1"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-xs font-bold text-navy">Email Address *</Label>
+              <Input
+                type="email"
+                required
+                placeholder="you@example.com"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="h-11 rounded-xl border-gray-200 text-xs font-semibold mt-1"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs font-bold text-navy flex items-center gap-1">
+                  <IconCalendar className="h-3.5 w-3.5 text-gold" /> Preferred Date
+                </Label>
+                <Input
+                  type="date"
+                  value={form.travelDate}
+                  onChange={(e) => setForm({ ...form, travelDate: e.target.value })}
+                  className="h-11 rounded-xl border-gray-200 text-xs font-semibold mt-1 bg-slate-50"
+                />
+              </div>
+              <div>
+                <Label className="text-xs font-bold text-navy flex items-center gap-1">
+                  <IconUsers className="h-3.5 w-3.5 text-gold" /> Passengers
+                </Label>
+                <select
+                  value={form.pax}
+                  onChange={(e) => setForm({ ...form, pax: e.target.value })}
+                  className="w-full h-11 rounded-xl border border-gray-200 bg-slate-50 px-3 text-xs font-bold text-navy focus:outline-none focus:border-gold mt-1"
+                >
+                  <option value="1">1 Passenger</option>
+                  <option value="2">2 Passengers</option>
+                  <option value="3">3 Passengers</option>
+                  <option value="4">4 Passengers</option>
+                  <option value="5">5 Passengers</option>
+                  <option value="6">6 Passengers (Minivan)</option>
+                  <option value="7">7 Passengers (Minivan)</option>
+                  <option value="8">8+ Large Group</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-xs font-bold text-navy">Special Requests / Notes</Label>
+              <textarea
+                rows={3}
+                placeholder="Customizations, hotel preferences, dietary or mobility needs..."
+                value={form.message}
+                onChange={(e) => setForm({ ...form, message: e.target.value })}
+                className="w-full mt-1 rounded-xl border border-gray-200 p-3 text-xs font-semibold text-navy focus:outline-none focus:border-gold"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={submitting}
+              className="w-full h-12 rounded-xl bg-gold hover:bg-gold-light text-navy font-black text-xs shadow-lg shadow-gold/20"
+            >
+              {submitting ? (
+                <span className="flex items-center gap-2">
+                  <IconLoader2 className="h-4 w-4 animate-spin" /> Submitting Package Enquiry...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <IconSend className="h-4 w-4" /> Send Tour Enquiry (€{priceDisplay} / person)
+                </span>
+              )}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Success Dialog */}
+      <Dialog open={successOpen} onOpenChange={setSuccessOpen}>
+        <DialogContent className="sm:max-w-md rounded-3xl p-8 text-center bg-white border border-gray-200">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 mx-auto border border-emerald-100 mb-4">
+            <IconShieldCheck className="h-8 w-8" />
+          </div>
+          <DialogTitle className="text-2xl font-black text-navy">Package Enquiry Transmitted!</DialogTitle>
+          <DialogDescription className="text-xs text-gray-500 mt-2 leading-relaxed">
+            Our VIP Concierge team has received your enquiry for <span className="font-extrabold text-navy">{pkg.title}</span>.
+            We will contact you within 24 hours with a customized itinerary quote.
+          </DialogDescription>
+          <div className="mt-6 pt-4 border-t border-gray-100 space-y-3">
+            <p className="text-[10px] font-bold text-gold uppercase tracking-widest">Need Immediate Assistance?</p>
+            <div className="flex items-center justify-center gap-3">
+              <a
+                href="tel:+41441234567"
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 p-2.5 text-xs font-extrabold text-navy hover:bg-slate-50 transition-colors"
+              >
+                <IconPhoneCall className="h-4 w-4 text-gold" /> Call Team
+              </a>
+              <a
+                href="https://wa.me/41441234567"
+                target="_blank"
+                rel="noreferrer"
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 text-white p-2.5 text-xs font-extrabold hover:bg-emerald-600 transition-colors"
+              >
+                <IconBrandWhatsapp className="h-4 w-4" /> WhatsApp
+              </a>
+            </div>
+          </div>
+          <Button onClick={() => setSuccessOpen(false)} className="mt-6 w-full rounded-xl bg-navy text-white text-xs font-extrabold h-11">
+            Done
+          </Button>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
 }
+
