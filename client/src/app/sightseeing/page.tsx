@@ -196,7 +196,7 @@ function SightseeingContent() {
           </Badge>
 
           <h1 className="text-2xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight">
-            Travel moments you'll love
+            Travel moments you&apos;ll love
           </h1>
           <p className="mt-3 text-sm sm:text-lg text-gray-300 max-w-2xl mx-auto font-normal">
             Partnered with leading travel & tour experiences across Paris, France, Rome & Switzerland.
@@ -294,7 +294,7 @@ function SightseeingContent() {
           <div className="bg-white rounded-3xl p-12 text-center border border-gray-200 shadow-sm max-w-lg mx-auto">
             <IconTicket className="h-12 w-12 text-gold mx-auto mb-3" />
             <h3 className="text-lg font-black text-navy">No activities found</h3>
-            <p className="text-xs text-gray-500 mt-1">Try a different search or select "ALL" cities.</p>
+            <p className="text-xs text-gray-500 mt-1">Try a different search or select &quot;ALL&quot; cities.</p>
             <Button onClick={() => { clearSearch(); handleCitySelect("ALL"); }} className="mt-4 bg-navy text-white text-xs font-bold px-6 py-2.5 rounded-xl">
               Reset Filters
             </Button>

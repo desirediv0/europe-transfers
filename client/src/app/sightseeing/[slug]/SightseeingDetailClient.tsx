@@ -71,7 +71,7 @@ export function SightseeingDetailClient({ tour }: Props) {
     message: "",
   });
 
-  const parseJson = (str?: string, fallback: any = []) => {
+  const parseJson = <T,>(str?: string, fallback: T = [] as T): T => {
     if (!str) return fallback;
     try {
       return typeof str === "string" ? JSON.parse(str) : str;
@@ -149,9 +149,10 @@ export function SightseeingDetailClient({ tour }: Props) {
       setEnquiryOpen(false);
       setSuccessOpen(true);
       toast.success("Sightseeing booking request submitted! Confirmation sent to your email.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       setSubmitting(false);
-      toast.error(err?.response?.data?.message || err?.message || "Failed to submit request. Please try again.");
+      const error = err as { response?: { data?: { message?: string } }; message?: string };
+      toast.error(error?.response?.data?.message || error?.message || "Failed to submit request. Please try again.");
     }
   };
 

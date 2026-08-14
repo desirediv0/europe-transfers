@@ -88,9 +88,10 @@ export function PackageDetailClient({ pkg }: Props) {
       setEnquiryOpen(false);
       setSuccessOpen(true);
       toast.success("Package enquiry submitted successfully! Check your email for confirmation.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       setSubmitting(false);
-      toast.error(err?.response?.data?.message || err?.message || "Failed to submit enquiry. Please try again.");
+      const error = err as { response?: { data?: { message?: string } }; message?: string };
+      toast.error(error?.response?.data?.message || error?.message || "Failed to submit enquiry. Please try again.");
     }
   };
 

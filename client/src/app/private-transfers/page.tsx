@@ -144,9 +144,10 @@ export default function PrivateTransfersPage() {
       setEnquiryOpen(false);
       setSuccessOpen(true);
       toast.success("Private transfer enquiry submitted! Confirmation sent to your email.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       setSubmitting(false);
-      const errMsg = err?.response?.data?.message || err?.message || "Failed to submit enquiry. Please try again.";
+      const error = err as { response?: { data?: { message?: string } }; message?: string };
+      const errMsg = error?.response?.data?.message || error?.message || "Failed to submit enquiry. Please try again.";
       toast.error(errMsg);
     }
   };
