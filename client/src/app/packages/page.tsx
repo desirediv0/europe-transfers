@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import Link from "next/link";
 import { IconPackage, IconSearch, IconChevronLeft, IconChevronRight, IconFilter, IconX } from "@tabler/icons-react";
 import { api } from "@/lib/api";
 import type { Package, Country } from "@/lib/types";
@@ -151,7 +150,7 @@ function PackagesContent() {
       <section className="bg-white border-b border-gray-200/80 sticky top-16 z-30 shadow-xs">
         <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-3.5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            
+
             {/* Search Input Box with Debounce */}
             <div className="relative w-full md:w-80">
               <Input
@@ -180,11 +179,10 @@ function PackagesContent() {
 
               <button
                 onClick={() => handleCountrySelect("all")}
-                className={`rounded-xl px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-xs font-extrabold transition-all shrink-0 cursor-pointer ${
-                  selectedCountry === "all"
+                className={`rounded-xl px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-xs font-extrabold transition-all shrink-0 cursor-pointer ${selectedCountry === "all"
                     ? "bg-navy text-gold shadow-md"
                     : "bg-slate-100 text-gray-600 hover:bg-slate-200"
-                }`}
+                  }`}
               >
                 All Countries
               </button>
@@ -193,11 +191,10 @@ function PackagesContent() {
                 <button
                   key={c.id}
                   onClick={() => handleCountrySelect(c.slug)}
-                  className={`rounded-xl px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-xs font-extrabold transition-all shrink-0 cursor-pointer ${
-                    selectedCountry === c.slug
+                  className={`rounded-xl px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-xs font-extrabold transition-all shrink-0 cursor-pointer ${selectedCountry === c.slug
                       ? "bg-navy text-gold shadow-md"
                       : "bg-slate-100 text-gray-600 hover:bg-slate-200"
-                  }`}
+                    }`}
                 >
                   {c.name}
                 </button>
@@ -295,11 +292,10 @@ function PackagesContent() {
                 <button
                   key={p}
                   onClick={() => handlePageChange(p)}
-                  className={`flex h-8 w-8 sm:h-11 sm:w-11 items-center justify-center rounded-xl text-xs font-black transition-all cursor-pointer ${
-                    currentPage === p
+                  className={`flex h-8 w-8 sm:h-11 sm:w-11 items-center justify-center rounded-xl text-xs font-black transition-all cursor-pointer ${currentPage === p
                       ? "bg-navy text-gold shadow-md"
                       : "bg-white border border-gray-200 text-gray-700 hover:bg-gold/20"
-                  }`}
+                    }`}
                 >
                   {p}
                 </button>

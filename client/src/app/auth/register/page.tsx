@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { toast } from "sonner";
-import { useAuth, type VerificationStep } from "@/context/AuthContext";
+import { useAuth, } from "@/context/AuthContext";
 import {
   IconUser,
   IconMail,
@@ -24,7 +24,7 @@ import {
   IconCheck,
   IconClock,
   IconX,
-  IconSend,
+
   IconUserPlus,
   IconSparkles,
 } from "@tabler/icons-react";
@@ -168,10 +168,10 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans">
       <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl border border-gray-200/80 overflow-hidden grid grid-cols-1 lg:grid-cols-12 my-6">
-        
+
         {/* Left Column: Form Steps */}
         <div className="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between space-y-6">
-          
+
           {/* Header */}
           <div>
             <div className="flex items-center justify-between mb-6">
@@ -238,9 +238,8 @@ export default function RegisterPage() {
                   onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                   onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
                   onClick={() => fileInputRef.current?.click()}
-                  className={`border-2 border-dashed rounded-3xl p-8 text-center cursor-pointer transition-all ${
-                    dragActive ? "border-gold bg-gold/10" : "border-gray-300 hover:border-gold hover:bg-slate-50"
-                  }`}
+                  className={`border-2 border-dashed rounded-3xl p-8 text-center cursor-pointer transition-all ${dragActive ? "border-gold bg-gold/10" : "border-gray-300 hover:border-gold hover:bg-slate-50"
+                    }`}
                 >
                   <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/15 text-gold mx-auto mb-3">
                     <IconUpload className="h-7 w-7" />

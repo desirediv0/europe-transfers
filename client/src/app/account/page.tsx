@@ -26,8 +26,6 @@ import {
   IconCreditCard,
   IconUpload,
   IconAlertTriangle,
-  IconShieldCheck,
-  IconSparkles,
   IconUser,
 } from "@tabler/icons-react";
 
@@ -143,7 +141,7 @@ export default function AccountPage() {
   return (
     <div className="min-h-screen bg-slate-50/70 font-sans py-8 sm:py-12 pb-24">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 space-y-6">
-        
+
         {/* Header Title */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-6">
           <div>
@@ -167,11 +165,10 @@ export default function AccountPage() {
 
         {/* Verification Status Banner */}
         {user.idDocumentStatus !== "VERIFIED" && (
-          <Card className={`overflow-hidden rounded-xl border ${
-            user.idDocumentStatus === "REJECTED" ? "bg-red-50 border-red-200 text-red-900" :
-            user.idDocumentUrl ? "bg-blue-50 border-blue-200 text-blue-900" :
-            "bg-amber-50 border-amber-200 text-amber-900"
-          }`}>
+          <Card className={`overflow-hidden rounded-xl border ${user.idDocumentStatus === "REJECTED" ? "bg-red-50 border-red-200 text-red-900" :
+              user.idDocumentUrl ? "bg-blue-50 border-blue-200 text-blue-900" :
+                "bg-amber-50 border-amber-200 text-amber-900"
+            }`}>
             <CardContent className="p-5 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-start sm:items-center gap-3">
@@ -249,11 +246,10 @@ export default function AccountPage() {
                 <div>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider">ID Document Status</p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <Badge className={`rounded-md text-[10px] font-black border-0 px-2 py-0.5 ${
-                      user.idDocumentStatus === "VERIFIED" ? "bg-emerald-100 text-emerald-800" :
-                      user.idDocumentStatus === "REJECTED" ? "bg-red-100 text-red-800" :
-                      "bg-amber-100 text-amber-800"
-                    }`}>
+                    <Badge className={`rounded-md text-[10px] font-black border-0 px-2 py-0.5 ${user.idDocumentStatus === "VERIFIED" ? "bg-emerald-100 text-emerald-800" :
+                        user.idDocumentStatus === "REJECTED" ? "bg-red-100 text-red-800" :
+                          "bg-amber-100 text-amber-800"
+                      }`}>
                       {user.idDocumentStatus === "VERIFIED" && <IconCheck className="mr-1 h-3 w-3 stroke-[3]" />}
                       {user.idDocumentStatus === "REJECTED" && <IconX className="mr-1 h-3 w-3 stroke-[3]" />}
                       {user.idDocumentStatus === "PENDING" && <IconClock className="mr-1 h-3 w-3 stroke-[3]" />}
@@ -346,11 +342,10 @@ export default function AccountPage() {
                           <IconCreditCard className="mr-1 h-3 w-3 text-gold" />
                           {b.paymentStatus}
                         </Badge>
-                        <Badge className={`rounded-md border-0 text-[10px] font-black px-2.5 py-1 ${
-                          b.bookingStatus === "CONFIRMED" ? "bg-emerald-100 text-emerald-800" :
-                          b.bookingStatus === "COMPLETED" ? "bg-blue-100 text-blue-800" :
-                          b.bookingStatus === "CANCELLED" ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-800"
-                        }`}>
+                        <Badge className={`rounded-md border-0 text-[10px] font-black px-2.5 py-1 ${b.bookingStatus === "CONFIRMED" ? "bg-emerald-100 text-emerald-800" :
+                            b.bookingStatus === "COMPLETED" ? "bg-blue-100 text-blue-800" :
+                              b.bookingStatus === "CANCELLED" ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-800"
+                          }`}>
                           {b.bookingStatus}
                         </Badge>
                       </div>
@@ -519,9 +514,8 @@ export default function AccountPage() {
                     <label
                       key={r}
                       onClick={() => setCancelReason(r)}
-                      className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${
-                        cancelReason === r ? "border-red-500 bg-red-50/40 font-black text-navy" : "border-gray-200 hover:bg-slate-50 font-bold text-gray-600"
-                      }`}
+                      className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${cancelReason === r ? "border-red-500 bg-red-50/40 font-black text-navy" : "border-gray-200 hover:bg-slate-50 font-bold text-gray-600"
+                        }`}
                     >
                       <input
                         type="radio"

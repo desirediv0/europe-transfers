@@ -10,7 +10,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 import {
   IconMenu2,
-  IconUser,
   IconLogout,
   IconCar,
   IconPackage,
@@ -144,7 +143,7 @@ export function Header() {
       )}
     >
       <div className="mx-auto flex h-14 sm:h-18 max-w-7xl items-center justify-between px-2.5 sm:px-5 lg:px-6">
-        
+
         {/* Left: Logo & Mobile Menu */}
         <div className="flex items-center gap-1.5 sm:gap-3">
           <MobileNav />
@@ -182,7 +181,7 @@ export function Header() {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-1.5 sm:gap-3">
-          
+
           {/* Call Now Button Pill */}
           <a
             href="tel:+41441234567"

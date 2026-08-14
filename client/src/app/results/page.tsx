@@ -25,7 +25,7 @@ export interface SearchData {
   cars: SearchResult[];
 }
 
-function getDemoData(from: string, to: string, pax: number): SearchData {
+function getDemoData(from: string, to: string): SearchData {
   return {
     route: {
       id: "demo-route",
@@ -89,7 +89,7 @@ export default async function ResultsPage({
   const accessToken = cookieStore.get("accessToken")?.value;
   const isLoggedIn = !!accessToken;
 
-  const demoData = getDemoData(from, to, pax);
+  const demoData = getDemoData(from, to);
   let realData: SearchData | null = null;
   let error: string | null = null;
 

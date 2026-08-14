@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -20,11 +20,8 @@ import {
   IconX,
   IconCheck,
   IconSend,
-  IconLock,
-  IconPhoto,
   IconSparkles,
-  IconChecklist,
-  IconUser,
+
 } from "@tabler/icons-react";
 
 export default function LoginPage() {
@@ -168,10 +165,10 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans">
       <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl border border-gray-200/80 overflow-hidden grid grid-cols-1 lg:grid-cols-12 my-6">
-        
+
         {/* Left Column: Form & OTP & Document Verification */}
         <div className="lg:col-span-6 p-6 sm:p-10 flex flex-col justify-between space-y-6">
-          
+
           {/* Header & Logo */}
           <div>
             <div className="flex items-center justify-between mb-6">
@@ -227,9 +224,8 @@ export default function LoginPage() {
                   onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                   onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
                   onClick={() => fileInputRef.current?.click()}
-                  className={`border-2 border-dashed rounded-3xl p-8 text-center cursor-pointer transition-all ${
-                    dragActive ? "border-gold bg-gold/10" : "border-gray-300 hover:border-gold hover:bg-slate-50"
-                  }`}
+                  className={`border-2 border-dashed rounded-3xl p-8 text-center cursor-pointer transition-all ${dragActive ? "border-gold bg-gold/10" : "border-gray-300 hover:border-gold hover:bg-slate-50"
+                    }`}
                 >
                   <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/15 text-gold mx-auto mb-3">
                     <IconUpload className="h-7 w-7" />
@@ -390,7 +386,7 @@ export default function LoginPage() {
             className="absolute inset-0 h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-          
+
           <div className="absolute top-8 left-8 right-8 z-10">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md px-3.5 py-1 text-xs font-black text-white border border-white/30">
               <IconSparkles className="h-3.5 w-3.5 text-gold" /> Exclusive Chauffeur Concierge

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,10 +20,6 @@ import {
   IconArrowLeft,
   IconRoute,
   IconShieldCheck,
-  IconDoorEnter,
-  IconUserStar,
-  IconPlane,
-  IconLicense,
   IconRefresh,
   IconX,
   IconSnowflake,
@@ -46,7 +41,6 @@ import {
   IconPaw,
   IconCreditCard,
   IconChecklist,
-  IconStar,
   IconSparkles,
 } from "@tabler/icons-react";
 
@@ -471,7 +465,6 @@ export default function FleetContent({
   searchParams: sp,
 }: FleetContentProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { user, verificationStep, loading: authLoading } = useAuth();
   const [carTypes, setCarTypes] = useState<CarType[]>([]);
   const [loadingCars, setLoadingCars] = useState(true);

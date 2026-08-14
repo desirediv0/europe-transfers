@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -30,8 +30,6 @@ import {
   IconMapPin,
   IconCheck,
   IconUsers,
-  IconChevronLeft,
-  IconChevronRight,
 } from "@tabler/icons-react";
 
 const HERO_IMAGES = [
@@ -40,72 +38,17 @@ const HERO_IMAGES = [
   "/images/hero_amalfi_coast.png",
 ];
 
-const gradientPairs = [
-  ["from-rose-400", "to-orange-400"],
-  ["from-violet-500", "to-purple-500"],
-  ["from-blue-400", "to-cyan-400"],
-  ["from-emerald-400", "to-teal-500"],
-  ["from-amber-400", "to-yellow-500"],
-  ["from-pink-400", "to-rose-500"],
-];
 
-function hashGradient(text: string) {
-  let hash = 0;
-  for (let i = 0; i < text.length; i++) hash = text.charCodeAt(i) + ((hash << 5) - hash);
-  const index = Math.abs(hash) % gradientPairs.length;
-  return gradientPairs[index];
-}
 
-function SectionHeading({
-  eyebrow,
-  title,
-  subtitle,
-  align = "left",
-  icon: Icon,
-}: {
-  eyebrow: string;
-  title: string;
-  subtitle?: string;
-  align?: "left" | "center";
-  icon?: React.ElementType;
-}) {
-  return (
-    <div className={align === "center" ? "text-center" : ""}>
-      <div className={`flex items-center gap-2 mb-3 ${align === "center" ? "justify-center" : ""}`}>
-        {Icon && (
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gold/10">
-            <Icon className="h-4 w-4 text-gold" />
-          </div>
-        )}
-        <span className="text-[11px] font-bold tracking-[0.2em] text-gold uppercase">{eyebrow}</span>
-      </div>
-      <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-navy">{title}</h2>
-      {subtitle && (
-        <p className="mt-3 text-base text-gray-500 max-w-2xl leading-relaxed">{subtitle}</p>
-      )}
-    </div>
-  );
-}
+
 
 export default function HomePage() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [_, setCurrentImageIndex] = useState(0);
 
-  const destinationsCarouselRef = useRef<HTMLDivElement>(null);
 
-  const scrollDestinationsLeft = () => {
-    if (destinationsCarouselRef.current) {
-      destinationsCarouselRef.current.scrollBy({ left: -340, behavior: "smooth" });
-    }
-  };
-
-  const scrollDestinationsRight = () => {
-    if (destinationsCarouselRef.current) {
-      destinationsCarouselRef.current.scrollBy({ left: 340, behavior: "smooth" });
-    }
-  };
 
   useEffect(() => {
     Promise.all([
@@ -453,15 +396,15 @@ export default function HomePage() {
             <CarouselContent className="-ml-2 md:-ml-4">
               {loading
                 ? Array.from({ length: 4 }).map((_, i) => (
-                    <CarouselItem key={i} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3">
-                      <PackageCardSkeleton />
-                    </CarouselItem>
-                  ))
+                  <CarouselItem key={i} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3">
+                    <PackageCardSkeleton />
+                  </CarouselItem>
+                ))
                 : packages.map((pkg) => (
-                    <CarouselItem key={pkg.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3">
-                      <PackageCard package={pkg} />
-                    </CarouselItem>
-                  ))}
+                  <CarouselItem key={pkg.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3">
+                    <PackageCard package={pkg} />
+                  </CarouselItem>
+                ))}
             </CarouselContent>
 
             {/* Navigation Arrows for Carousel */}
@@ -518,15 +461,15 @@ export default function HomePage() {
             <CarouselContent className="-ml-2 md:-ml-4">
               {loading
                 ? Array.from({ length: 4 }).map((_, i) => (
-                    <CarouselItem key={i} className="pl-2 md:pl-4 basis-1/2 sm:basis-1/3 lg:basis-1/4">
-                      <DestinationCardSkeleton />
-                    </CarouselItem>
-                  ))
+                  <CarouselItem key={i} className="pl-2 md:pl-4 basis-1/2 sm:basis-1/3 lg:basis-1/4">
+                    <DestinationCardSkeleton />
+                  </CarouselItem>
+                ))
                 : cities.map((city) => (
-                    <CarouselItem key={city.id} className="pl-2 md:pl-4 basis-1/2 sm:basis-1/3 lg:basis-1/4">
-                      <DestinationCard city={city} />
-                    </CarouselItem>
-                  ))}
+                  <CarouselItem key={city.id} className="pl-2 md:pl-4 basis-1/2 sm:basis-1/3 lg:basis-1/4">
+                    <DestinationCard city={city} />
+                  </CarouselItem>
+                ))}
             </CarouselContent>
 
             {/* Bottom Controls Row */}

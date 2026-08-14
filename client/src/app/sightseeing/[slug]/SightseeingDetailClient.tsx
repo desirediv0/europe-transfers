@@ -246,11 +246,10 @@ export function SightseeingDetailClient({ tour }: Props) {
                 <button
                   key={idx}
                   onClick={() => setActiveGalleryIdx(idx)}
-                  className={`relative flex-shrink-0 h-14 w-20 sm:h-16 sm:w-24 rounded-xl overflow-hidden border-2 transition-all ${
-                    idx === activeGalleryIdx
-                      ? "border-gold scale-105 shadow-lg shadow-gold/30"
-                      : "border-white/20 opacity-60 hover:opacity-100"
-                  }`}
+                  className={`relative flex-shrink-0 h-14 w-20 sm:h-16 sm:w-24 rounded-xl overflow-hidden border-2 transition-all ${idx === activeGalleryIdx
+                    ? "border-gold scale-105 shadow-lg shadow-gold/30"
+                    : "border-white/20 opacity-60 hover:opacity-100"
+                    }`}
                 >
                   <img src={img} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
                 </button>
@@ -380,8 +379,8 @@ export function SightseeingDetailClient({ tour }: Props) {
             {/* ✦ VISIT'S ORGANISATION TIMELINE */}
             {scheduleList.length > 0 && (
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-200 shadow-sm">
-                <h2 className="text-xl sm:text-2xl font-black text-navy tracking-tight mb-1">Visit's Organisation</h2>
-                <p className="text-xs text-gray-500 font-medium mb-7">We'll take care of every detail</p>
+                <h2 className="text-xl sm:text-2xl font-black text-navy tracking-tight mb-1">Visit&apos;s Organisation</h2>
+                <p className="text-xs text-gray-500 font-medium mb-7">We&apos;ll take care of every detail</p>
 
                 <div className="relative pl-7 space-y-8 border-l-2 border-gold/30">
                   {scheduleList.map((step, idx) => (
@@ -428,7 +427,7 @@ export function SightseeingDetailClient({ tour }: Props) {
                 <div className="bg-[#060C17] p-5 text-white">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="flex text-gold">
-                      {[1,2,3,4,5].map(i => <IconStar key={i} className="h-3.5 w-3.5 fill-gold text-gold" />)}
+                      {[1, 2, 3, 4, 5].map(i => <IconStar key={i} className="h-3.5 w-3.5 fill-gold text-gold" />)}
                     </div>
                     <span className="text-[11px] text-gray-400 font-semibold">Premium Experience</span>
                   </div>
@@ -536,7 +535,7 @@ export function SightseeingDetailClient({ tour }: Props) {
 
           <form onSubmit={handleEnquireSubmit} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
             <DialogDescription className="text-[11px] text-gray-400 font-medium -mt-1">
-              Fill in your details and we'll confirm availability within 2 hours.
+              Fill in your details and we&apos;ll confirm availability within 2 hours.
             </DialogDescription>
 
             <div className="grid grid-cols-2 gap-3">

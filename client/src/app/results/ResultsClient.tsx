@@ -18,7 +18,6 @@ import maplibregl from "maplibre-gl";
 import type { SearchResult, SearchData } from "./page";
 import {
   IconUsers,
-  IconSearch,
   IconArrowLeft,
   IconRoute,
   IconShieldCheck,
@@ -84,13 +83,12 @@ function VehicleCard({
   return (
     <Card
       onClick={onSelect}
-      className={`group overflow-hidden transition-all duration-300 cursor-pointer border-border/40 ${
-        isLocked
+      className={`group overflow-hidden transition-all duration-300 cursor-pointer border-border/40 ${isLocked
           ? "border-blue-200 bg-blue-50/30 opacity-80"
           : selected
             ? "ring-2 ring-gold shadow-xl shadow-gold/10 border-gold"
             : "hover:shadow-xl hover:shadow-black/5 hover:border-gold/30 hover:-translate-y-0.5"
-      }`}
+        }`}
     >
       <CardContent className="p-0">
         <div className="flex flex-col sm:flex-row">
@@ -156,13 +154,12 @@ function VehicleCard({
                   e.stopPropagation();
                   onSelect();
                 }}
-                className={`rounded-full px-5 ${
-                  isLocked
+                className={`rounded-full px-5 ${isLocked
                     ? "bg-blue-600 text-white hover:bg-blue-700 font-semibold"
                     : selected
                       ? "bg-navy text-white hover:bg-navy/90"
                       : "bg-gold text-navy hover:bg-gold-light font-semibold"
-                }`}
+                  }`}
               >
                 {isLocked ? (
                   "Login to Book"
@@ -372,7 +369,7 @@ export default function ResultsClient({
           setRouteInfo({ distance: data.routes[0].distance, duration: data.routes[0].duration });
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [searchData]);
 
   useEffect(() => {

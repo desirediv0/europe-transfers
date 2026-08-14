@@ -14,7 +14,6 @@ import {
   IconCheck,
   IconArrowRight,
   IconAward,
-  IconMapPin,
 } from "@tabler/icons-react";
 
 const stats = [
@@ -50,10 +49,10 @@ const pillars = [
 export default function AboutPage() {
   return (
     <div className="bg-slate-50/50 min-h-screen font-sans">
-      
+
       {/* Luxury Hero Banner with High Contrast Geometric Grid Overlay */}
       <section className="relative bg-[#060C17] text-white overflow-hidden border-b border-white/10">
-        
+
         {/* Prominent High-Contrast Grid SVG Pattern */}
         <div className="absolute inset-0 pointer-events-none opacity-30 overflow-hidden z-10">
           <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -63,7 +62,7 @@ export default function AboutPage() {
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#about-hero-grid)" />
-            
+
             {/* Glowing European Route Doodle Curves */}
             <path d="M100 150 Q 400 50, 700 200 T 1300 150" stroke="#C9A227" strokeWidth="2.5" strokeDasharray="8 8" />
             <path d="M200 350 Q 650 220, 1100 380" stroke="#3B82F6" strokeWidth="2" strokeDasharray="6 6" />
@@ -82,7 +81,7 @@ export default function AboutPage() {
         <div className="absolute bottom-0 right-0 w-[500px] h-[300px] bg-blue-500/10 rounded-full blur-[140px] pointer-events-none z-10" />
 
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-[#0B1426]/85 to-[#060C17] z-10" />
-        
+
         <div className="relative z-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 sm:py-32 text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-gold/15 px-4.5 py-1.5 text-xs font-black text-gold uppercase tracking-widest mb-6 border border-gold/30 backdrop-blur-md shadow-md">
             <IconAward className="h-4 w-4 text-gold" />

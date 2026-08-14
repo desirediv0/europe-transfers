@@ -102,7 +102,6 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
 
       durations = { change: 0.7, snap: 800 },
       reduceMotion,
-      smoothScroll = false, // enable if you install Lenis
 
       bgTransition = "fade",
       parallaxAmount = 4,
