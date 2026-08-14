@@ -28,6 +28,19 @@ function handleScrollTop() {
 const navigation = {
   sections: [
     {
+      id: "quick-links",
+      name: "Quick Links",
+      items: [
+        { name: "Home", href: "/" },
+        { name: "Private Transfers", href: "/private-transfers" },
+        { name: "Van & Coach", href: "/van-coach" },
+        { name: "Packages", href: "/packages" },
+        { name: "Sightseeing", href: "/sightseeing" },
+        { name: "Blog", href: "/blog" },
+        { name: "Contact", href: "/contact" },
+      ],
+    },
+    {
       id: "services",
       name: "Services",
       items: [

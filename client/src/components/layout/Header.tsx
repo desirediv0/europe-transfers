@@ -22,7 +22,6 @@ import {
   IconCompass,
   IconArrowRight,
   IconHeadset,
-  IconRoute,
 } from "@tabler/icons-react";
 
 const navLinks = [
