@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import {
@@ -61,6 +64,8 @@ export function SightseeingDetailClient({ tour }: Props) {
   const [successOpen, setSuccessOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [activeGalleryIdx, setActiveGalleryIdx] = useState(0);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [lastBooking, setLastBooking] = useState<{ option: string; date: string; pax: string } | null>(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -126,10 +131,12 @@ export function SightseeingDetailClient({ tour }: Props) {
       return;
     }
 
-    setSubmitting(true);
-    try {
-      const activeOptName = selectedOption?.name || tour.title;
-      const activeOptPrice = selectedOption ? Number(selectedOption.price).toFixed(2) : priceDisplay;
+      setSubmitting(true);
+      try {
+        const activeOptName = selectedOption?.name || tour.title;
+        const activeOptPrice = selectedOption ? Number(selectedOption.price).toFixed(2) : priceDisplay;
+
+        setLastBooking({ option: activeOptName, date: form.travelDate, pax: form.pax });
 
       await api.post("/sightseeing/enquire", {
         sightseeingId: tour.id,
@@ -580,12 +587,33 @@ export function SightseeingDetailClient({ tour }: Props) {
                 <Label className="text-xs font-black text-navy flex items-center gap-1">
                   <IconCalendar className="h-3.5 w-3.5 text-gold" /> Preferred Date
                 </Label>
-                <Input
-                  type="date"
-                  value={form.travelDate}
-                  onChange={(e) => setForm({ ...form, travelDate: e.target.value })}
-                  className="h-11 rounded-xl border-gray-200 text-xs font-semibold mt-1 bg-slate-50"
-                />
+                <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full h-11 mt-1 justify-start text-left font-semibold rounded-xl border-gray-200 bg-slate-50 text-xs cursor-pointer hover:bg-white hover:border-gold/60"
+                    >
+                      <IconCalendar className="mr-2 h-4 w-4 text-gold shrink-0" />
+                      <span className="truncate">
+                        {form.travelDate ? format(new Date(form.travelDate + "T00:00:00"), "dd MMM yyyy") : "Pick a date"}
+                      </span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 z-50" align="start" side="bottom" sideOffset={4} collisionPadding={16}>
+                    <Calendar
+                      mode="single"
+                      selected={form.travelDate ? new Date(form.travelDate + "T00:00:00") : undefined}
+                      onSelect={(date) => {
+                        if (date) {
+                          setForm({ ...form, travelDate: format(date, "yyyy-MM-dd") });
+                          setCalendarOpen(false);
+                        }
+                      }}
+                      disabled={{ before: new Date(new Date().setHours(0, 0, 0, 0)) }}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               <div>
                 <Label className="text-xs font-black text-navy flex items-center gap-1">
@@ -647,6 +675,26 @@ export function SightseeingDetailClient({ tour }: Props) {
             Your request for <span className="font-extrabold text-navy">{tour.title}</span> has been saved.
             Confirmation details have been emailed to you.
           </DialogDescription>
+
+          {lastBooking && (
+            <div className="mt-4 bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-2 text-left">
+              <p className="text-[10px] font-black text-gold uppercase tracking-widest mb-2">Booking Summary</p>
+              <div className="flex items-center gap-2 text-xs text-navy">
+                <IconTicket className="h-3.5 w-3.5 text-gold shrink-0" />
+                <span className="font-semibold">{lastBooking.option}</span>
+              </div>
+              {lastBooking.date && (
+                <div className="flex items-center gap-2 text-xs text-navy">
+                  <IconCalendar className="h-3.5 w-3.5 text-gold shrink-0" />
+                  <span className="font-semibold">{format(new Date(lastBooking.date + "T00:00:00"), "EEEE, dd MMMM yyyy")}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2 text-xs text-navy">
+                <IconUsers className="h-3.5 w-3.5 text-gold shrink-0" />
+                <span className="font-semibold">{lastBooking.pax} {parseInt(lastBooking.pax, 10) === 1 ? "Person" : "People"}</span>
+              </div>
+            </div>
+          )}
 
           <div className="mt-6 pt-4 border-t border-gray-100 space-y-3">
             <p className="text-[10px] font-black text-gold uppercase tracking-widest">Need Immediate Assistance?</p>
