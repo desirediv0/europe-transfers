@@ -28,7 +28,6 @@ import {
 const navLinks = [
   { label: "Home", href: "/", icon: IconHome },
   { label: "Private Transfers", href: "/private-transfers", icon: IconCar },
-  { label: "Fleet & Rates", href: "/fleet", icon: IconRoute },
   { label: "Van & Coach", href: "/van-coach", icon: IconClock },
   { label: "Packages", href: "/packages", icon: IconPackage },
   { label: "Sightseeing", href: "/sightseeing", icon: IconCompass },
