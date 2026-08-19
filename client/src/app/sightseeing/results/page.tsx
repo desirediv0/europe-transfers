@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, Suspense } from "react";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,6 @@ const LIMIT = 20;
 function ResultsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const pathname = usePathname();
 
   const initialPage = parseInt(searchParams.get("page") || "1", 10);
   const initialCity = searchParams.get("city") || "ALL";

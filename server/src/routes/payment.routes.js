@@ -2,29 +2,21 @@ import { Router } from "express";
 import {
   createOrder,
   verifyPayment,
-  webhookHandler,
-  getPaymentStatus,
+  getOrder,
+  getUserOrders,
+  getAllOrders,
+  updateOrderStatus,
 } from "../controllers/payment.controller.js";
-import { bookingRateLimiter } from "../middlewares/rateLimiter.js";
-import validate from "../middlewares/validate.middleware.js";
-import { z } from "zod";
+import { protectUser } from "../middlewares/auth.middleware.js";
+import { protectAdmin } from "../middlewares/adminAuth.middleware.js";
 
 const router = Router();
 
-const createOrderSchema = z.object({
-  bookingId: z.string().min(1),
-});
-
-const verifySchema = z.object({
-  razorpay_order_id: z.string().min(1),
-  razorpay_payment_id: z.string().min(1),
-  razorpay_signature: z.string().min(1),
-  bookingId: z.string().min(1),
-});
-
-router.post("/create-order", bookingRateLimiter, validate(createOrderSchema), createOrder);
-router.post("/verify", validate(verifySchema), verifyPayment);
-router.post("/webhook", webhookHandler);
-router.get("/status/:bookingId", getPaymentStatus);
+router.post("/create-order", protectUser, createOrder);
+router.post("/verify-payment", protectUser, verifyPayment);
+router.get("/my-orders", protectUser, getUserOrders);
+router.get("/admin/all", protectAdmin, getAllOrders);
+router.get("/:id", protectUser, getOrder);
+router.patch("/:id/status", protectAdmin, updateOrderStatus);
 
 export default router;

@@ -9,13 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-import type { Location } from "@/lib/types";
 import {
   IconCar,
   IconClock,
@@ -30,8 +26,6 @@ import {
   IconUser,
   IconRoad,
   IconSearch,
-  IconChevronDown,
-  IconCircleCheck,
   IconLoader2,
   IconX,
   IconArrowLeft,
@@ -89,112 +83,17 @@ function mapToDisposalVehicle(v: VanCoachVehicle): DisposalVehicle {
   };
 }
 
-function LocationPicker({
-  value,
-  name,
-  placeholder,
-  locations,
-  onChange,
-}: {
-  value: string;
-  name: string;
-  placeholder: string;
-  locations: Location[];
-  onChange: (id: string, name: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const selected = locations.find((l) => l.id === value || l.name === value);
-
-  const filtered = locations.filter((l) => {
-    if (!query) return true;
-    const q = query.toLowerCase();
-    return l.name.toLowerCase().includes(q) || l.city.toLowerCase().includes(q);
-  });
-
-  return (
-    <Popover open={open} onOpenChange={(o) => { setOpen(o); if (!o) setQuery(""); }}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="flex h-12 w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy shadow-sm transition-colors hover:border-gold/50 focus:outline-none"
-        >
-          {selected ? (
-            <span className="flex items-center gap-2 truncate">
-              <IconMapPin className="h-4 w-4 shrink-0 text-gold" />
-              <span className="truncate font-bold">{selected.name}</span>
-              <span className="text-gray-400 font-medium">({selected.city})</span>
-            </span>
-          ) : (
-            <span className="flex items-center gap-2 text-gray-400 font-medium">
-              <IconMapPin className="h-4 w-4 shrink-0 text-gold" />
-              {value || placeholder}
-            </span>
-          )}
-          <IconChevronDown className="h-4 w-4 shrink-0 text-gray-400" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)] z-50 bg-white shadow-2xl rounded-2xl border border-gray-100" align="start" side="bottom" sideOffset={4}>
-        <div className="max-h-80 overflow-auto">
-          <div className="sticky top-0 bg-white p-2 border-b border-gray-100">
-            <div className="relative">
-              <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder={`Search ${name}...`}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="flex h-10 w-full rounded-lg border border-gray-200 pl-9 pr-3 py-1 text-xs font-medium focus:outline-none focus:border-gold"
-                autoFocus
-              />
-            </div>
-          </div>
-          <div className="p-1.5">
-            {filtered.length === 0 ? (
-              <div className="py-6 text-center text-xs text-gray-400">No location found.</div>
-            ) : (
-              filtered.map((loc) => (
-                <button
-                  key={loc.id}
-                  type="button"
-                  onClick={() => {
-                    onChange(loc.id, loc.name);
-                    setOpen(false);
-                    setQuery("");
-                  }}
-                  className={`flex w-full items-start rounded-lg px-3 py-2.5 text-xs text-left transition-colors hover:bg-slate-100 ${value === loc.id || value === loc.name ? "bg-slate-100 font-bold" : ""
-                    }`}
-                >
-                  <div className="flex flex-col">
-                    <span className="font-bold text-navy">{loc.name}</span>
-                    <span className="text-[10px] text-gray-400">{loc.city}</span>
-                  </div>
-                  {(value === loc.id || value === loc.name) && <IconCircleCheck className="ml-auto h-4 w-4 text-gold" />}
-                </button>
-              ))
-            )}
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-}
-
 function ResultsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
   const [fleet, setFleet] = useState<DisposalVehicle[]>([]);
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [selectedLocationId, setSelectedLocationId] = useState(searchParams.get("locationId") || "");
-  const [selectedLocationName, setSelectedLocationName] = useState(searchParams.get("location") || "Milan, Italy");
+  const selectedLocationName = searchParams.get("location") || "Milan, Italy";
   const [vehicleSearch, setVehicleSearch] = useState(searchParams.get("search") || "");
+  const hours = searchParams.get("hours") || "8";
+  const pickupDateParam = searchParams.get("date");
+  const pickupDate = pickupDateParam ? new Date(pickupDateParam) : new Date();
 
-  const [hours, setHours] = useState(searchParams.get("hours") || "8");
-  const [pickupDate, setPickupDate] = useState<Date | null>(searchParams.get("date") ? new Date(searchParams.get("date")!) : new Date());
-  const [pickupTime, setPickupTime] = useState(searchParams.get("time") || "09:00 AM");
-
-  const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<DisposalVehicle | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 
@@ -203,7 +102,6 @@ function ResultsContent() {
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
 
   useEffect(() => {
-    api.get<Location[]>("/search/locations").then(setLocations).catch(() => { });
     api.get<VanCoachVehicle[]>("/van-coach/all")
       .then((vehicles) => setFleet(vehicles.map(mapToDisposalVehicle)))
       .catch(() => { });
@@ -215,17 +113,6 @@ function ResultsContent() {
     else params.delete("search");
     router.push(`/van-coach/results?${params.toString()}`);
   }, [searchParams, router]);
-
-  const times: string[] = [];
-  for (let h = 0; h < 24; h++) {
-    for (let m = 0; m < 60; m += 30) {
-      const hr = h % 12 === 0 ? 12 : h % 12;
-      const ampm = h < 12 ? "AM" : "PM";
-      const min = m.toString().padStart(2, "0");
-      const hrStr = hr.toString().padStart(2, "0");
-      times.push(`${hrStr}:${min} ${ampm}`);
-    }
-  }
 
   const numericHours = Number(hours) || 8;
 

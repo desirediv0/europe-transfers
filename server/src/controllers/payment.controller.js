@@ -1,67 +1,86 @@
+import Razorpay from "razorpay";
 import crypto from "crypto";
-import razorpay from "../config/razorpay.js";
 import prisma from "../config/db.js";
 import apiResponse from "../utils/apiResponse.js";
 import ApiError from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { sendEmail } from "../config/mailer.js";
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 export const createOrder = asyncHandler(async (req, res) => {
-  const { bookingId } = req.body;
+  const {
+    productType,
+    productId,
+    productName,
+    amount,
+    currency = "EUR",
+    customerName,
+    customerEmail,
+    customerPhone,
+    travelDate,
+    pax,
+    optionSelected,
+    notes,
+  } = req.body;
 
-  if (!bookingId) {
-    throw new ApiError(400, "bookingId is required");
+  if (!productType || !productId || !productName || !amount || !customerName || !customerEmail || !customerPhone) {
+    throw new ApiError(400, "Missing required fields: productType, productId, productName, amount, customerName, customerEmail, customerPhone");
   }
 
-  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_ID.includes("placeholder")) {
-    throw new ApiError(503, "Payment gateway not configured. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env.local");
-  }
+  const amountInPaise = Math.round(Number(amount) * 100);
 
-  const booking = await prisma.booking.findUnique({
-    where: { id: bookingId },
-    include: {
-      route: { include: { fromLocation: true, toLocation: true } },
-      carType: true,
-    },
-  });
-
-  if (!booking) {
-    throw new ApiError(404, "Booking not found");
-  }
-
-  if (booking.paymentStatus === "PAID") {
-    throw new ApiError(400, "Booking is already paid");
-  }
-
-  const amountInPaise = Math.round(Number(booking.price) * 100);
-
-  const order = await razorpay.orders.create({
+  const razorpayOrder = await razorpay.orders.create({
     amount: amountInPaise,
-    currency: booking.currency || "EUR",
-    receipt: booking.id,
+    currency,
+    receipt: `order_${productType}_${productId}_${Date.now()}`,
     notes: {
-      bookingId: booking.id,
-      customerName: booking.customerName,
-      phone: booking.phone,
-      route: `${booking.route?.fromLocation?.name} → ${booking.route?.toLocation?.name}`,
+      productType,
+      productId,
+      productName,
+      customerName,
+      customerEmail,
     },
   });
 
-  return apiResponse(res, 200, "Order created", {
+  const userId = req.user?.id || null;
+
+  const order = await prisma.order.create({
+    data: {
+      userId,
+      productType,
+      productId,
+      productName,
+      amount: Number(amount),
+      currency,
+      razorpayOrderId: razorpayOrder.id,
+      status: "CREATED",
+      customerName,
+      customerEmail,
+      customerPhone,
+      travelDate: travelDate || null,
+      pax: parseInt(pax, 10) || 1,
+      optionSelected: optionSelected || null,
+      notes: notes || null,
+    },
+  });
+
+  return apiResponse(res, 201, "Order created", {
     orderId: order.id,
-    amount: order.amount,
-    currency: order.currency,
-    keyId: process.env.RAZORPAY_KEY_ID,
-    customerName: booking.customerName,
-    email: booking.email || undefined,
-    phone: booking.phone,
-    description: `Transfer: ${booking.route?.fromLocation?.name} → ${booking.route?.toLocation?.name}`,
+    razorpayOrderId: razorpayOrder.id,
+    amount: amountInPaise,
+    currency,
+    key: process.env.RAZORPAY_KEY_ID,
   });
 });
 
 export const verifyPayment = asyncHandler(async (req, res) => {
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, bookingId } = req.body;
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
 
-  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !bookingId) {
+  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !orderId) {
     throw new ApiError(400, "Missing payment verification fields");
   }
 
@@ -71,121 +90,134 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     .update(body)
     .digest("hex");
 
-  if (expectedSignature !== razorpay_signature) {
-    await prisma.booking.update({
-      where: { id: bookingId },
-      data: {
-        paymentStatus: "FAILED",
-        paymentId: razorpay_payment_id,
-        message: "Payment signature verification failed",
-      },
+  const isValid = expectedSignature === razorpay_signature;
+
+  if (!isValid) {
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { status: "FAILED" },
     });
-    throw new ApiError(400, "Payment verification failed — invalid signature");
+    throw new ApiError(400, "Payment verification failed");
   }
 
-  const payment = await razorpay.payments.fetch(razorpay_payment_id);
-
-  if (payment.status !== "captured" && payment.status !== "authorized") {
-    await prisma.booking.update({
-      where: { id: bookingId },
-      data: {
-        paymentStatus: "FAILED",
-        paymentId: razorpay_payment_id,
-        message: `Payment status: ${payment.status}`,
-      },
-    });
-    throw new ApiError(400, `Payment not completed — status: ${payment.status}`);
-  }
-
-  const updatedBooking = await prisma.booking.update({
-    where: { id: bookingId },
+  const order = await prisma.order.update({
+    where: { id: orderId },
     data: {
-      paymentStatus: "PAID",
-      bookingStatus: "CONFIRMED",
-      paymentId: razorpay_payment_id,
-      message: `Paid via Razorpay | Order: ${razorpay_order_id} | Payment: ${razorpay_payment_id}`,
-    },
-    include: {
-      route: { include: { fromLocation: true, toLocation: true } },
-      carType: true,
+      razorpayPaymentId: razorpay_payment_id,
+      razorpaySignature: razorpay_signature,
+      status: "CAPTURED",
     },
   });
 
-  return apiResponse(res, 200, "Payment verified successfully", updatedBooking);
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "codeshorts007@gmail.com";
+    await sendEmail({
+      to: adminEmail,
+      subject: `Payment Received: ${order.productName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 24px; color: #0B1528; background-color: #f8fafc;">
+          <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0;">
+            <h2 style="color: #060C17; margin-top: 0;">Payment Received</h2>
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+              <tr><td style="padding: 8px 0; color: #64748b; width: 140px;">Product:</td><td style="padding: 8px 0; font-weight: bold;">${order.productName}</td></tr>
+              <tr><td style="padding: 8px 0; color: #64748b;">Type:</td><td style="padding: 8px 0; font-weight: bold;">${order.productType}</td></tr>
+              <tr><td style="padding: 8px 0; color: #64748b;">Amount:</td><td style="padding: 8px 0; font-weight: bold; color: #059669;">€${order.amount}</td></tr>
+              <tr><td style="padding: 8px 0; color: #64748b;">Customer:</td><td style="padding: 8px 0; font-weight: bold;">${order.customerName}</td></tr>
+              <tr><td style="padding: 8px 0; color: #64748b;">Email:</td><td style="padding: 8px 0; font-weight: bold;">${order.customerEmail}</td></tr>
+              <tr><td style="padding: 8px 0; color: #64748b;">Phone:</td><td style="padding: 8px 0; font-weight: bold;">${order.customerPhone}</td></tr>
+              <tr><td style="padding: 8px 0; color: #64748b;">Payment ID:</td><td style="padding: 8px 0; font-weight: bold;">${razorpay_payment_id}</td></tr>
+            </table>
+          </div>
+        </div>
+      `,
+    });
+  } catch (err) {
+    console.error("Failed to send admin payment email:", err);
+  }
+
+  try {
+    await sendEmail({
+      to: order.customerEmail,
+      subject: `Payment Confirmation - ${order.productName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 24px; color: #0B1528; background-color: #f8fafc;">
+          <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0;">
+            <h2 style="color: #060C17; margin-top: 0;">Payment Confirmed!</h2>
+            <p style="color: #475569; font-size: 14px;">Dear <strong>${order.customerName}</strong>,</p>
+            <p style="color: #475569; font-size: 14px;">Your payment for <strong>${order.productName}</strong> has been received successfully.</p>
+            <div style="background-color: #f1f5f9; border-radius: 12px; padding: 16px; margin: 20px 0;">
+              <p style="margin: 4px 0; font-size: 13px;"><strong>Product:</strong> ${order.productName}</p>
+              <p style="margin: 4px 0; font-size: 13px;"><strong>Amount:</strong> €${order.amount}</p>
+              <p style="margin: 4px 0; font-size: 13px;"><strong>Payment ID:</strong> ${razorpay_payment_id}</p>
+            </div>
+            <p style="color: #64748b; font-size: 13px;">Our team will contact you shortly with booking confirmation.</p>
+          </div>
+        </div>
+      `,
+    });
+  } catch (err) {
+    console.error("Failed to send customer payment email:", err);
+  }
+
+  return apiResponse(res, 200, "Payment verified successfully", { order });
 });
 
-export const webhookHandler = asyncHandler(async (req, res) => {
-  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
-  const signature = req.headers["x-razorpay-signature"];
-
-  if (!webhookSecret) {
-    return apiResponse(res, 200, "Webhook secret not configured");
+export const getOrder = asyncHandler(async (req, res) => {
+  const order = await prisma.order.findUnique({
+    where: { id: req.params.id },
+  });
+  if (!order) {
+    throw new ApiError(404, "Order not found");
   }
-
-  const body = JSON.stringify(req.body);
-  const expectedSignature = crypto
-    .createHmac("sha256", webhookSecret)
-    .update(body)
-    .digest("hex");
-
-  if (expectedSignature !== signature) {
-    return apiResponse(res, 400, "Invalid webhook signature");
-  }
-
-  const event = req.body.event;
-  const paymentEntity = req.body.payload?.payment?.entity;
-
-  if (event === "payment.captured" && paymentEntity) {
-    const receipt = paymentEntity.receipt;
-    if (receipt) {
-      await prisma.booking.update({
-        where: { id: receipt },
-        data: {
-          paymentStatus: "PAID",
-          bookingStatus: "CONFIRMED",
-          paymentId: paymentEntity.id,
-          message: `Paid via Razorpay webhook | Payment: ${paymentEntity.id}`,
-        },
-      }).catch(() => {});
-    }
-  }
-
-  if (event === "payment.failed" && paymentEntity) {
-    const receipt = paymentEntity.receipt;
-    if (receipt) {
-      await prisma.booking.update({
-        where: { id: receipt },
-        data: {
-          paymentStatus: "FAILED",
-          paymentId: paymentEntity.id,
-          message: `Failed via Razorpay webhook | ${paymentEntity.error_description || paymentEntity.status}`,
-        },
-      }).catch(() => {});
-    }
-  }
-
-  return apiResponse(res, 200, "Webhook processed");
+  return apiResponse(res, 200, "Order retrieved", order);
 });
 
-export const getPaymentStatus = asyncHandler(async (req, res) => {
-  const { bookingId } = req.params;
+export const getUserOrders = asyncHandler(async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    throw new ApiError(401, "Not authenticated");
+  }
 
-  const booking = await prisma.booking.findUnique({
-    where: { id: bookingId },
-    select: {
-      id: true,
-      paymentStatus: true,
-      bookingStatus: true,
-      paymentId: true,
-      price: true,
-      currency: true,
-      message: true,
-    },
+  const orders = await prisma.order.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
   });
 
-  if (!booking) {
-    throw new ApiError(404, "Booking not found");
-  }
+  return apiResponse(res, 200, "Orders retrieved", orders);
+});
 
-  return apiResponse(res, 200, "Payment status retrieved", booking);
+export const getAllOrders = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 20;
+  const skip = (page - 1) * limit;
+  const status = req.query.status;
+  const productType = req.query.productType;
+
+  const where = {};
+  if (status) where.status = status;
+  if (productType) where.productType = productType;
+
+  const [orders, total] = await Promise.all([
+    prisma.order.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.order.count({ where }),
+  ]);
+
+  return apiResponse(res, 200, "Orders retrieved", {
+    items: orders,
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+  });
+});
+
+export const updateOrderStatus = asyncHandler(async (req, res) => {
+  const { status } = req.body;
+  const order = await prisma.order.update({
+    where: { id: req.params.id },
+    data: { status },
+  });
+  return apiResponse(res, 200, "Order updated", order);
 });

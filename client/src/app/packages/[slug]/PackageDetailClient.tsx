@@ -12,6 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import type { Package } from "@/lib/types";
+import { usePayment } from "@/hooks/usePayment";
 import {
   IconCalendar,
   IconMapPin,
@@ -30,6 +31,7 @@ import {
   IconLoader2,
   IconBrandWhatsapp,
   IconPhoneCall,
+  IconCreditCard,
 } from "@tabler/icons-react";
 
 interface Props {
@@ -62,6 +64,16 @@ export function PackageDetailClient({ pkg }: Props) {
     message: "",
   });
 
+  const [paymentForm, setPaymentForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    travelDate: "",
+    pax: "2",
+  });
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const { initiatePayment, loading: paymentLoading } = usePayment();
+
   const handleEnquireSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.phone) {
@@ -93,6 +105,27 @@ export function PackageDetailClient({ pkg }: Props) {
       const error = err as { response?: { data?: { message?: string } }; message?: string };
       toast.error(error?.response?.data?.message || error?.message || "Failed to submit enquiry. Please try again.");
     }
+  };
+
+  const handlePaymentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!paymentForm.name || !paymentForm.email || !paymentForm.phone) {
+      toast.error("Please enter your name, email, and phone number.");
+      return;
+    }
+
+    await initiatePayment({
+      productType: "PACKAGE",
+      productId: pkg.id,
+      productName: pkg.title,
+      amount: Number(pkg.priceFrom) || 1195,
+      currency: "EUR",
+      customerName: paymentForm.name,
+      customerEmail: paymentForm.email,
+      customerPhone: paymentForm.phone,
+      travelDate: paymentForm.travelDate || undefined,
+      pax: parseInt(paymentForm.pax, 10) || 2,
+    });
   };
 
   return (
@@ -304,6 +337,13 @@ export function PackageDetailClient({ pkg }: Props) {
                   >
                     Enquire & Book Package <IconArrowRight className="ml-2 h-4 w-4" />
                   </Button>
+                  <Button
+                    onClick={() => setPaymentOpen(true)}
+                    variant="outline"
+                    className="w-full rounded-xl py-3.5 border-2 border-navy text-navy hover:bg-navy hover:text-white text-sm font-extrabold cursor-pointer"
+                  >
+                    <IconCreditCard className="mr-1.5 h-4 w-4" /> Pay Now & Confirm
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -498,6 +538,116 @@ export function PackageDetailClient({ pkg }: Props) {
           <Button onClick={() => setSuccessOpen(false)} className="mt-6 w-full rounded-xl bg-navy text-white text-xs font-extrabold h-11">
             Done
           </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Modal */}
+      <Dialog open={paymentOpen} onOpenChange={setPaymentOpen}>
+        <DialogContent className="sm:max-w-lg rounded-3xl p-0 overflow-hidden bg-white border border-gray-100 shadow-2xl">
+          <div className="bg-[#060C17] p-6 text-white">
+            <Badge className="rounded-full bg-gold text-navy font-black text-[10px] px-3 mb-2">
+              Secure Payment
+            </Badge>
+            <DialogTitle className="text-base font-black text-white leading-snug">Complete Your Booking</DialogTitle>
+            <div className="mt-2 flex items-center gap-3">
+              <span className="text-xs text-gray-300 font-medium">{pkg.title}</span>
+              <span className="text-lg font-black text-gold">€{priceDisplay}</span>
+              <span className="text-[11px] text-gray-400">/ person</span>
+            </div>
+          </div>
+
+          <form onSubmit={handlePaymentSubmit} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+            <DialogDescription className="text-[11px] text-gray-400 font-medium -mt-1">
+              Fill in your details to proceed with secure payment.
+            </DialogDescription>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs font-black text-navy">Full Name *</Label>
+                <Input
+                  required
+                  placeholder="John Doe"
+                  value={paymentForm.name}
+                  onChange={(e) => setPaymentForm({ ...paymentForm, name: e.target.value })}
+                  className="h-11 rounded-xl border-gray-200 text-xs font-semibold mt-1"
+                />
+              </div>
+              <div>
+                <Label className="text-xs font-black text-navy">Phone / WhatsApp *</Label>
+                <Input
+                  type="tel"
+                  required
+                  placeholder="+41 44 123 4567"
+                  value={paymentForm.phone}
+                  onChange={(e) => setPaymentForm({ ...paymentForm, phone: e.target.value })}
+                  className="h-11 rounded-xl border-gray-200 text-xs font-semibold mt-1"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-xs font-black text-navy">Email Address *</Label>
+              <Input
+                type="email"
+                required
+                placeholder="you@example.com"
+                value={paymentForm.email}
+                onChange={(e) => setPaymentForm({ ...paymentForm, email: e.target.value })}
+                className="h-11 rounded-xl border-gray-200 text-xs font-semibold mt-1"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs font-black text-navy flex items-center gap-1">
+                  <IconCalendar className="h-3.5 w-3.5 text-gold" /> Travel Date
+                </Label>
+                <Input
+                  type="date"
+                  value={paymentForm.travelDate}
+                  onChange={(e) => setPaymentForm({ ...paymentForm, travelDate: e.target.value })}
+                  className="h-11 rounded-xl border-gray-200 text-xs font-semibold mt-1"
+                />
+              </div>
+              <div>
+                <Label className="text-xs font-black text-navy flex items-center gap-1">
+                  <IconUsers className="h-3.5 w-3.5 text-gold" /> Passengers
+                </Label>
+                <select
+                  value={paymentForm.pax}
+                  onChange={(e) => setPaymentForm({ ...paymentForm, pax: e.target.value })}
+                  className="w-full h-11 rounded-xl border border-gray-200 bg-slate-50 px-3 text-xs font-bold text-navy focus:outline-none focus:border-gold mt-1"
+                >
+                  <option value="1">1 Passenger</option>
+                  <option value="2">2 Passengers</option>
+                  <option value="3">3 Passengers</option>
+                  <option value="4">4 Passengers</option>
+                  <option value="5">5 Passengers</option>
+                  <option value="6">6+ Passengers</option>
+                </select>
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={paymentLoading}
+              className="w-full h-12 rounded-xl bg-gold hover:bg-yellow-400 text-navy font-black text-sm shadow-lg shadow-gold/20 cursor-pointer"
+            >
+              {paymentLoading ? (
+                <span className="flex items-center gap-2">
+                  <IconLoader2 className="h-4 w-4 animate-spin" /> Processing Payment...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <IconCreditCard className="h-4 w-4" /> Pay €{priceDisplay} Now
+                </span>
+              )}
+            </Button>
+
+            <p className="text-[10px] text-gray-400 text-center font-medium">
+              Secured by Razorpay. Your payment details are encrypted.
+            </p>
+          </form>
         </DialogContent>
       </Dialog>
 

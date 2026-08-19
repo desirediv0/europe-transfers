@@ -64,6 +64,7 @@ model User {
   isEmailVerified  Boolean          @default(false)
   rejectionReason  String?
   otps             Otp[]
+  orders           Order[]
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 }
@@ -359,6 +360,50 @@ model Booking {
   message       String?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+}
+
+// ─── Unified Order System (Sightseeing / Packages / Van-Coach) ──
+
+enum OrderProductType {
+  SIGHTSEEING
+  PACKAGE
+  VAN_COACH
+}
+
+enum OrderStatus {
+  CREATED
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  REFUNDED
+}
+
+model Order {
+  id               String          @id @default(cuid())
+  userId           String?
+  user             User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  productType      OrderProductType
+  productId        String
+  productName      String
+  amount           Decimal         @db.Decimal(10, 2)
+  currency         String          @default("EUR")
+  razorpayOrderId  String?
+  razorpayPaymentId String?
+  razorpaySignature String?
+  status           OrderStatus     @default(CREATED)
+  customerName     String
+  customerEmail    String
+  customerPhone    String
+  travelDate       String?
+  pax              Int             @default(1)
+  optionSelected   String?
+  notes            String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([userId])
+  @@index([razorpayOrderId])
+  @@index([razorpayPaymentId])
 }
 
 // ─── Testimonials ───────────────────────────────────────
