@@ -14,6 +14,8 @@ import RoutesPage from "@/pages/RoutesPage";
 import PackagesPage from "@/pages/PackagesPage";
 import SightseeingPage from "@/pages/SightseeingPage";
 import BookingsPage from "@/pages/BookingsPage";
+import SightseeingOrdersPage from "@/pages/SightseeingOrdersPage";
+import FleetOrdersPage from "@/pages/FleetOrdersPage";
 import UsersPage from "@/pages/UsersPage";
 import TestimonialsPage from "@/pages/TestimonialsPage";
 import UploadsPage from "@/pages/UploadsPage";
@@ -82,6 +84,8 @@ export default function App() {
                       <Route path="/packages" element={<PackagesPage />} />
                       <Route path="/sightseeing" element={<SightseeingPage />} />
                       <Route path="/bookings" element={<BookingsPage />} />
+                      <Route path="/sightseeing-orders" element={<SightseeingOrdersPage />} />
+                      <Route path="/fleet-orders" element={<FleetOrdersPage />} />
                       <Route path="/users" element={<UsersPage />} />
                       <Route path="/testimonials" element={<TestimonialsPage />} />
                       <Route path="/uploads" element={<UploadsPage />} />

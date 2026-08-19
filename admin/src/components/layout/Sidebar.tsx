@@ -26,6 +26,8 @@ import {
   Bus,
   Map,
   Compass,
+  CreditCard,
+  Ship,
 } from "lucide-react";
 
 const mainNavItems = [
@@ -38,6 +40,8 @@ const mainNavItems = [
   { label: "Packages", icon: Package, href: "/packages" },
   { label: "Sightseeing", icon: Compass, href: "/sightseeing" },
   { label: "Bookings", icon: CalendarCheck, href: "/bookings" },
+  { label: "Sightseeing Orders", icon: CreditCard, href: "/sightseeing-orders" },
+  { label: "Fleet Orders", icon: Ship, href: "/fleet-orders" },
   { label: "Users", icon: Users, href: "/users" },
   { label: "Testimonials", icon: Star, href: "/testimonials" },
   { label: "Uploads", icon: Upload, href: "/uploads" },

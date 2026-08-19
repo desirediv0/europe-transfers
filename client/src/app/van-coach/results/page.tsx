@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { usePayment } from "@/hooks/usePayment";
 import {
   IconCar,
   IconClock,
@@ -30,6 +31,7 @@ import {
   IconX,
   IconArrowLeft,
   IconFilter,
+  IconCreditCard,
 } from "@tabler/icons-react";
 
 interface VanCoachRoutePrice {
@@ -101,6 +103,10 @@ function ResultsContent() {
   const [submitting, setSubmitting] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
 
+  const [paymentForm, setPaymentForm] = useState({ name: "", email: "", phone: "", pickupAddress: "" });
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const { initiatePayment, loading: paymentLoading } = usePayment();
+
   useEffect(() => {
     api.get<VanCoachVehicle[]>("/van-coach/all")
       .then((vehicles) => setFleet(vehicles.map(mapToDisposalVehicle)))
@@ -126,11 +132,49 @@ function ResultsContent() {
     if (!selectedVehicle) { toast.error("Please select a vehicle"); return; }
     if (!form.name || !form.email || !form.phone) { toast.error("Please enter name, email, and phone"); return; }
     setSubmitting(true);
-    await new Promise((res) => setTimeout(res, 1000));
-    setSubmitting(false);
-    setDetailModalOpen(false);
-    setSuccessDialogOpen(true);
-    toast.success("Enquiry sent to Europe Transfers Concierge Team!");
+    try {
+      await api.post("/van-coach/enquire", {
+        vehicleId: selectedVehicle.id,
+        vehicleName: selectedVehicle.name,
+        location: selectedLocationName,
+        hours: numericHours,
+        rate: selectedVehicle.hourlyRate * numericHours,
+        name: form.name,
+        phone: form.phone,
+        email: form.email,
+        pickupAddress: form.pickupAddress || undefined,
+        itineraryNotes: form.itineraryNotes || undefined,
+      });
+      setSubmitting(false);
+      setDetailModalOpen(false);
+      setSuccessDialogOpen(true);
+      toast.success("Enquiry sent to Europe Transfers Concierge Team!");
+    } catch {
+      setSubmitting(false);
+      toast.error("Failed to send enquiry. Please try again.");
+    }
+  };
+
+  const handlePaymentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedVehicle) return;
+    if (!paymentForm.name || !paymentForm.email || !paymentForm.phone) {
+      toast.error("Please enter name, email, and phone");
+      return;
+    }
+    const totalAmount = selectedVehicle.hourlyRate * numericHours;
+    await initiatePayment({
+      productType: "VAN_COACH",
+      productId: selectedVehicle.id,
+      productName: `${selectedVehicle.name} - ${numericHours}h Disposal`,
+      amount: totalAmount,
+      currency: "EUR",
+      customerName: paymentForm.name,
+      customerEmail: paymentForm.email,
+      customerPhone: paymentForm.phone,
+      pax: 1,
+      optionSelected: `${numericHours}h Disposal in ${selectedLocationName}`,
+    });
   };
 
   const filteredFleet = fleet.filter((v) => {
@@ -250,7 +294,12 @@ function ResultsContent() {
                       </div>
                       <Button onClick={() => handleOpenDetail(v)}
                         className="rounded-xl bg-gold hover:bg-gold-light text-navy font-black text-[10px] sm:text-xs px-2 sm:px-4 py-1 sm:py-2 cursor-pointer shadow-xs">
-                        Register
+                        Enquire
+                      </Button>
+                      <Button onClick={() => { setSelectedVehicle(v); setPaymentForm({ name: "", email: "", phone: "", pickupAddress: "" }); setPaymentOpen(true); }}
+                        variant="outline"
+                        className="rounded-xl border-2 border-navy text-navy hover:bg-navy hover:text-white font-black text-[10px] sm:text-xs px-2 sm:px-4 py-1 sm:py-2 cursor-pointer shadow-xs">
+                        <IconCreditCard className="h-3 w-3 mr-0.5" /> Pay
                       </Button>
                     </div>
                   </div>
@@ -366,6 +415,53 @@ function ResultsContent() {
           <Button onClick={() => setSuccessDialogOpen(false)} className="mt-6 w-full rounded-xl bg-navy text-white text-xs font-extrabold h-11">Done</Button>
         </DialogContent>
       </Dialog>
+
+      {/* Payment Modal */}
+      {selectedVehicle && (
+        <Dialog open={paymentOpen} onOpenChange={setPaymentOpen}>
+          <DialogContent className="sm:max-w-lg rounded-3xl p-0 overflow-hidden bg-white border border-gray-100 shadow-2xl">
+            <div className="bg-[#060C17] p-6 text-white">
+              <Badge className="rounded-full bg-gold text-navy font-black text-[10px] px-3 mb-2">Secure Payment</Badge>
+              <DialogTitle className="text-base font-black text-white leading-snug">Complete Fleet Booking</DialogTitle>
+              <div className="mt-2 space-y-1">
+                <p className="text-xs text-gray-300 font-medium">{selectedVehicle.name} · {numericHours}h Disposal</p>
+                <p className="text-lg font-black text-gold">€{Math.round(selectedVehicle.hourlyRate * numericHours)}</p>
+              </div>
+            </div>
+            <form onSubmit={handlePaymentSubmit} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+              <DialogDescription className="text-[11px] text-gray-400 font-medium -mt-1">
+                Fill in your details to proceed with secure payment.
+              </DialogDescription>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs font-black text-navy">Full Name *</Label>
+                  <Input required placeholder="John Doe" value={paymentForm.name} onChange={(e) => setPaymentForm({ ...paymentForm, name: e.target.value })} className="h-11 rounded-xl border-gray-200 text-xs font-semibold mt-1" />
+                </div>
+                <div>
+                  <Label className="text-xs font-black text-navy">Phone *</Label>
+                  <Input type="tel" required placeholder="+41 44 123 4567" value={paymentForm.phone} onChange={(e) => setPaymentForm({ ...paymentForm, phone: e.target.value })} className="h-11 rounded-xl border-gray-200 text-xs font-semibold mt-1" />
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs font-black text-navy">Email *</Label>
+                <Input type="email" required placeholder="you@example.com" value={paymentForm.email} onChange={(e) => setPaymentForm({ ...paymentForm, email: e.target.value })} className="h-11 rounded-xl border-gray-200 text-xs font-semibold mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs font-black text-navy">Pickup Address</Label>
+                <Input placeholder="Hotel or Airport address" value={paymentForm.pickupAddress} onChange={(e) => setPaymentForm({ ...paymentForm, pickupAddress: e.target.value })} className="h-11 rounded-xl border-gray-200 text-xs font-semibold mt-1" />
+              </div>
+              <Button type="submit" disabled={paymentLoading} className="w-full h-12 rounded-xl bg-gold hover:bg-yellow-400 text-navy font-black text-sm shadow-lg shadow-gold/20 cursor-pointer">
+                {paymentLoading ? (
+                  <span className="flex items-center gap-2"><IconLoader2 className="h-4 w-4 animate-spin" /> Processing Payment...</span>
+                ) : (
+                  <span className="flex items-center gap-2"><IconCreditCard className="h-4 w-4" /> Pay €{Math.round(selectedVehicle.hourlyRate * numericHours)} Now</span>
+                )}
+              </Button>
+              <p className="text-[10px] text-gray-400 text-center font-medium">Secured by Razorpay. Your payment details are encrypted.</p>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
