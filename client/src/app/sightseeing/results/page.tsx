@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
-import type { SightseeingTour } from "../page";
 import {
   IconSearch,
   IconMapPin,
@@ -21,6 +20,19 @@ import {
   IconX,
   IconArrowLeft,
 } from "@tabler/icons-react";
+
+export interface SightseeingTour {
+  id: string;
+  title: string;
+  slug: string;
+  cityName?: string;
+  countryName?: string;
+  duration: string;
+  priceFrom: number | string;
+  coverImage?: string;
+  summary?: string;
+  highlights?: string;
+}
 
 interface PaginationInfo {
   page: number;
