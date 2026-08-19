@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,10 +33,7 @@ import {
   IconMail,
   IconUser,
   IconCreditCard,
-  IconSparkles,
   IconCheck,
-  IconStar,
-  IconPhone,
 } from "@tabler/icons-react";
 
 interface VanCoachRoutePrice {
@@ -201,10 +197,8 @@ const PROCESS_STEPS = [
 ];
 
 function VanCoachFleetContent() {
-  const router = useRouter();
   const [locations, setLocations] = useState<Location[]>([]);
   const [fleet, setFleet] = useState<DisposalVehicle[]>([]);
-  const [selectedLocationId, setSelectedLocationId] = useState("");
   const [selectedLocationName, setSelectedLocationName] = useState("");
   const [hours, setHours] = useState("8");
   const [pickupDate, setPickupDate] = useState<Date | null>(new Date());

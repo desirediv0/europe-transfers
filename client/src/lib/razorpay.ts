@@ -1,10 +1,11 @@
 declare global {
   interface Window {
-    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Razorpay: new (options: any) => any;
   }
 }
 
-interface RazorpayOptions {
+export interface RazorpayOptions {
   key: string;
   amount: number;
   currency: string;
@@ -36,12 +37,6 @@ export interface RazorpayResponse {
   razorpay_signature: string;
 }
 
-interface RazorpayInstance {
-  open: () => void;
-  close: () => void;
-  on: (event: string, callback: (response: { error: { description: string } }) => void) => void;
-}
-
 function loadScript(src: string): Promise<boolean> {
   return new Promise((resolve) => {
     if (document.querySelector(`script[src="${src}"]`)) {
@@ -56,7 +51,7 @@ function loadScript(src: string): Promise<boolean> {
   });
 }
 
-export async function initRazorpay(options: RazorpayOptions): Promise<boolean> {
+export async function initRazorpay(options: RazorpayOptions): Promise<void> {
   const loaded = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
   if (!loaded) {
     throw new Error("Failed to load Razorpay SDK. Check your internet connection.");
@@ -67,7 +62,7 @@ export async function initRazorpay(options: RazorpayOptions): Promise<boolean> {
 
     options.handler = (response) => {
       originalHandler?.(response);
-      resolve(true);
+      resolve();
     };
 
     options.modal = {
@@ -81,7 +76,7 @@ export async function initRazorpay(options: RazorpayOptions): Promise<boolean> {
 
     const rzp = new window.Razorpay(options);
 
-    rzp.on("payment.failed", (response: { error: { description: string } }) => {
+    rzp.on?.("payment.failed", (response: { error: { description: string } }) => {
       reject(new Error(response.error.description || "Payment failed"));
     });
 
