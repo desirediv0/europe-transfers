@@ -189,12 +189,25 @@ function LocationPicker({
   );
 }
 
-export default function VehicleAtDisposalPage() {
+export default function VehicleAtDisposalPageWrapper() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center"><IconLoader2 className="h-8 w-8 animate-spin text-gold" /></div>}>
+      <VehicleAtDisposalPage />
+    </Suspense>
+  );
+}
+
+function VehicleAtDisposalPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
   const [fleet, setFleet] = useState<DisposalVehicle[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocationId, setSelectedLocationId] = useState("");
   const [selectedLocationName, setSelectedLocationName] = useState("Milan, Italy");
-  const [vehicleSearch, setVehicleSearch] = useState("");
+  const vehicleSearchFromURL = searchParams.get("search") || "";
+  const [vehicleSearch, setVehicleSearch] = useState(vehicleSearchFromURL);
 
   const [hours, setHours] = useState("8");
   const [pickupDate, setPickupDate] = useState<Date | null>(new Date());
@@ -204,7 +217,6 @@ export default function VehicleAtDisposalPage() {
   const [selectedVehicle, setSelectedVehicle] = useState<DisposalVehicle | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 
-  // Form State
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -222,6 +234,18 @@ export default function VehicleAtDisposalPage() {
       .then((vehicles) => setFleet(vehicles.map(mapToDisposalVehicle)))
       .catch(() => { });
   }, []);
+
+  const updateURLSearch = useCallback((value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) {
+      params.set("search", value);
+    } else {
+      params.delete("search");
+    }
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [searchParams, router, pathname]);
+
+  const hasActiveFilters = vehicleSearch.trim().length > 0;
 
   // Time slots (Formatted as "09:00 AM", "09:30 AM", etc.)
   const times: string[] = [];
@@ -408,26 +432,66 @@ export default function VehicleAtDisposalPage() {
           </p>
         </div>
 
-        {/* Vehicle Search Bar */}
-        <div className="max-w-md mx-auto mb-8">
+        {/* Search bar with back/clear */}
+        <div className="max-w-2xl mx-auto mb-6">
+          {hasActiveFilters && (
+            <div className="flex items-center justify-between mb-4 p-3 rounded-2xl bg-white border border-gray-200 shadow-xs">
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-[10px] font-black text-gold uppercase tracking-widest flex items-center gap-1.5">
+                  <IconFilter className="h-3 w-3" /> Active Filters
+                </span>
+                <Badge variant="secondary" className="rounded-full bg-navy text-white text-[10px] font-bold px-2.5 py-0.5">
+                  Search: "{vehicleSearch}"
+                  <button
+                    onClick={() => { setVehicleSearch(""); updateURLSearch(""); }}
+                    className="ml-1.5 text-white/60 hover:text-white"
+                  >
+                    <IconX className="h-3 w-3" />
+                  </button>
+                </Badge>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => { setVehicleSearch(""); updateURLSearch(""); }}
+                className="text-[10px] font-bold text-navy border-gray-200 rounded-lg px-3 py-1.5 h-auto cursor-pointer hover:bg-slate-50"
+              >
+                <IconX className="h-3 w-3 mr-1" /> Clear All
+              </Button>
+            </div>
+          )}
           <div className="relative">
             <IconSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
             <input
               type="text"
               placeholder="Search vehicles... e.g. Mercedes, S-Class, Van"
               value={vehicleSearch}
-              onChange={(e) => setVehicleSearch(e.target.value)}
+              onChange={(e) => {
+                setVehicleSearch(e.target.value);
+                updateURLSearch(e.target.value);
+              }}
               className="flex h-11 w-full rounded-xl border border-gray-200 bg-white pl-10 pr-9 py-2 text-xs font-semibold text-navy shadow-sm focus:outline-none focus:border-gold transition-colors"
             />
             {vehicleSearch && (
               <button
-                onClick={() => setVehicleSearch("")}
+                onClick={() => { setVehicleSearch(""); updateURLSearch(""); }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-navy transition-colors cursor-pointer"
               >
                 <IconX className="h-4 w-4" />
               </button>
             )}
           </div>
+        </div>
+
+        {/* Result count */}
+        <div className="mb-6">
+          <p className="text-xs font-bold text-gray-500">
+            Showing <span className="text-navy">{fleet.filter((v) => {
+              if (!vehicleSearch.trim()) return true;
+              const q = vehicleSearch.toLowerCase();
+              return v.name.toLowerCase().includes(q) || v.category.toLowerCase().includes(q) || v.description.toLowerCase().includes(q);
+            }).length}</span> of <span className="text-navy">{fleet.length}</span> vehicles
+          </p>
         </div>
 
         {/* 2-Column Mobile Grid: grid-cols-2 lg:grid-cols-4 */}
@@ -505,7 +569,7 @@ export default function VehicleAtDisposalPage() {
               <IconCar className="h-12 w-12 text-gold mx-auto mb-3" />
               <h3 className="text-lg font-black text-navy">No vehicles found</h3>
               <p className="text-xs text-gray-500 mt-1">Try a different search term or clear the search.</p>
-              <Button onClick={() => setVehicleSearch("")} className="mt-4 bg-navy text-white text-xs font-bold px-6 py-2.5 rounded-xl cursor-pointer">
+              <Button onClick={() => { setVehicleSearch(""); updateURLSearch(""); }} className="mt-4 bg-navy text-white text-xs font-bold px-6 py-2.5 rounded-xl cursor-pointer">
                 Clear Search
               </Button>
             </div>
