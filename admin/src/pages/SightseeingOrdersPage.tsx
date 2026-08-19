@@ -65,7 +65,7 @@ export default function SightseeingOrdersPage() {
 
   const updateStatus = async (id: string, status: string) => {
     try {
-      await api.patch(`/payments/${id}/status`, { status });
+      await api.put(`/payments/${id}/status`, { status });
       toast.success("Order status updated");
       load(pagination.page);
     } catch { toast.error("Failed to update"); }
