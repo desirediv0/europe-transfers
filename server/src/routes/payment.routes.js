@@ -17,6 +17,6 @@ router.post("/verify-payment", protectUser, verifyPayment);
 router.get("/my-orders", protectUser, getUserOrders);
 router.get("/admin/all", protectAdmin, getAllOrders);
 router.get("/:id", protectUser, getOrder);
-router.patch("/:id/status", protectAdmin, updateOrderStatus);
+router.put("/:id/status", protectAdmin, updateOrderStatus);
 
 export default router;
