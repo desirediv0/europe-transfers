@@ -384,7 +384,7 @@ function VanCoachFleetContent() {
                 name="city"
                 placeholder="e.g. Milan, Zurich, Paris"
                 locations={locations}
-                onChange={(id, name) => { setSelectedLocationId(id); setSelectedLocationName(name); }}
+                onChange={(_id, name) => { setSelectedLocationName(name); }}
               />
             </div>
 
