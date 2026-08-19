@@ -33,6 +33,7 @@ import {
   IconCircleCheck,
   IconLoader2,
   IconChecklist,
+  IconX,
 } from "@tabler/icons-react";
 
 interface VanCoachRoutePrice {
@@ -190,6 +191,7 @@ export default function VehicleAtDisposalPage() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocationId, setSelectedLocationId] = useState("");
   const [selectedLocationName, setSelectedLocationName] = useState("Milan, Italy");
+  const [vehicleSearch, setVehicleSearch] = useState("");
 
   const [hours, setHours] = useState("8");
   const [pickupDate, setPickupDate] = useState<Date | null>(new Date());
@@ -403,58 +405,108 @@ export default function VehicleAtDisposalPage() {
           </p>
         </div>
 
+        {/* Vehicle Search Bar */}
+        <div className="max-w-md mx-auto mb-8">
+          <div className="relative">
+            <IconSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search vehicles... e.g. Mercedes, S-Class, Van"
+              value={vehicleSearch}
+              onChange={(e) => setVehicleSearch(e.target.value)}
+              className="flex h-11 w-full rounded-xl border border-gray-200 bg-white pl-10 pr-9 py-2 text-xs font-semibold text-navy shadow-sm focus:outline-none focus:border-gold transition-colors"
+            />
+            {vehicleSearch && (
+              <button
+                onClick={() => setVehicleSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-navy transition-colors cursor-pointer"
+              >
+                <IconX className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* 2-Column Mobile Grid: grid-cols-2 lg:grid-cols-4 */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
-          {fleet.map((v) => {
-            const totalPrice = v.hourlyRate * numericHours;
-            const totalKm = v.includedKmPerHour * numericHours;
+          {fleet
+            .filter((v) => {
+              if (!vehicleSearch.trim()) return true;
+              const q = vehicleSearch.toLowerCase();
+              return (
+                v.name.toLowerCase().includes(q) ||
+                v.category.toLowerCase().includes(q) ||
+                v.description.toLowerCase().includes(q)
+              );
+            })
+            .map((v) => {
+              const totalPrice = v.hourlyRate * numericHours;
+              const totalKm = v.includedKmPerHour * numericHours;
 
-            return (
-              <Card key={v.id} className="group overflow-hidden rounded-2xl sm:rounded-3xl border-gray-200/80 bg-white transition-all duration-300 hover:shadow-xl hover:border-gold/40 flex flex-col justify-between">
-                <CardContent className="p-0">
-                  <div className="relative h-28 sm:h-48 bg-slate-100 overflow-hidden">
-                    <img src={v.image} alt={v.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                    <div className="absolute top-2 right-2 z-10">
-                      <Badge className="rounded-full bg-navy/90 text-gold border-0 px-2 py-0.5 text-[9px] sm:text-xs font-black shadow-sm">€{v.hourlyRate}/hr</Badge>
-                    </div>
-                  </div>
-
-                  <div className="p-3 sm:p-5 space-y-1.5 sm:space-y-3">
-                    <div>
-                      <p className="text-[8px] sm:text-[10px] font-black text-gold uppercase tracking-wider truncate">{v.category}</p>
-                      <h3 className="text-xs sm:text-base font-black text-navy truncate leading-tight">{v.name}</h3>
-                    </div>
-
-                    {/* Single-line specs on mobile */}
-                    <div className="flex items-center gap-1.5 text-[9px] sm:text-xs font-bold text-gray-500">
-                      <span className="flex items-center gap-0.5">
-                        <IconUsers className="h-3 w-3 text-gold shrink-0" /> {v.seats}s
-                      </span>
-                      <span>·</span>
-                      <span className="flex items-center gap-0.5">
-                        <IconRoad className="h-3 w-3 text-gold shrink-0" /> {totalKm}km
-                      </span>
-                    </div>
-
-                    <p className="hidden sm:block text-xs text-gray-500 line-clamp-2">{v.description}</p>
-
-                    <div className="pt-2 border-t border-gray-100 flex items-center justify-between gap-1">
-                      <div>
-                        <span className="text-[8px] sm:text-[10px] font-bold text-gray-400">Total ({numericHours}h)</span>
-                        <p className="text-xs sm:text-lg font-black text-navy">€{totalPrice}</p>
+              return (
+                <Card key={v.id} className="group overflow-hidden rounded-2xl sm:rounded-3xl border-gray-200/80 bg-white transition-all duration-300 hover:shadow-xl hover:border-gold/40 flex flex-col justify-between">
+                  <CardContent className="p-0">
+                    <div className="relative h-28 sm:h-48 bg-slate-100 overflow-hidden">
+                      <img src={v.image} alt={v.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <div className="absolute top-2 right-2 z-10">
+                        <Badge className="rounded-full bg-navy/90 text-gold border-0 px-2 py-0.5 text-[9px] sm:text-xs font-black shadow-sm">€{v.hourlyRate}/hr</Badge>
                       </div>
-                      <Button
-                        onClick={() => handleOpenDetail(v)}
-                        className="rounded-xl bg-gold hover:bg-gold-light text-navy font-black text-[10px] sm:text-xs px-2 sm:px-4 py-1 sm:py-2 cursor-pointer shadow-xs"
-                      >
-                        Register
-                      </Button>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+
+                    <div className="p-3 sm:p-5 space-y-1.5 sm:space-y-3">
+                      <div>
+                        <p className="text-[8px] sm:text-[10px] font-black text-gold uppercase tracking-wider truncate">{v.category}</p>
+                        <h3 className="text-xs sm:text-base font-black text-navy truncate leading-tight">{v.name}</h3>
+                      </div>
+
+                      {/* Single-line specs on mobile */}
+                      <div className="flex items-center gap-1.5 text-[9px] sm:text-xs font-bold text-gray-500">
+                        <span className="flex items-center gap-0.5">
+                          <IconUsers className="h-3 w-3 text-gold shrink-0" /> {v.seats}s
+                        </span>
+                        <span>·</span>
+                        <span className="flex items-center gap-0.5">
+                          <IconRoad className="h-3 w-3 text-gold shrink-0" /> {totalKm}km
+                        </span>
+                      </div>
+
+                      <p className="hidden sm:block text-xs text-gray-500 line-clamp-2">{v.description}</p>
+
+                      <div className="pt-2 border-t border-gray-100 flex items-center justify-between gap-1">
+                        <div>
+                          <span className="text-[8px] sm:text-[10px] font-bold text-gray-400">Total ({numericHours}h)</span>
+                          <p className="text-xs sm:text-lg font-black text-navy">€{totalPrice}</p>
+                        </div>
+                        <Button
+                          onClick={() => handleOpenDetail(v)}
+                          className="rounded-xl bg-gold hover:bg-gold-light text-navy font-black text-[10px] sm:text-xs px-2 sm:px-4 py-1 sm:py-2 cursor-pointer shadow-xs"
+                        >
+                          Register
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          {fleet.filter((v) => {
+            if (!vehicleSearch.trim()) return true;
+            const q = vehicleSearch.toLowerCase();
+            return (
+              v.name.toLowerCase().includes(q) ||
+              v.category.toLowerCase().includes(q) ||
+              v.description.toLowerCase().includes(q)
             );
-          })}
+          }).length === 0 && (
+            <div className="col-span-full bg-white rounded-3xl p-12 text-center border border-gray-200 shadow-sm max-w-lg mx-auto">
+              <IconCar className="h-12 w-12 text-gold mx-auto mb-3" />
+              <h3 className="text-lg font-black text-navy">No vehicles found</h3>
+              <p className="text-xs text-gray-500 mt-1">Try a different search term or clear the search.</p>
+              <Button onClick={() => setVehicleSearch("")} className="mt-4 bg-navy text-white text-xs font-bold px-6 py-2.5 rounded-xl cursor-pointer">
+                Clear Search
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 

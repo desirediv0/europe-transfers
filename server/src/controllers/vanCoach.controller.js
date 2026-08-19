@@ -29,8 +29,19 @@ export const getVanCoachVehicles = asyncHandler(async (req, res) => {
 });
 
 export const getAllVanCoachVehicles = asyncHandler(async (req, res) => {
+  const search = req.query.search;
+
+  const where = { isActive: true };
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: "insensitive" } },
+      { category: { contains: search, mode: "insensitive" } },
+      { description: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
   const items = await prisma.vanCoachVehicle.findMany({
-    where: { isActive: true },
+    where,
     orderBy: [{ order: "asc" }, { name: "asc" }],
     include: includeRoutePrices,
   });
