@@ -25,22 +25,6 @@ export interface SearchData {
   cars: SearchResult[];
 }
 
-function getDemoData(from: string, to: string): SearchData {
-  return {
-    route: {
-      id: "demo-route",
-      from: { id: "demo-from", name: from, city: "Milan", latitude: 45.63, longitude: 8.72 },
-      to: { id: "demo-to", name: to, city: "Milan", latitude: 45.464, longitude: 9.19 },
-    },
-    cars: [
-      { routePriceId: "demo-1", carType: { id: "sedan", name: "Sedan", seats: 4, isAC: true }, price: 45, currency: "EUR" },
-      { routePriceId: "demo-2", carType: { id: "suv", name: "SUV", seats: 6, isAC: true }, price: 65, currency: "EUR" },
-      { routePriceId: "demo-3", carType: { id: "van", name: "Van", seats: 8, isAC: true }, price: 85, currency: "EUR" },
-      { routePriceId: "demo-4", carType: { id: "minivan", name: "Minivan", seats: 7, isAC: true }, price: 75, currency: "EUR" },
-    ],
-  };
-}
-
 async function fetchSearchResults(params: {
   fromLocationId: string;
   toLocationId: string;
@@ -89,25 +73,21 @@ export default async function ResultsPage({
   const accessToken = cookieStore.get("accessToken")?.value;
   const isLoggedIn = !!accessToken;
 
-  const demoData = getDemoData(from, to);
   let realData: SearchData | null = null;
   let error: string | null = null;
 
-  if (isLoggedIn) {
-    try {
-      realData = await fetchSearchResults({
-        fromLocationId: fromId,
-        toLocationId: toId,
-        passengers: pax,
-      });
-    } catch (e) {
-      error = e instanceof Error ? e.message : "Failed to load results";
-    }
+  try {
+    realData = await fetchSearchResults({
+      fromLocationId: fromId,
+      toLocationId: toId,
+      passengers: pax,
+    });
+  } catch (e) {
+    error = e instanceof Error ? e.message : "Failed to load results";
   }
 
   return (
     <ResultsClient
-      demoData={demoData}
       realData={realData}
       error={error}
       isLoggedIn={isLoggedIn}

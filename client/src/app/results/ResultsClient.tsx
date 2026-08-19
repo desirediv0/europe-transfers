@@ -13,7 +13,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Map, MapMarker, MarkerContent, MarkerTooltip, MapControls, MapRoute } from "@/components/ui/map";
 import { api } from "@/lib/api";
-import { useAuth } from "@/context/AuthContext";
 import maplibregl from "maplibre-gl";
 import type { SearchResult, SearchData } from "./page";
 import {
@@ -44,7 +43,6 @@ import {
 } from "@tabler/icons-react";
 
 interface ResultsClientProps {
-  demoData: SearchData;
   realData: SearchData | null;
   error: string | null;
   isLoggedIn: boolean;
@@ -72,23 +70,20 @@ function VehicleCard({
   selected,
   onSelect,
   index,
-  isLocked,
 }: {
   item: SearchResult;
   selected: boolean;
   onSelect: () => void;
   index: number;
-  isLocked?: boolean;
 }) {
   return (
     <Card
       onClick={onSelect}
-      className={`group overflow-hidden transition-all duration-300 cursor-pointer border-border/40 ${isLocked
-          ? "border-blue-200 bg-blue-50/30 opacity-80"
-          : selected
-            ? "ring-2 ring-gold shadow-xl shadow-gold/10 border-gold"
-            : "hover:shadow-xl hover:shadow-black/5 hover:border-gold/30 hover:-translate-y-0.5"
-        }`}
+      className={`group overflow-hidden transition-all duration-300 cursor-pointer border-border/40 ${
+        selected
+          ? "ring-2 ring-gold shadow-xl shadow-gold/10 border-gold"
+          : "hover:shadow-xl hover:shadow-black/5 hover:border-gold/30 hover:-translate-y-0.5"
+      }`}
     >
       <CardContent className="p-0">
         <div className="flex flex-col sm:flex-row">
@@ -108,7 +103,7 @@ function VehicleCard({
               </div>
             )}
             <div className="absolute top-3 left-3">
-              <Badge className={`rounded-full font-semibold border-0 shadow-sm ${isLocked ? "bg-blue-100 text-blue-700" : "bg-white/95 text-navy"}`}>
+              <Badge className="rounded-full font-semibold border-0 shadow-sm bg-white/95 text-navy">
                 #{index + 1}
               </Badge>
             </div>
@@ -154,16 +149,13 @@ function VehicleCard({
                   e.stopPropagation();
                   onSelect();
                 }}
-                className={`rounded-full px-5 ${isLocked
-                    ? "bg-blue-600 text-white hover:bg-blue-700 font-semibold"
-                    : selected
-                      ? "bg-navy text-white hover:bg-navy/90"
-                      : "bg-gold text-navy hover:bg-gold-light font-semibold"
-                  }`}
+                className={`rounded-full px-5 ${
+                  selected
+                    ? "bg-navy text-white hover:bg-navy/90"
+                    : "bg-gold text-navy hover:bg-gold-light font-semibold"
+                }`}
               >
-                {isLocked ? (
-                  "Login to Book"
-                ) : selected ? (
+                {selected ? (
                   <span className="flex items-center gap-1">
                     <IconCheck className="h-4 w-4" /> Selected
                   </span>
@@ -201,12 +193,8 @@ function EmptyState({ onGoBack }: { onGoBack: () => void }) {
     <div className="mx-auto max-w-7xl px-4 py-16">
       <Card className="max-w-xl mx-auto border-gray-100 rounded-3xl overflow-hidden shadow-2xl bg-white">
         <CardContent className="py-14 px-8 text-center flex flex-col items-center">
-          <div className="w-full max-w-sm h-56 relative mb-6">
-            <img
-              src="/images/no_vehicles_route_found.png"
-              alt="No vehicles available"
-              className="w-full h-full object-contain mx-auto drop-shadow-md"
-            />
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gold/10 text-gold mb-4">
+            <IconCar className="h-8 w-8" />
           </div>
           <h2 className="text-2xl font-black text-navy tracking-tight">No vehicles available for this route</h2>
           <p className="mt-3 text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
@@ -245,51 +233,24 @@ function ErrorState({ message, onRetry, onGoBack }: { message: string; onRetry: 
   );
 }
 
-function AuthOverlay({ type, onLogin, onVerify }: { type: "login" | "verify"; onLogin: () => void; onVerify: () => void }) {
-  if (type === "login") {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-        <Card className="w-[90%] max-w-md mx-4 border-border/40 overflow-hidden shadow-2xl">
-          <div className="h-2 bg-gradient-to-r from-blue-400 to-blue-600" />
-          <CardContent className="py-10 px-8 text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-              <IconLock className="h-8 w-8 text-blue-600" />
-            </div>
-            <h2 className="mt-5 text-xl font-bold">Login to Continue</h2>
-            <p className="mt-2 text-sm text-muted-foreground max-w-xs mx-auto">
-              Login to see real prices, book transfers, and manage your trips.
-            </p>
-            <div className="mt-6 flex flex-col gap-3">
-              <Button onClick={onLogin} className="w-full h-11 rounded-full bg-blue-600 hover:bg-blue-700 font-semibold text-white">
-                Login Now
-              </Button>
-              <Button onClick={onVerify} variant="ghost" className="w-full h-11 rounded-full text-muted-foreground">
-                Go Back
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
+function AuthOverlay({ onLogin, onVerify }: { onLogin: () => void; onVerify: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <Card className="w-[90%] max-w-md mx-4 border-border/40 overflow-hidden shadow-2xl">
-        <div className="h-2 bg-gradient-to-r from-amber-400 to-amber-600" />
+        <div className="h-2 bg-gradient-to-r from-gold to-gold-light" />
         <CardContent className="py-10 px-8 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
-            <IconFile className="h-8 w-8 text-amber-600" />
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gold/10">
+            <IconLock className="h-8 w-8 text-gold" />
           </div>
-          <h2 className="mt-5 text-xl font-bold">Verify Your Document</h2>
+          <h2 className="mt-5 text-xl font-bold">Login to Continue</h2>
           <p className="mt-2 text-sm text-muted-foreground max-w-xs mx-auto">
-            Upload your government ID and get verified to access real prices and book transfers.
+            Login to see real prices, book transfers, and manage your trips.
           </p>
           <div className="mt-6 flex flex-col gap-3">
-            <Button onClick={onVerify} className="w-full h-11 rounded-full bg-amber-600 hover:bg-amber-700 font-semibold text-white">
-              Verify Now
+            <Button onClick={onLogin} className="w-full h-11 rounded-full bg-gold hover:bg-gold-light font-semibold text-navy">
+              Login Now
             </Button>
-            <Button onClick={onLogin} variant="ghost" className="w-full h-11 rounded-full text-muted-foreground">
+            <Button onClick={onVerify} variant="ghost" className="w-full h-11 rounded-full text-muted-foreground">
               Go Back
             </Button>
           </div>
@@ -300,36 +261,18 @@ function AuthOverlay({ type, onLogin, onVerify }: { type: "login" | "verify"; on
 }
 
 export default function ResultsClient({
-  demoData,
   realData,
   error: initialError,
   isLoggedIn,
   searchParams: sp,
 }: ResultsClientProps) {
   const router = useRouter();
-  const { user, verificationStep, loading: authLoading } = useAuth();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
-  const [passenger, setPassenger] = useState({
-    name: user?.name || "",
-    phone: user?.phone || "",
-    email: user?.email || "",
-  });
+  const [passenger, setPassenger] = useState({ name: "", phone: "", email: "" });
   const [error, setError] = useState(initialError);
 
-  useEffect(() => {
-    if (user) {
-      setPassenger({
-        name: user.name || "",
-        phone: user.phone || "",
-        email: user.email || "",
-      });
-    }
-  }, [user]);
-
-  const isVerified = verificationStep === "VERIFIED";
-  const showRealData = isLoggedIn && isVerified && realData;
-  const searchData = showRealData ? realData : demoData;
-  const isLocked = !showRealData;
+  const searchData = realData;
+  const showLoginPrompt = !isLoggedIn;
 
   const fetchData = useCallback(async () => {
     setError(null);
@@ -380,14 +323,16 @@ export default function ResultsClient({
   }, [routeCoords]);
 
   const handleCarSelect = (idx: number) => {
-    if (isLocked) {
+    if (showLoginPrompt) {
+      toast.error("Please login to see real prices and book");
       return;
     }
     setSelectedIdx(idx);
   };
 
   const handleContinue = () => {
-    if (isLocked) {
+    if (showLoginPrompt) {
+      router.push("/auth/login");
       return;
     }
     if (!selected) {
@@ -436,11 +381,8 @@ export default function ResultsClient({
 
   return (
     <div className="min-h-screen bg-muted/20">
-      {!authLoading && isLocked && !isLoggedIn && (
-        <AuthOverlay type="login" onLogin={() => router.push("/auth/login")} onVerify={() => router.back()} />
-      )}
-      {!authLoading && isLocked && isLoggedIn && !isVerified && (
-        <AuthOverlay type="verify" onLogin={() => router.back()} onVerify={() => router.push("/account")} />
+      {showLoginPrompt && (
+        <AuthOverlay onLogin={() => router.push("/auth/login")} onVerify={() => router.back()} />
       )}
 
       {/* Header */}
@@ -557,8 +499,7 @@ export default function ResultsClient({
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold">Available Cars ({searchData.cars.length})</h2>
-                {isLocked && <Badge className="bg-blue-100 text-blue-700 border-0">Demo Prices</Badge>}
-                {!isLocked && <span className="text-sm text-muted-foreground">Sorted by price</span>}
+                <span className="text-sm text-muted-foreground">Sorted by price</span>
               </div>
               <div className="space-y-4">
                 {searchData.cars.map((car, idx) => (
@@ -568,7 +509,6 @@ export default function ResultsClient({
                     selected={selectedIdx === idx}
                     onSelect={() => handleCarSelect(idx)}
                     index={idx}
-                    isLocked={isLocked}
                   />
                 ))}
               </div>
@@ -651,7 +591,7 @@ export default function ResultsClient({
                   </div>
                 ) : (
                   <p className="text-center text-sm text-muted-foreground py-2">
-                    {isLocked ? "Login to see real prices" : "Select a car to see the price"}
+                    Select a car to see the price
                   </p>
                 )}
 
@@ -668,7 +608,6 @@ export default function ResultsClient({
                       value={passenger.name}
                       onChange={(e) => setPassenger({ ...passenger, name: e.target.value })}
                       placeholder="John Doe"
-                      disabled={isLocked}
                       className="h-10 rounded-lg"
                     />
                   </div>
@@ -678,7 +617,6 @@ export default function ResultsClient({
                       value={passenger.phone}
                       onChange={(e) => setPassenger({ ...passenger, phone: e.target.value })}
                       placeholder="+39 123 456 7890"
-                      disabled={isLocked}
                       className="h-10 rounded-lg"
                     />
                   </div>
@@ -689,7 +627,6 @@ export default function ResultsClient({
                       value={passenger.email}
                       onChange={(e) => setPassenger({ ...passenger, email: e.target.value })}
                       placeholder="john@example.com"
-                      disabled={isLocked}
                       className="h-10 rounded-lg"
                     />
                   </div>
@@ -708,15 +645,11 @@ export default function ResultsClient({
 
                 <Button
                   className="w-full h-12 text-base font-semibold rounded-full"
-                  variant={isLocked ? "outline" : "gold"}
-                  disabled={!selected && !isLocked}
+                  variant="gold"
+                  disabled={!selected}
                   onClick={handleContinue}
                 >
-                  {isLocked ? (
-                    <span className="flex items-center gap-2">
-                      <IconLock className="h-4 w-4" /> Login to Book
-                    </span>
-                  ) : selected ? (
+                  {selected ? (
                     <span className="flex items-center gap-2">
                       Continue <IconArrowRight className="h-4 w-4" />
                     </span>
