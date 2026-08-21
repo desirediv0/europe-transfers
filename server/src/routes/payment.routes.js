@@ -8,7 +8,7 @@ import {
   updateOrderStatus,
 } from "../controllers/payment.controller.js";
 import { protectUser } from "../middlewares/auth.middleware.js";
-import { protectAdmin } from "../middlewares/adminAuth.middleware.js";
+import protectAdmin from "../middlewares/adminAuth.middleware.js";
 
 const router = Router();
 
