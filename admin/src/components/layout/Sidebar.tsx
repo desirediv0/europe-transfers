@@ -28,10 +28,12 @@ import {
   Compass,
   CreditCard,
   Ship,
+  Settings,
 } from "lucide-react";
 
 const mainNavItems = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/" },
+  { label: "Homepage Settings", icon: Settings, href: "/homepage-settings" },
   { label: "Locations", icon: MapPin, href: "/locations" },
   { label: "Car Types", icon: Car, href: "/car-types" },
   { label: "Routes & Prices", icon: Route, href: "/routes" },

@@ -337,6 +337,23 @@ model PrivateTransferEnquiry {
   updatedAt        DateTime @updatedAt
 }
 
+model VanCoachEnquiry {
+  id           String   @id @default(cuid())
+  vehicleId    String?
+  vehicleName  String
+  location     String
+  hours        Int
+  rate         Decimal  @db.Decimal(10, 2)
+  customerName String
+  phone        String
+  email        String
+  pickupAddress String?
+  notes        String?
+  status       String   @default("PENDING")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 model Booking {
   id            String        @id @default(cuid())
   routeId       String
@@ -406,6 +423,17 @@ model Order {
   @@index([userId])
   @@index([razorpayOrderId])
   @@index([razorpayPaymentId])
+}
+
+// ─── Site Settings (singleton) ──────────────────────────
+
+model SiteSettings {
+  id                       String   @id @default("singleton")
+  showPrivateTransfers     Boolean  @default(true)
+  showVanCoach             Boolean  @default(true)
+  showPackages             Boolean  @default(true)
+  showSightseeing          Boolean  @default(true)
+  updatedAt                DateTime @updatedAt
 }
 
 // ─── Testimonials ───────────────────────────────────────
