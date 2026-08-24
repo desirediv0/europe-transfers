@@ -11,18 +11,18 @@ export default defineConfig({
     },
   },
   preview: {
-    port: 4174,
+    port: 4173,
     host: "0.0.0.0",
     allowedHosts: [
-      "admin.cookieaccess.com",
-      "www.admin.cookieaccess.com",
+      "secureadmin.theeuropetransfers.com",
+      "www.secureadmin.theeuropetransfers.com",
     ],
   },
   server: {
     host: "0.0.0.0",
     allowedHosts: [
-      "admin.cookieaccess.com",
-      "www.admin.cookieaccess.com",
+      "secureadmin.theeuropetransfers.com",
+      "www.secureadmin.theeuropetransfers.com",
     ],
     proxy: {
       "/api": {
