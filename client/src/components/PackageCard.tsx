@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Package } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCurrency } from "@/context/CurrencyContext";
 import {
   IconMapPin,
   IconCalendar,
@@ -49,6 +50,8 @@ export function PackageCardSkeleton() {
 }
 
 export default function PackageCard({ package: pkg, loading }: PackageCardProps) {
+  const { format } = useCurrency();
+
   if (loading || !pkg) {
     return <PackageCardSkeleton />;
   }
@@ -140,7 +143,7 @@ export default function PackageCard({ package: pkg, loading }: PackageCardProps)
             <div>
               <p className="text-[8px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Price</p>
               <p className="text-sm sm:text-2xl font-black text-navy tracking-tight">
-                €{pkg.priceFrom ? Number(pkg.priceFrom).toFixed(0) : "1,195"}
+                {format(pkg.priceFrom ? Number(pkg.priceFrom) : 1195)}
               </p>
             </div>
 

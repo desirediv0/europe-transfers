@@ -3,6 +3,7 @@ import apiResponse from "../utils/apiResponse.js";
 import ApiError from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { sendEmail } from "../config/mailer.js";
+import { convertFromEur } from "../config/currency.js";
 
 const includeRoutes = {
   routes: { orderBy: { order: "asc" } },
@@ -298,12 +299,14 @@ export const submitPrivateTransferEnquiry = asyncHandler(async (req, res) => {
     status: "PENDING",
   };
 
+  const priceInr = await convertFromEur(price, "INR");
+
   // 1. Send Email Notification to Admin
   const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "codeshorts007@gmail.com";
   try {
     await sendEmail({
       to: adminEmail,
-      subject: `🚘 New Private Transfer Enquiry: ${cityName} (${vehicleType.toUpperCase()} - £${price})`,
+      subject: `🚘 New Private Transfer Enquiry: ${cityName} (${vehicleType.toUpperCase()} - ₹${priceInr})`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 24px; color: #0B1528; background-color: #f8fafc;">
           <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0;">
@@ -315,7 +318,7 @@ export const submitPrivateTransferEnquiry = asyncHandler(async (req, res) => {
               <tr><td style="padding: 8px 0; color: #64748b; width: 140px;">City:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${cityName}</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b;">Route:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${routeDescription}</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b;">Vehicle:</td><td style="padding: 8px 0; font-weight: bold; color: #d97706;">${vehicleType.toUpperCase()}</td></tr>
-              <tr><td style="padding: 8px 0; color: #64748b;">Quoted Price:</td><td style="padding: 8px 0; font-weight: bold; color: #059669;">£${price} ${currency || "GBP"}</td></tr>
+              <tr><td style="padding: 8px 0; color: #64748b;">Quoted Price:</td><td style="padding: 8px 0; font-weight: bold; color: #059669;">₹${priceInr}</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b;">Pickup Date:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${pickupDate || "Not specified"}</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b;">Pickup Time:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${pickupTime || "Not specified"}</td></tr>
             </table>
@@ -356,7 +359,7 @@ export const submitPrivateTransferEnquiry = asyncHandler(async (req, res) => {
               <p style="margin: 4px 0; font-size: 13px;"><strong>City:</strong> ${cityName}</p>
               <p style="margin: 4px 0; font-size: 13px;"><strong>Route:</strong> ${routeDescription}</p>
               <p style="margin: 4px 0; font-size: 13px;"><strong>Vehicle:</strong> ${vehicleType.toUpperCase()}</p>
-              <p style="margin: 4px 0; font-size: 13px;"><strong>Price Quote:</strong> £${price} ${currency || "GBP"}</p>
+              <p style="margin: 4px 0; font-size: 13px;"><strong>Price Quote:</strong> ₹${priceInr}</p>
               ${pickupDate ? `<p style="margin: 4px 0; font-size: 13px;"><strong>Pickup Date & Time:</strong> ${pickupDate} ${pickupTime || ""}</p>` : ""}
             </div>
 

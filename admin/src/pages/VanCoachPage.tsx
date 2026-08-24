@@ -10,8 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { ImageUpload } from "@/components/ImageUpload";
-import type { VanCoachVehicle, VanCoachRoutePrice, VanCoachPriceGroup, Pagination } from "@/lib/types";
-import { Plus, Pencil, Trash2, Users } from "lucide-react";
+import type { VanCoachVehicle, VanCoachRoutePrice, VanCoachPriceGroup, VanCoachEnquiry, Pagination } from "@/lib/types";
+import { Plus, Pencil, Trash2, Users, RefreshCw, Mail, Phone } from "lucide-react";
 
 const GROUP_LABELS: Record<VanCoachPriceGroup, string> = {
   AIRPORT_TRANSFER: "Airport Transfers",
@@ -43,6 +43,11 @@ export default function VanCoachPage() {
   const [priceRows, setPriceRows] = useState<PriceRow[]>([]);
   const [saving, setSaving] = useState(false);
 
+  const [activeTab, setActiveTab] = useState<"vehicles" | "enquiries">("vehicles");
+  const [enquiries, setEnquiries] = useState<VanCoachEnquiry[]>([]);
+  const [loadingEnquiries, setLoadingEnquiries] = useState(true);
+  const [selectedEnquiry, setSelectedEnquiry] = useState<VanCoachEnquiry | null>(null);
+
   const load = useCallback(async (page = 1) => {
     setLoading(true);
     try {
@@ -56,7 +61,19 @@ export default function VanCoachPage() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  const loadEnquiries = useCallback(async () => {
+    setLoadingEnquiries(true);
+    try {
+      const data = await api.get<VanCoachEnquiry[]>("/van-coach/enquiries");
+      setEnquiries(Array.isArray(data) ? data : []);
+    } catch {
+      toast.error("Failed to load Van & Coach enquiries");
+    } finally {
+      setLoadingEnquiries(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); loadEnquiries(); }, [load, loadEnquiries]);
 
   const openCreate = () => {
     setEditing(null);
@@ -148,11 +165,36 @@ export default function VanCoachPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Van & Coach</h1>
-        <Button onClick={openCreate} className="bg-[#1B2A4A] hover:bg-[#1B2A4A]/90">
-          <Plus className="mr-2 h-4 w-4" /> Add Vehicle
+        {activeTab === "vehicles" ? (
+          <Button onClick={openCreate} className="bg-[#1B2A4A] hover:bg-[#1B2A4A]/90">
+            <Plus className="mr-2 h-4 w-4" /> Add Vehicle
+          </Button>
+        ) : (
+          <Button variant="outline" size="sm" onClick={loadEnquiries} disabled={loadingEnquiries}>
+            <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loadingEnquiries ? "animate-spin" : ""}`} /> Refresh
+          </Button>
+        )}
+      </div>
+
+      <div className="flex gap-2 border-b">
+        <Button
+          variant="ghost"
+          onClick={() => setActiveTab("vehicles")}
+          className={`rounded-none border-b-2 ${activeTab === "vehicles" ? "border-[#1B2A4A] font-bold" : "border-transparent text-muted-foreground"}`}
+        >
+          Vehicles
+        </Button>
+        <Button
+          variant="ghost"
+          onClick={() => setActiveTab("enquiries")}
+          className={`rounded-none border-b-2 ${activeTab === "enquiries" ? "border-[#1B2A4A] font-bold" : "border-transparent text-muted-foreground"}`}
+        >
+          Enquiries {enquiries.length > 0 && <Badge className="ml-1.5">{enquiries.length}</Badge>}
         </Button>
       </div>
 
+      {activeTab === "vehicles" && (
+      <>
       <Card>
         <CardContent className="p-0">
           <Table>
@@ -215,6 +257,90 @@ export default function VanCoachPage() {
             </Button>
           ))}
         </div>
+      )}
+      </>
+      )}
+
+      {activeTab === "enquiries" && (
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Vehicle</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Hours</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-20">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loadingEnquiries ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}><TableCell colSpan={8}><Skeleton className="h-4 w-full" /></TableCell></TableRow>
+                  ))
+                ) : enquiries.length === 0 ? (
+                  <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No Van & Coach enquiries received yet.</TableCell></TableRow>
+                ) : (
+                  enquiries.map((e) => (
+                    <TableRow key={e.id}>
+                      <TableCell className="font-medium">{e.vehicleName}</TableCell>
+                      <TableCell>{e.location}</TableCell>
+                      <TableCell>{e.hours}h</TableCell>
+                      <TableCell className="font-bold">{e.rate}</TableCell>
+                      <TableCell>{e.customerName}</TableCell>
+                      <TableCell className="text-xs">{e.email}</TableCell>
+                      <TableCell><Badge variant="outline">{e.status}</Badge></TableCell>
+                      <TableCell>
+                        <Button variant="outline" size="sm" onClick={() => setSelectedEnquiry(e)}>View</Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+
+      {selectedEnquiry && (
+        <Dialog open={Boolean(selectedEnquiry)} onOpenChange={() => setSelectedEnquiry(null)}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Enquiry Details</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="font-bold">{selectedEnquiry.vehicleName}</span>
+                <span className="font-black text-lg">{selectedEnquiry.rate}</span>
+              </div>
+              <p className="text-muted-foreground">{selectedEnquiry.location} · {selectedEnquiry.hours} hours</p>
+              <div className="border-t pt-3 space-y-2">
+                <div className="flex items-center gap-2"><Users className="h-4 w-4 text-muted-foreground" /> {selectedEnquiry.customerName}</div>
+                <div className="flex items-center gap-2"><Phone className="h-4 w-4 text-muted-foreground" /> <a href={`tel:${selectedEnquiry.phone}`} className="text-blue-600 hover:underline">{selectedEnquiry.phone}</a></div>
+                <div className="flex items-center gap-2"><Mail className="h-4 w-4 text-muted-foreground" /> <a href={`mailto:${selectedEnquiry.email}`} className="text-blue-600 hover:underline">{selectedEnquiry.email}</a></div>
+              </div>
+              {selectedEnquiry.pickupAddress && (
+                <div className="border-t pt-3">
+                  <p className="text-xs font-bold text-muted-foreground mb-1">Pickup Address</p>
+                  <p>{selectedEnquiry.pickupAddress}</p>
+                </div>
+              )}
+              {selectedEnquiry.notes && (
+                <div className="border-t pt-3">
+                  <p className="text-xs font-bold text-muted-foreground mb-1">Notes</p>
+                  <p>{selectedEnquiry.notes}</p>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setSelectedEnquiry(null)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

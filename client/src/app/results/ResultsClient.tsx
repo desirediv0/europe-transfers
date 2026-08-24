@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Map, MapMarker, MarkerContent, MarkerTooltip, MapControls, MapRoute } from "@/components/ui/map";
 import { api } from "@/lib/api";
+import { useCurrency } from "@/context/CurrencyContext";
 import maplibregl from "maplibre-gl";
 import type { SearchResult, SearchData } from "./page";
 import {
@@ -76,6 +77,7 @@ function VehicleCard({
   onSelect: () => void;
   index: number;
 }) {
+  const { format } = useCurrency();
   return (
     <Card
       onClick={onSelect}
@@ -129,7 +131,7 @@ function VehicleCard({
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-3xl font-bold text-gold">€{item.price.toFixed(2)}</div>
+                  <div className="text-3xl font-bold text-gold">{format(item.price)}</div>
                   <p className="text-xs text-muted-foreground">{item.currency} total</p>
                 </div>
               </div>
@@ -267,6 +269,7 @@ export default function ResultsClient({
   searchParams: sp,
 }: ResultsClientProps) {
   const router = useRouter();
+  const { format } = useCurrency();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [passenger, setPassenger] = useState({ name: "", phone: "", email: "" });
   const [error, setError] = useState(initialError);
@@ -581,11 +584,11 @@ export default function ResultsClient({
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">{selected.carType.name}</span>
-                      <span className="font-semibold">€{selected.price.toFixed(2)}</span>
+                      <span className="font-semibold">{format(selected.price)}</span>
                     </div>
                     <div className="flex items-center justify-between border-t pt-2 text-lg font-bold">
                       <span>Total</span>
-                      <span className="text-gold">€{selected.price.toFixed(2)}</span>
+                      <span className="text-gold">{format(selected.price)}</span>
                     </div>
                     <p className="text-xs text-muted-foreground">Fixed price in {selected.currency}</p>
                   </div>

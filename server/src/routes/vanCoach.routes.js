@@ -6,6 +6,8 @@ import {
   createVanCoachVehicle,
   updateVanCoachVehicle,
   deleteVanCoachVehicle,
+  submitVanCoachEnquiry,
+  getVanCoachEnquiries,
 } from "../controllers/vanCoach.controller.js";
 import protectAdmin from "../middlewares/adminAuth.middleware.js";
 import validate from "../middlewares/validate.middleware.js";
@@ -33,6 +35,23 @@ const vehicleSchema = z.object({
   order: z.number().optional(),
   routePrices: z.array(routePriceSchema).optional(),
 });
+
+const enquirySchema = z.object({
+  vehicleId: z.string().optional(),
+  vehicleName: z.string().min(1),
+  location: z.string().min(1),
+  hours: z.number(),
+  rate: z.number(),
+  name: z.string().min(1),
+  phone: z.string().min(1),
+  email: z.string().email(),
+  pickupAddress: z.string().optional(),
+  itineraryNotes: z.string().optional(),
+});
+
+// Enquiry routes (must be registered before "/:id" so they aren't shadowed)
+router.post("/enquire", validate(enquirySchema), submitVanCoachEnquiry);
+router.get("/enquiries", protectAdmin, getVanCoachEnquiries);
 
 router.get("/", getVanCoachVehicles);
 router.get("/all", getAllVanCoachVehicles);

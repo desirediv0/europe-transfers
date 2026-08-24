@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Map, MapMarker, MarkerContent, MarkerTooltip, MapControls, MapRoute } from "@/components/ui/map";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import TransferSearchWidget from "@/components/TransferSearchWidget";
 import maplibregl from "maplibre-gl";
 import type { SearchResult, SearchData } from "./page";
@@ -106,6 +107,7 @@ function VehicleCard({
   index: number;
   isLocked?: boolean;
 }) {
+  const { format } = useCurrency();
   const fallbackImg = CAR_IMAGE_FALLBACKS[item.carType.id.toLowerCase()] || CAR_IMAGE_FALLBACKS.sedan;
   const imgSrc = item.carType.image || fallbackImg;
 
@@ -158,7 +160,7 @@ function VehicleCard({
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-3xl font-black text-navy tracking-tight">€{item.price.toFixed(0)}</div>
+                  <div className="text-3xl font-black text-navy tracking-tight">{format(item.price)}</div>
                   <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">{item.currency} Total · All-Inclusive</p>
                 </div>
               </div>
@@ -466,6 +468,7 @@ export default function FleetContent({
 }: FleetContentProps) {
   const router = useRouter();
   const { user, verificationStep, loading: authLoading } = useAuth();
+  const { format } = useCurrency();
   const [carTypes, setCarTypes] = useState<CarType[]>([]);
   const [loadingCars, setLoadingCars] = useState(true);
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
@@ -751,7 +754,7 @@ export default function FleetContent({
                       <p className="text-lg font-black text-navy">{selected.carType.name}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-black text-navy">€{selected.price.toFixed(0)}</p>
+                      <p className="text-2xl font-black text-navy">{format(selected.price)}</p>
                       <p className="text-[10px] font-bold text-emerald-600">Fixed Rate · All-Inclusive</p>
                     </div>
                   </div>

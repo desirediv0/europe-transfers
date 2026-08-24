@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { initRazorpay, type RazorpayResponse } from "@/lib/razorpay";
 import { useAuth } from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import type { Booking } from "@/lib/types";
 import {
   IconArrowLeft,
@@ -33,6 +34,7 @@ function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, loading: authLoading, verificationStep } = useAuth();
+  const { format } = useCurrency();
 
   const routeId = searchParams.get("routeId") || "";
   const carTypeId = searchParams.get("carTypeId") || "";
@@ -201,7 +203,7 @@ function CheckoutContent() {
 
                 <div className="flex items-center justify-between text-base pt-1">
                   <span className="font-black text-navy">Total Amount Paid</span>
-                  <span className="font-black text-emerald-600 text-xl">€{parseFloat(price).toFixed(2)}</span>
+                  <span className="font-black text-emerald-600 text-xl">{format(parseFloat(price))}</span>
                 </div>
 
                 <div className="flex items-center justify-between pt-1">
@@ -567,7 +569,7 @@ function CheckoutContent() {
                     <span className="text-xs font-black text-navy uppercase tracking-wider block">Total Fare</span>
                     <span className="text-[10px] text-emerald-600 font-bold">No Hidden Fees</span>
                   </div>
-                  <span className="text-2xl sm:text-3xl font-black text-navy tracking-tight">€{parseFloat(price).toFixed(2)}</span>
+                  <span className="text-2xl sm:text-3xl font-black text-navy tracking-tight">{format(parseFloat(price))}</span>
                 </div>
 
                 {errorMessage && (
@@ -590,7 +592,7 @@ function CheckoutContent() {
                   ) : (
                     <span className="flex items-center gap-2">
                       <IconCreditCard className="h-4 w-4 stroke-[2.5]" />
-                      Pay €{parseFloat(price).toFixed(2)} Securely
+                      Pay {format(parseFloat(price))} Securely
                     </span>
                   )}
                 </Button>

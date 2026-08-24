@@ -60,7 +60,7 @@ export function usePayment() {
               orderId: orderData.orderId,
             });
             toast.success("Payment successful! Booking confirmed.");
-            router.push("/account/orders");
+            router.push("/account#orders");
           } catch {
             toast.error("Payment verification failed. Please contact support.");
           }

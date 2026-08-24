@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { useCurrency } from "@/context/CurrencyContext";
 import {
   IconMapPin,
   IconCar,
@@ -56,6 +57,7 @@ const CITY_IMAGES: Record<string, string> = {
 };
 
 export default function PrivateTransfersPage() {
+  const { format } = useCurrency();
   const [cities, setCities] = useState<TransferCity[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -110,8 +112,6 @@ export default function PrivateTransfersPage() {
       : selectedRoute.minivanPrice
     : 0;
 
-  const currencySymbol = selectedRoute?.currency === "EUR" ? "€" : "£";
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.phone) {
@@ -131,7 +131,7 @@ export default function PrivateTransfersPage() {
         routeDescription: selectedRoute.description,
         vehicleType,
         price: Number(totalPrice),
-        currency: selectedRoute.currency || "GBP",
+        currency: "EUR",
         name: form.name,
         phone: form.phone,
         email: form.email,
@@ -258,8 +258,6 @@ export default function PrivateTransfersPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCities.map((city) => {
               const minSedan = city.routes.reduce((min, r) => Math.min(min, r.sedanPrice), Infinity);
-              const isPound = city.routes[0]?.currency === "GBP";
-              const symbol = isPound ? "£" : "€";
 
               return (
                 <Card
@@ -281,7 +279,7 @@ export default function PrivateTransfersPage() {
                       </div>
                       <div className="absolute top-3 right-3">
                         <Badge className="rounded-full bg-navy/90 text-gold border border-gold/30 px-3 py-1 text-xs font-black shadow-md backdrop-blur-md">
-                          From {symbol}{minSedan}
+                          From {format(minSedan)}
                         </Badge>
                       </div>
                     </div>
@@ -313,7 +311,7 @@ export default function PrivateTransfersPage() {
                             >
                               <IconCar className="h-3 w-3 text-slate-500" />
                               <span>Sedan:</span>
-                              <span className="text-navy font-black">{symbol}{route.sedanPrice}</span>
+                              <span className="text-navy font-black">{format(route.sedanPrice)}</span>
                             </button>
 
                             <button
@@ -326,7 +324,7 @@ export default function PrivateTransfersPage() {
                             >
                               <IconUsers className="h-3 w-3 text-slate-500" />
                               <span>Minivan:</span>
-                              <span className="text-navy font-black">{symbol}{route.minivanPrice}</span>
+                              <span className="text-navy font-black">{format(route.minivanPrice)}</span>
                             </button>
                           </div>
                         </div>
@@ -411,7 +409,7 @@ export default function PrivateTransfersPage() {
                   {vehicleType === "sedan" ? "Executive Sedan (1-3 Pax)" : "Luxury Minivan (1-7 Pax)"}
                 </span>
                 <span className="text-gold font-black text-base">
-                  {currencySymbol}{totalPrice} Total
+                  {format(totalPrice)} Total
                 </span>
               </div>
             </div>
@@ -429,7 +427,7 @@ export default function PrivateTransfersPage() {
                 >
                   {selectedCity.routes.map((r) => (
                     <option key={r.id} value={r.id}>
-                      {r.description} (Sedan: {currencySymbol}{r.sedanPrice} | Minivan: {currencySymbol}{r.minivanPrice})
+                      {r.description} (Sedan: {format(r.sedanPrice)} | Minivan: {format(r.minivanPrice)})
                     </option>
                   ))}
                 </select>
@@ -460,7 +458,7 @@ export default function PrivateTransfersPage() {
                       )}
                     </div>
                     <span className="text-[11px] text-gray-500 font-medium">1–3 Passengers</span>
-                    <span className="mt-2 text-sm font-black text-navy">{currencySymbol}{selectedRoute?.sedanPrice || 0}</span>
+                    <span className="mt-2 text-sm font-black text-navy">{format(selectedRoute?.sedanPrice || 0)}</span>
                   </button>
 
                   <button
@@ -484,7 +482,7 @@ export default function PrivateTransfersPage() {
                       )}
                     </div>
                     <span className="text-[11px] text-gray-500 font-medium">1–7 Passengers</span>
-                    <span className="mt-2 text-sm font-black text-navy">{currencySymbol}{selectedRoute?.minivanPrice || 0}</span>
+                    <span className="mt-2 text-sm font-black text-navy">{format(selectedRoute?.minivanPrice || 0)}</span>
                   </button>
                 </div>
               </div>
@@ -573,7 +571,7 @@ export default function PrivateTransfersPage() {
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    <IconSend className="h-4 w-4" /> Send Transfer Request ({currencySymbol}{totalPrice})
+                    <IconSend className="h-4 w-4" /> Send Transfer Request ({format(totalPrice)})
                   </span>
                 )}
               </Button>

@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { usePayment } from "@/hooks/usePayment";
+import { useCurrency } from "@/context/CurrencyContext";
 import type { Location } from "@/lib/types";
 import {
   IconClock,
@@ -197,6 +198,7 @@ const PROCESS_STEPS = [
 ];
 
 function VanCoachFleetContent() {
+  const { format: formatCurrency } = useCurrency();
   const [locations, setLocations] = useState<Location[]>([]);
   const [fleet, setFleet] = useState<DisposalVehicle[]>([]);
   const [selectedLocationName, setSelectedLocationName] = useState("");
@@ -501,7 +503,7 @@ function VanCoachFleetContent() {
                       <img src={v.image} alt={v.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                       <div className="absolute top-3 right-3 z-10">
                         <Badge className="rounded-full bg-navy/90 text-gold border-0 px-3 py-1 text-xs font-black shadow-sm">
-                          €{Math.round(totalPrice)}
+                          {formatCurrency(totalPrice)}
                         </Badge>
                       </div>
                       <div className="absolute bottom-3 left-3 z-10">
@@ -532,11 +534,11 @@ function VanCoachFleetContent() {
                       <div className="pt-3 border-t border-gray-100 space-y-2">
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-gray-400 font-medium">Hourly Rate</span>
-                          <span className="font-bold text-navy">€{Math.round(v.hourlyRate)}/hr</span>
+                          <span className="font-bold text-navy">{formatCurrency(v.hourlyRate)}/hr</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-gray-400 font-medium">Total ({numericHours}h)</span>
-                          <span className="text-lg font-black text-navy">€{Math.round(totalPrice)}</span>
+                          <span className="text-lg font-black text-navy">{formatCurrency(totalPrice)}</span>
                         </div>
                         <div className="flex gap-2">
                           <Button onClick={() => { setSelectedVehicle(v); setDetailModalOpen(true); }}
@@ -576,11 +578,11 @@ function VanCoachFleetContent() {
               <div className="p-4 rounded-2xl bg-slate-50 border border-gray-200/80 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-navy">Estimated Hourly Rate</span>
-                  <span className="text-base font-black text-navy">€{Math.round(selectedVehicle.hourlyRate)} / hour</span>
+                  <span className="text-base font-black text-navy">{formatCurrency(selectedVehicle.hourlyRate)} / hour</span>
                 </div>
                 <div className="flex items-center justify-between border-t border-gray-200/60 pt-2 text-xs">
                   <span className="text-gray-500 font-medium">Estimated Total ({numericHours} Hours)</span>
-                  <span className="text-lg font-black text-gold">€{Math.round(selectedVehicle.hourlyRate * numericHours)}</span>
+                  <span className="text-lg font-black text-gold">{formatCurrency(selectedVehicle.hourlyRate * numericHours)}</span>
                 </div>
               </div>
               <div>
@@ -639,7 +641,7 @@ function VanCoachFleetContent() {
               <DialogTitle className="text-base font-black text-white leading-snug">Complete Fleet Booking</DialogTitle>
               <div className="mt-2 space-y-1">
                 <p className="text-xs text-gray-300 font-medium">{selectedVehicle.name} · {numericHours}h Disposal</p>
-                <p className="text-lg font-black text-gold">€{Math.round(selectedVehicle.hourlyRate * numericHours)}</p>
+                <p className="text-lg font-black text-gold">{formatCurrency(selectedVehicle.hourlyRate * numericHours)}</p>
               </div>
             </div>
             <form onSubmit={handlePaymentSubmit} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
@@ -668,7 +670,7 @@ function VanCoachFleetContent() {
                 {paymentLoading ? (
                   <span className="flex items-center gap-2"><IconLoader2 className="h-4 w-4 animate-spin" /> Processing Payment...</span>
                 ) : (
-                  <span className="flex items-center gap-2"><IconCreditCard className="h-4 w-4" /> Pay €{Math.round(selectedVehicle.hourlyRate * numericHours)} Now</span>
+                  <span className="flex items-center gap-2"><IconCreditCard className="h-4 w-4" /> Pay {formatCurrency(selectedVehicle.hourlyRate * numericHours)} Now</span>
                 )}
               </Button>
               <p className="text-[10px] text-gray-400 text-center font-medium">Secured by Razorpay. Your payment details are encrypted.</p>

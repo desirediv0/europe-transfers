@@ -5,6 +5,7 @@ import apiResponse from "../utils/apiResponse.js";
 import ApiError from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { sendEmail } from "../config/mailer.js";
+import { getRates } from "../config/currency.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -31,11 +32,17 @@ export const createOrder = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Missing required fields: productType, productId, productName, amount, customerName, customerEmail, customerPhone");
   }
 
-  const amountInPaise = Math.round(Number(amount) * 100);
+  // The site always sends its base EUR price here; Razorpay (INR-only account)
+  // always charges the customer in INR, converted at today's rate.
+  const rates = await getRates();
+  const eurToInrRate = rates.INR;
+  const amountEur = Number(amount);
+  const amountInr = Math.round(amountEur * eurToInrRate * 100) / 100;
+  const amountInPaise = Math.round(amountInr * 100);
 
   const razorpayOrder = await razorpay.orders.create({
     amount: amountInPaise,
-    currency,
+    currency: "INR",
     receipt: `order_${productType}_${productId}_${Date.now()}`,
     notes: {
       productType,
@@ -54,8 +61,10 @@ export const createOrder = asyncHandler(async (req, res) => {
       productType,
       productId,
       productName,
-      amount: Number(amount),
-      currency,
+      amount: amountEur,
+      currency: currency || "EUR",
+      amountInr,
+      eurToInrRate,
       razorpayOrderId: razorpayOrder.id,
       status: "CREATED",
       customerName,
@@ -72,7 +81,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     orderId: order.id,
     razorpayOrderId: razorpayOrder.id,
     amount: amountInPaise,
-    currency,
+    currency: "INR",
     key: process.env.RAZORPAY_KEY_ID,
   });
 });
@@ -100,14 +109,35 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Payment verification failed");
   }
 
-  const order = await prisma.order.update({
-    where: { id: orderId },
+  const existingOrder = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!existingOrder) {
+    throw new ApiError(404, "Order not found");
+  }
+
+  // Idempotency guard: if this order was already captured (e.g. the client
+  // retried the verify call, or the Razorpay handler fired twice), don't
+  // re-process it or send duplicate confirmation emails.
+  if (existingOrder.status === "CAPTURED") {
+    return apiResponse(res, 200, "Payment already verified", { order: existingOrder });
+  }
+
+  const { count } = await prisma.order.updateMany({
+    where: { id: orderId, status: { not: "CAPTURED" } },
     data: {
       razorpayPaymentId: razorpay_payment_id,
       razorpaySignature: razorpay_signature,
       status: "CAPTURED",
     },
   });
+
+  if (count === 0) {
+    // Lost the race against a concurrent verify call; re-fetch and return
+    // the now-captured order without sending a second round of emails.
+    const settled = await prisma.order.findUnique({ where: { id: orderId } });
+    return apiResponse(res, 200, "Payment already verified", { order: settled });
+  }
+
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
 
   try {
     const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "codeshorts007@gmail.com";
@@ -121,7 +151,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
             <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
               <tr><td style="padding: 8px 0; color: #64748b; width: 140px;">Product:</td><td style="padding: 8px 0; font-weight: bold;">${order.productName}</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b;">Type:</td><td style="padding: 8px 0; font-weight: bold;">${order.productType}</td></tr>
-              <tr><td style="padding: 8px 0; color: #64748b;">Amount:</td><td style="padding: 8px 0; font-weight: bold; color: #059669;">€${order.amount}</td></tr>
+              <tr><td style="padding: 8px 0; color: #64748b;">Amount:</td><td style="padding: 8px 0; font-weight: bold; color: #059669;">₹${order.amountInr ?? order.amount}</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b;">Customer:</td><td style="padding: 8px 0; font-weight: bold;">${order.customerName}</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b;">Email:</td><td style="padding: 8px 0; font-weight: bold;">${order.customerEmail}</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b;">Phone:</td><td style="padding: 8px 0; font-weight: bold;">${order.customerPhone}</td></tr>
@@ -147,7 +177,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
             <p style="color: #475569; font-size: 14px;">Your payment for <strong>${order.productName}</strong> has been received successfully.</p>
             <div style="background-color: #f1f5f9; border-radius: 12px; padding: 16px; margin: 20px 0;">
               <p style="margin: 4px 0; font-size: 13px;"><strong>Product:</strong> ${order.productName}</p>
-              <p style="margin: 4px 0; font-size: 13px;"><strong>Amount:</strong> €${order.amount}</p>
+              <p style="margin: 4px 0; font-size: 13px;"><strong>Amount:</strong> ₹${order.amountInr ?? order.amount}</p>
               <p style="margin: 4px 0; font-size: 13px;"><strong>Payment ID:</strong> ${razorpay_payment_id}</p>
             </div>
             <p style="color: #64748b; font-size: 13px;">Our team will contact you shortly with booking confirmation.</p>

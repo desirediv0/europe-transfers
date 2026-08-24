@@ -3,9 +3,16 @@ import apiResponse from "../utils/apiResponse.js";
 import ApiError from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { sendEmail } from "../config/mailer.js";
+import { convertFromEur } from "../config/currency.js";
 
 const paginateArgs = (page = 1, limit = 20) => {
   return { skip: (page - 1) * limit, take: limit };
+};
+
+const priceToInrDisplay = async (priceDisplay) => {
+  const numeric = parseFloat(String(priceDisplay).replace(/[^0-9.]/g, ""));
+  if (Number.isNaN(numeric)) return priceDisplay || "N/A";
+  return await convertFromEur(numeric, "INR");
 };
 
 export const getPackages = asyncHandler(async (req, res) => {
@@ -230,6 +237,8 @@ export const submitPackageEnquiry = asyncHandler(async (req, res) => {
     status: "PENDING",
   };
 
+  const priceInr = await priceToInrDisplay(priceDisplay);
+
   // 1. Send Email Notification to Admin
   const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "codeshorts007@gmail.com";
   try {
@@ -246,7 +255,7 @@ export const submitPackageEnquiry = asyncHandler(async (req, res) => {
             <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
               <tr><td style="padding: 8px 0; color: #64748b; width: 140px;">Package:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${packageTitle}</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b;">Destination:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${countryName || "Europe"}</td></tr>
-              <tr><td style="padding: 8px 0; color: #64748b;">Starting Price:</td><td style="padding: 8px 0; font-weight: bold; color: #059669;">€${priceDisplay || "N/A"} / person</td></tr>
+              <tr><td style="padding: 8px 0; color: #64748b;">Starting Price:</td><td style="padding: 8px 0; font-weight: bold; color: #059669;">₹${priceInr} / person</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b;">Travel Date:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${travelDate || "Not specified"}</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b;">Passengers:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${paxCount} Person(s)</td></tr>
             </table>
@@ -286,7 +295,7 @@ export const submitPackageEnquiry = asyncHandler(async (req, res) => {
               <h4 style="margin: 0 0 10px 0; color: #0f172a;">Tour Summary</h4>
               <p style="margin: 4px 0; font-size: 13px;"><strong>Package:</strong> ${packageTitle}</p>
               <p style="margin: 4px 0; font-size: 13px;"><strong>Destination:</strong> ${countryName || "Europe"}</p>
-              <p style="margin: 4px 0; font-size: 13px;"><strong>Starting Price:</strong> €${priceDisplay || "N/A"} / person</p>
+              <p style="margin: 4px 0; font-size: 13px;"><strong>Starting Price:</strong> ₹${priceInr} / person</p>
               ${travelDate ? `<p style="margin: 4px 0; font-size: 13px;"><strong>Preferred Date:</strong> ${travelDate}</p>` : ""}
               <p style="margin: 4px 0; font-size: 13px;"><strong>Travelers:</strong> ${paxCount} Person(s)</p>
             </div>

@@ -7,7 +7,9 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/context/AuthContext";
+import { useCurrency, type CurrencyCode } from "@/context/CurrencyContext";
 import {
   IconMenu2,
   IconLogout,
@@ -34,6 +36,22 @@ const navLinks = [
   { label: "Contact", href: "/contact", icon: IconPhone },
 ];
 
+
+function CurrencySwitcher({ className }: { className?: string }) {
+  const { currency, setCurrency } = useCurrency();
+  return (
+    <Select value={currency} onValueChange={(v) => setCurrency(v as CurrencyCode)}>
+      <SelectTrigger className={cn("h-8 sm:h-9 w-17.5 sm:w-19.5 rounded-xl border-gray-200/80 bg-white px-2.5 text-xs font-bold text-navy", className)}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent position="popper" sideOffset={6} align="end" className="min-w-22.5 z-60 bg-white">
+        <SelectItem value="EUR">EUR €</SelectItem>
+        <SelectItem value="USD">USD $</SelectItem>
+        <SelectItem value="INR">INR ₹</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
 
 function MobileNav() {
   const pathname = usePathname();
@@ -74,6 +92,11 @@ function MobileNav() {
           ))}
 
           <div className="my-3 h-px bg-gray-100" />
+
+          <div className="px-4 pb-2 flex items-center justify-between">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">Currency</span>
+            <CurrencySwitcher />
+          </div>
 
           <a
             href="tel:+41441234567"
@@ -179,6 +202,9 @@ export function Header() {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-1.5 sm:gap-3">
+
+          {/* Currency Switcher */}
+          <CurrencySwitcher />
 
           {/* Call Now Button Pill */}
           <a

@@ -3,6 +3,13 @@ import apiResponse from "../utils/apiResponse.js";
 import ApiError from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { sendEmail } from "../config/mailer.js";
+import { convertFromEur } from "../config/currency.js";
+
+const priceToInrDisplay = async (priceDisplay) => {
+  const numeric = parseFloat(String(priceDisplay).replace(/[^0-9.]/g, ""));
+  if (Number.isNaN(numeric)) return priceDisplay || "N/A";
+  return await convertFromEur(numeric, "INR");
+};
 
 const ensureTablesExist = async () => {
   try {
@@ -176,6 +183,8 @@ export const submitSightseeingEnquiry = asyncHandler(async (req, res) => {
     status: "PENDING",
   };
 
+  const priceInr = await priceToInrDisplay(priceDisplay);
+
   const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "codeshorts007@gmail.com";
   try {
     await sendEmail({
@@ -190,7 +199,7 @@ export const submitSightseeingEnquiry = asyncHandler(async (req, res) => {
               <tr><td style="padding: 8px 0; color: #64748b; width: 140px;">Activity:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${sightseeingTitle}</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b;">Selected Option:</td><td style="padding: 8px 0; font-weight: bold; color: #2563eb;">${optionSelected || "Standard Option"}</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b;">City / Region:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${cityName || "Europe"}</td></tr>
-              <tr><td style="padding: 8px 0; color: #64748b;">Quoted Price:</td><td style="padding: 8px 0; font-weight: bold; color: #059669;">€${priceDisplay || "N/A"} / person</td></tr>
+              <tr><td style="padding: 8px 0; color: #64748b;">Quoted Price:</td><td style="padding: 8px 0; font-weight: bold; color: #059669;">₹${priceInr} / person</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b;">Activity Date:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${travelDate || "Not specified"}</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b;">Passengers:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${paxCount} Person(s)</td></tr>
             </table>
@@ -227,7 +236,7 @@ export const submitSightseeingEnquiry = asyncHandler(async (req, res) => {
               <p style="margin: 4px 0; font-size: 13px;"><strong>Activity:</strong> ${sightseeingTitle}</p>
               <p style="margin: 4px 0; font-size: 13px;"><strong>Option:</strong> ${optionSelected || "Standard Access"}</p>
               <p style="margin: 4px 0; font-size: 13px;"><strong>City:</strong> ${cityName || "Europe"}</p>
-              <p style="margin: 4px 0; font-size: 13px;"><strong>Price:</strong> €${priceDisplay || "N/A"} / person</p>
+              <p style="margin: 4px 0; font-size: 13px;"><strong>Price:</strong> ₹${priceInr} / person</p>
               ${travelDate ? `<p style="margin: 4px 0; font-size: 13px;"><strong>Preferred Date:</strong> ${travelDate}</p>` : ""}
               <p style="margin: 4px 0; font-size: 13px;"><strong>Travelers:</strong> ${paxCount} Person(s)</p>
             </div>

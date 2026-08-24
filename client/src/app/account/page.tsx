@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { api } from "@/lib/api";
 import type { Booking } from "@/lib/types";
 import {
@@ -27,7 +28,36 @@ import {
   IconUpload,
   IconAlertTriangle,
   IconUser,
+  IconTicket,
 } from "@tabler/icons-react";
+
+interface Order {
+  id: string;
+  productType: "SIGHTSEEING" | "PACKAGE" | "VAN_COACH";
+  productName: string;
+  amount: number;
+  currency: string;
+  amountInr: number | null;
+  status: "CREATED" | "AUTHORIZED" | "CAPTURED" | "FAILED" | "REFUNDED";
+  travelDate: string | null;
+  pax: number;
+  optionSelected: string | null;
+  createdAt: string;
+}
+
+const ORDER_PRODUCT_LABELS: Record<Order["productType"], string> = {
+  SIGHTSEEING: "Sightseeing",
+  PACKAGE: "Tour Package",
+  VAN_COACH: "Van & Coach",
+};
+
+const ORDER_STATUS_STYLES: Record<Order["status"], string> = {
+  CREATED: "bg-amber-100 text-amber-700",
+  AUTHORIZED: "bg-blue-100 text-blue-700",
+  CAPTURED: "bg-emerald-100 text-emerald-700",
+  FAILED: "bg-red-100 text-red-700",
+  REFUNDED: "bg-gray-200 text-gray-700",
+};
 
 function ProfileSkeleton() {
   return (
@@ -69,8 +99,11 @@ function BookingSkeleton() {
 
 export default function AccountPage() {
   const { user, loading: authLoading, logout } = useAuth();
+  const { format } = useCurrency();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
   const router = useRouter();
 
   // Dialog & Modal State
@@ -90,12 +123,22 @@ export default function AccountPage() {
     }
   };
 
+  const fetchOrders = () => {
+    if (user) {
+      api.get<Order[]>(`/payments/my-orders`)
+        .then((d) => setOrders(Array.isArray(d) ? d : []))
+        .catch(() => setOrders([]))
+        .finally(() => setOrdersLoading(false));
+    }
+  };
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push("/auth/login");
       return;
     }
     fetchBookings();
+    fetchOrders();
   }, [user, authLoading, router]);
 
   const handleLogout = async () => {
@@ -320,7 +363,7 @@ export default function AccountPage() {
                           <IconUsers className="h-3.5 w-3.5 text-gold" /> {b.pax} pax
                         </span>
                         <span className="text-gray-300">·</span>
-                        <span className="text-sm font-black text-navy">€{Number(b.price).toFixed(0)}</span>
+                        <span className="text-sm font-black text-navy">{format(Number(b.price))}</span>
                       </div>
 
                       <div className="text-xs text-gray-500 flex flex-wrap items-center gap-2 font-medium">
@@ -383,6 +426,84 @@ export default function AccountPage() {
           </CardContent>
         </Card>
 
+        {/* My Orders (Van & Coach / Sightseeing / Packages via Razorpay) */}
+        <Card id="orders" className="border border-gray-200 bg-white rounded-xl shadow-sm overflow-hidden">
+          <CardHeader className="border-b border-gray-100 bg-slate-50/70 py-3.5 px-5">
+            <CardTitle className="text-sm font-black text-navy flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <IconTicket className="h-4 w-4 text-gold" /> My Orders
+              </span>
+              <Badge className="rounded-md bg-navy text-gold text-[10px] font-black px-2.5 py-0.5">
+                {orders.length} {orders.length === 1 ? "Order" : "Orders"}
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-6">
+            {ordersLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i} className="p-4 rounded-xl border border-gray-100 space-y-2">
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-3 w-full" />
+                  </div>
+                ))}
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="text-center py-10 space-y-3">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-gold/10 text-gold">
+                  <IconTicket className="h-7 w-7 text-navy" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-navy">No Orders Yet</h3>
+                  <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto font-medium">
+                    Book a Van & Coach disposal, sightseeing tour, or vacation package to see it here.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {orders.map((o) => (
+                  <div
+                    key={o.id}
+                    className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-4 sm:p-5 rounded-xl border border-gray-200 bg-white"
+                  >
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge className="rounded-md bg-slate-100 text-navy border-0 text-[10px] font-black px-2 py-0.5">
+                          {ORDER_PRODUCT_LABELS[o.productType]}
+                        </Badge>
+                        <span className="text-sm font-black text-navy">{o.productName}</span>
+                      </div>
+                      {o.optionSelected && (
+                        <p className="text-xs text-gray-500 font-medium">{o.optionSelected}</p>
+                      )}
+                      <div className="text-xs text-gray-500 flex flex-wrap items-center gap-2 font-medium">
+                        {o.travelDate && (
+                          <span className="flex items-center gap-1 font-semibold text-gray-600">
+                            <IconClock className="h-3.5 w-3.5 text-gold" /> {o.travelDate}
+                          </span>
+                        )}
+                        <span className="flex items-center gap-1 font-semibold text-gray-600">
+                          <IconUsers className="h-3.5 w-3.5 text-gold" /> {o.pax} pax
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-sm font-black text-navy">
+                        {o.amountInr != null ? `₹${o.amountInr}` : format(Number(o.amount))}
+                      </span>
+                      <Badge className={`rounded-md border-0 text-[10px] font-black px-2.5 py-1 ${ORDER_STATUS_STYLES[o.status]}`}>
+                        {o.status}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Booking Details Modal Dialog */}
         {showDetails && selectedBooking && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
@@ -428,7 +549,7 @@ export default function AccountPage() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-500">Total Price</span>
-                      <span className="font-black text-navy text-sm">€{Number(selectedBooking.price).toFixed(2)}</span>
+                      <span className="font-black text-navy text-sm">{format(Number(selectedBooking.price))}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-500">Status</span>

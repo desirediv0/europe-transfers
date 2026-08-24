@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
+import { useCurrency } from "@/context/CurrencyContext";
 import {
   IconSearch,
   IconMapPin,
@@ -45,6 +46,7 @@ const CITIES = ["ALL", "Paris", "Rome", "Tuscany", "Switzerland"];
 const LIMIT = 20;
 
 function ResultsContent() {
+  const { format } = useCurrency();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -342,7 +344,7 @@ function ResultsContent() {
                   <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
                     <div>
                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Starting from</span>
-                      <span className="text-lg font-black text-navy">{Number(tour.priceFrom).toFixed(2)} €</span>
+                      <span className="text-lg font-black text-navy">{format(Number(tour.priceFrom))}</span>
                     </div>
                     <Link href={`/sightseeing/${tour.slug}`}>
                       <button className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-navy group-hover:bg-gold group-hover:text-navy transition-all shadow-sm cursor-pointer">

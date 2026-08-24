@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { City } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCurrency } from "@/context/CurrencyContext";
 import { IconMapPin, IconStar } from "@tabler/icons-react";
 
 interface DestinationCardProps {
@@ -10,42 +11,42 @@ interface DestinationCardProps {
   loading?: boolean;
 }
 
-// High Quality Curated European City Photos Fallback Map
-const CITY_IMAGE_MAP: Record<string, { image: string; tag: string; price: string; rating: string }> = {
+// High Quality Curated European City Photos Fallback Map (prices are EUR base values)
+const CITY_IMAGE_MAP: Record<string, { image: string; tag: string; price: number; rating: string }> = {
   paris: {
     image: "/images/hero_paris_twilight.png",
     tag: "City of Lights",
-    price: "€140",
+    price: 140,
     rating: "4.9 (1.8k)",
   },
   rome: {
     image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1000&auto=format&fit=crop",
     tag: "Historic Capital",
-    price: "€120",
+    price: 120,
     rating: "4.9 (2.1k)",
   },
   milan: {
     image: "https://images.unsplash.com/photo-1513581166391-887a96ddeafd?q=80&w=1000&auto=format&fit=crop",
     tag: "Fashion & Business",
-    price: "€110",
+    price: 110,
     rating: "4.8 (1.4k)",
   },
   barcelona: {
     image: "https://images.unsplash.com/photo-1583422409516-2895a77efded?q=80&w=1000&auto=format&fit=crop",
     tag: "Coastal Charm",
-    price: "€130",
+    price: 130,
     rating: "4.9 (1.6k)",
   },
   zurich: {
     image: "/images/hero_swiss_alps.png",
     tag: "Alpine Luxury",
-    price: "€180",
+    price: 180,
     rating: "5.0 (2.4k)",
   },
   venice: {
     image: "/images/hero_amalfi_coast.png",
     tag: "Canal Romance",
-    price: "€160",
+    price: 160,
     rating: "4.9 (1.9k)",
   },
 };
@@ -64,6 +65,8 @@ export function DestinationCardSkeleton() {
 }
 
 export default function DestinationCard({ city, loading }: DestinationCardProps) {
+  const { format } = useCurrency();
+
   if (loading || !city) {
     return <DestinationCardSkeleton />;
   }
@@ -72,18 +75,20 @@ export default function DestinationCard({ city, loading }: DestinationCardProps)
   const matched = CITY_IMAGE_MAP[slugKey] || {
     image: city.image || "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?q=80&w=1000&auto=format&fit=crop",
     tag: "Luxury Destination",
-    price: "€120",
+    price: 120,
     rating: "4.9 (1.2k)",
   };
 
   const imageSrc = city.image || matched.image;
   const countryName = city.country?.name || "Europe";
 
-  const priceText = (city as { basePrice?: string | number; startingPrice?: string | number }).basePrice 
-    ? `€${(city as { basePrice?: string | number }).basePrice}`
-    : (city as { startingPrice?: string | number }).startingPrice 
-      ? `€${(city as { startingPrice?: string | number }).startingPrice}`
+  const cityWithPrice = city as { basePrice?: string | number; startingPrice?: string | number };
+  const priceEur = cityWithPrice.basePrice != null
+    ? Number(cityWithPrice.basePrice)
+    : cityWithPrice.startingPrice != null
+      ? Number(cityWithPrice.startingPrice)
       : matched.price;
+  const priceText = format(priceEur);
 
   return (
     <Link href={`/rates/${city.slug}`} className="group block w-full h-80 sm:h-[26rem]">

@@ -387,6 +387,8 @@ model Order {
   productName      String
   amount           Decimal         @db.Decimal(10, 2)
   currency         String          @default("EUR")
+  amountInr        Decimal?        @db.Decimal(10, 2)
+  eurToInrRate     Decimal?        @db.Decimal(10, 4)
   razorpayOrderId  String?
   razorpayPaymentId String?
   razorpaySignature String?

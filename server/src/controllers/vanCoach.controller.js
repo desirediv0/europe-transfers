@@ -2,6 +2,8 @@ import prisma from "../config/db.js";
 import apiResponse from "../utils/apiResponse.js";
 import ApiError from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { sendEmail } from "../config/mailer.js";
+import { convertFromEur } from "../config/currency.js";
 
 const includeRoutePrices = {
   routePrices: { orderBy: { order: "asc" } },
@@ -174,4 +176,127 @@ export const deleteVanCoachVehicle = asyncHandler(async (req, res) => {
   await prisma.vanCoachRoutePrice.deleteMany({ where: { vehicleId: req.params.id } });
   await prisma.vanCoachVehicle.delete({ where: { id: req.params.id } });
   return apiResponse(res, 200, "Van & Coach vehicle deleted");
+});
+
+// ─── Enquiries ───────────────────────────────────────────
+
+export const submitVanCoachEnquiry = asyncHandler(async (req, res) => {
+  const {
+    vehicleId,
+    vehicleName,
+    location,
+    hours,
+    rate,
+    name,
+    phone,
+    email,
+    pickupAddress,
+    itineraryNotes,
+  } = req.body;
+
+  if (!vehicleName || !location || hours == null || rate == null || !name || !phone || !email) {
+    throw new ApiError(400, "vehicleName, location, hours, rate, name, phone, and email are required");
+  }
+
+  // Ensure table exists in database
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "VanCoachEnquiry" (
+      "id" TEXT PRIMARY KEY,
+      "vehicleId" TEXT,
+      "vehicleName" TEXT NOT NULL,
+      "location" TEXT NOT NULL,
+      "hours" INTEGER NOT NULL,
+      "rate" DECIMAL(10,2) NOT NULL,
+      "customerName" TEXT NOT NULL,
+      "phone" TEXT NOT NULL,
+      "email" TEXT NOT NULL,
+      "pickupAddress" TEXT,
+      "notes" TEXT,
+      "status" TEXT DEFAULT 'PENDING',
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  const id = `vce_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+  await prisma.$executeRawUnsafe(
+    `INSERT INTO "VanCoachEnquiry" ("id", "vehicleId", "vehicleName", "location", "hours", "rate", "customerName", "phone", "email", "pickupAddress", "notes", "status", "createdAt", "updatedAt")
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'PENDING', NOW(), NOW())`,
+    id,
+    vehicleId || null,
+    vehicleName,
+    location,
+    hours,
+    rate,
+    name,
+    phone,
+    email,
+    pickupAddress || null,
+    itineraryNotes || null
+  );
+
+  const rateInr = await convertFromEur(rate, "INR");
+
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "codeshorts007@gmail.com";
+  try {
+    await sendEmail({
+      to: adminEmail,
+      subject: `🚐 New Van & Coach Enquiry: ${vehicleName} (${location})`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 24px; color: #0B1528; background-color: #f8fafc;">
+          <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0;">
+            <h2 style="color: #060C17; margin-top: 0;">🚐 New Van & Coach Disposal Enquiry</h2>
+            <p style="color: #64748b; font-size: 14px;">A customer has submitted a new Van & Coach hourly disposal enquiry on Europe Transfers.</p>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
+
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+              <tr><td style="padding: 8px 0; color: #64748b; width: 140px;">Vehicle:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${vehicleName}</td></tr>
+              <tr><td style="padding: 8px 0; color: #64748b;">Location:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${location}</td></tr>
+              <tr><td style="padding: 8px 0; color: #64748b;">Duration:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${hours} hours</td></tr>
+              <tr><td style="padding: 8px 0; color: #64748b;">Estimated Total:</td><td style="padding: 8px 0; font-weight: bold; color: #059669;">₹${rateInr}</td></tr>
+              <tr><td style="padding: 8px 0; color: #64748b;">Pickup Address:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${pickupAddress || "Not specified"}</td></tr>
+            </table>
+
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
+
+            <h3 style="color: #060C17; font-size: 16px; margin-bottom: 12px;">Customer Details</h3>
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+              <tr><td style="padding: 8px 0; color: #64748b; width: 140px;">Name:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${name}</td></tr>
+              <tr><td style="padding: 8px 0; color: #64748b;">Phone:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${phone}</td></tr>
+              <tr><td style="padding: 8px 0; color: #64748b;">Email:</td><td style="padding: 8px 0; font-weight: bold; color: #060C17;">${email}</td></tr>
+              ${itineraryNotes ? `<tr><td style="padding: 8px 0; color: #64748b; vertical-align: top;">Notes:</td><td style="padding: 8px 0; color: #060C17;">${itineraryNotes}</td></tr>` : ""}
+            </table>
+          </div>
+        </div>
+      `,
+    });
+  } catch (err) {
+    console.error("Failed to send Van & Coach enquiry email:", err.message);
+  }
+
+  return apiResponse(res, 201, "Enquiry submitted successfully", {
+    id,
+    vehicleId,
+    vehicleName,
+    location,
+    hours,
+    rate,
+    customerName: name,
+    phone,
+    email,
+    pickupAddress,
+    notes: itineraryNotes,
+    status: "PENDING",
+  });
+});
+
+export const getVanCoachEnquiries = asyncHandler(async (req, res) => {
+  try {
+    const enquiries = await prisma.$queryRawUnsafe(
+      `SELECT * FROM "VanCoachEnquiry" ORDER BY "createdAt" DESC`
+    );
+    return apiResponse(res, 200, "Van & Coach enquiries retrieved", enquiries);
+  } catch (err) {
+    return apiResponse(res, 200, "Van & Coach enquiries retrieved", []);
+  }
 });

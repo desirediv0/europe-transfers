@@ -7,7 +7,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { useCurrencyRates, type ViewCurrency } from "@/hooks/useCurrencyRates";
 import { RefreshCw, Download, Bus } from "lucide-react";
+
+const CURRENCY_SYMBOLS: Record<ViewCurrency, string> = { EUR: "€", USD: "$", INR: "₹" };
 
 interface Order {
   id: string;
@@ -16,6 +19,8 @@ interface Order {
   productName: string;
   amount: number;
   currency: string;
+  amountInr: number | null;
+  eurToInrRate: number | null;
   razorpayOrderId: string | null;
   razorpayPaymentId: string | null;
   status: string;
@@ -45,6 +50,8 @@ const statusColors: Record<string, "default" | "success" | "warning" | "destruct
 };
 
 export default function FleetOrdersPage() {
+  const [viewCurrency, setViewCurrency] = useState<ViewCurrency>("INR");
+  const { convert } = useCurrencyRates();
   const [items, setItems] = useState<Order[]>([]);
   const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, pages: 0 });
   const [loading, setLoading] = useState(true);
@@ -71,6 +78,12 @@ export default function FleetOrdersPage() {
     } catch { toast.error("Failed to update"); }
   };
 
+  const displayAmount = (o: Order) => {
+    // For INR, prefer the exact amount actually charged/recorded at booking time.
+    if (viewCurrency === "INR" && o.amountInr != null) return o.amountInr;
+    return convert(o.amount, viewCurrency);
+  };
+
   const exportCSV = () => {
     const headers = ["ID", "Customer", "Email", "Phone", "Vehicle", "Amount", "Status", "Payment ID", "Date"];
     const rows = items.map((o) => [
@@ -79,7 +92,7 @@ export default function FleetOrdersPage() {
       o.customerEmail,
       o.customerPhone,
       o.productName,
-      `${o.currency} ${o.amount}`,
+      `${viewCurrency} ${displayAmount(o)}`,
       o.status,
       o.razorpayPaymentId || "-",
       new Date(o.createdAt).toLocaleDateString(),
@@ -131,6 +144,17 @@ export default function FleetOrdersPage() {
           </SelectContent>
         </Select>
         <Badge variant="secondary">{pagination.total} fleet orders</Badge>
+
+        <Select value={viewCurrency} onValueChange={(v) => setViewCurrency(v as ViewCurrency)}>
+          <SelectTrigger className="w-28 ml-auto">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="EUR">View: EUR</SelectItem>
+            <SelectItem value="USD">View: USD</SelectItem>
+            <SelectItem value="INR">View: INR</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <Card>
@@ -175,7 +199,12 @@ export default function FleetOrdersPage() {
                         {order.optionSelected && <p className="text-xs text-gray-500">{order.optionSelected}</p>}
                       </div>
                     </TableCell>
-                    <TableCell className="font-bold">{order.currency} {order.amount}</TableCell>
+                    <TableCell className="font-bold">
+                      {CURRENCY_SYMBOLS[viewCurrency]}{displayAmount(order)}
+                      {viewCurrency === "INR" && order.amountInr == null && (
+                        <span className="ml-1 text-[10px] font-normal text-gray-400">(est.)</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Badge variant={statusColors[order.status] || "secondary"}>{order.status}</Badge>
                     </TableCell>

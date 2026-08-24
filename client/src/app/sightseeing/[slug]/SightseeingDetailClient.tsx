@@ -14,6 +14,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { usePayment } from "@/hooks/usePayment";
+import { useCurrency } from "@/context/CurrencyContext";
 import {
   IconClock,
   IconArrowLeft,
@@ -61,6 +62,7 @@ interface Props {
 }
 
 export function SightseeingDetailClient({ tour }: Props) {
+  const { format: formatCurrency } = useCurrency();
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<{ name: string; price: number } | null>(null);
   const [successOpen, setSuccessOpen] = useState(false);
@@ -261,7 +263,7 @@ export function SightseeingDetailClient({ tour }: Props) {
             <div>
               <span className="text-xs text-gray-400 uppercase tracking-widest font-bold block mb-1">Starting From</span>
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl sm:text-5xl font-black text-gold">{priceDisplay} €</span>
+                <span className="text-4xl sm:text-5xl font-black text-gold">{formatCurrency(Number(tour.priceFrom))}</span>
                 <span className="text-sm text-gray-400 font-medium">/ person</span>
               </div>
             </div>
@@ -373,7 +375,7 @@ export function SightseeingDetailClient({ tour }: Props) {
                           </span>
                         </div>
                         <div className="mt-1">
-                          <span className="text-2xl font-black text-navy">{Number(opt.price).toFixed(2)} €</span>
+                          <span className="text-2xl font-black text-navy">{formatCurrency(Number(opt.price))}</span>
                           <span className="text-xs text-gray-400 font-medium ml-1">/ person</span>
                         </div>
                       </div>
@@ -484,7 +486,7 @@ export function SightseeingDetailClient({ tour }: Props) {
                   <div>
                     <span className="text-xs text-gray-400 uppercase tracking-widest font-bold block">Starting From</span>
                     <div className="flex items-baseline gap-2 mt-1">
-                      <span className="text-3xl font-black text-gold">{priceDisplay} €</span>
+                      <span className="text-3xl font-black text-gold">{formatCurrency(Number(tour.priceFrom))}</span>
                       <span className="text-xs text-gray-400">/ person</span>
                     </div>
                   </div>
@@ -527,7 +529,7 @@ export function SightseeingDetailClient({ tour }: Props) {
                             <p className="text-[11px] font-extrabold text-navy group-hover:text-navy leading-tight">{opt.name}</p>
                             <p className="text-[10px] text-gray-400 font-medium mt-0.5">{opt.duration || tour.duration}</p>
                           </div>
-                          <span className="text-base font-black text-navy flex-shrink-0 ml-2">€{Number(opt.price).toFixed(0)}</span>
+                          <span className="text-base font-black text-navy flex-shrink-0 ml-2">{formatCurrency(Number(opt.price))}</span>
                         </button>
                       ))}
                     </div>
@@ -584,7 +586,7 @@ export function SightseeingDetailClient({ tour }: Props) {
               <div className="mt-2 flex items-center gap-3">
                 <span className="text-xs text-gray-300 font-medium">Selected:</span>
                 <span className="text-xs text-gold font-extrabold">{selectedOption.name}</span>
-                <span className="text-base font-black text-white">€{Number(selectedOption.price).toFixed(2)}</span>
+                <span className="text-base font-black text-white">{formatCurrency(Number(selectedOption.price))}</span>
                 <span className="text-[11px] text-gray-400">/ person</span>
               </div>
             )}
@@ -782,7 +784,7 @@ export function SightseeingDetailClient({ tour }: Props) {
             {selectedForPayment && (
               <div className="mt-2 flex items-center gap-3">
                 <span className="text-xs text-gray-300 font-medium">{selectedForPayment.name}</span>
-                <span className="text-lg font-black text-gold">€{Number(selectedForPayment.price).toFixed(2)}</span>
+                <span className="text-lg font-black text-gold">{formatCurrency(Number(selectedForPayment.price))}</span>
               </div>
             )}
           </div>
@@ -870,7 +872,7 @@ export function SightseeingDetailClient({ tour }: Props) {
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
-                  <IconCreditCard className="h-4 w-4" /> Pay €{selectedForPayment ? Number(selectedForPayment.price).toFixed(2) : "0.00"} Now
+                  <IconCreditCard className="h-4 w-4" /> Pay {selectedForPayment ? formatCurrency(Number(selectedForPayment.price)) : formatCurrency(0)} Now
                 </span>
               )}
             </Button>

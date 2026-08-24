@@ -89,6 +89,22 @@ export interface VanCoachVehicle {
   createdAt: string;
 }
 
+export interface VanCoachEnquiry {
+  id: string;
+  vehicleId?: string;
+  vehicleName: string;
+  location: string;
+  hours: number;
+  rate: number;
+  customerName: string;
+  phone: string;
+  email: string;
+  pickupAddress?: string;
+  notes?: string;
+  status: string;
+  createdAt: string;
+}
+
 export interface Route {
   id: string;
   fromLocationId: string;

@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { usePayment } from "@/hooks/usePayment";
+import { useCurrency } from "@/context/CurrencyContext";
 import {
   IconCar,
   IconClock,
@@ -86,6 +87,7 @@ function mapToDisposalVehicle(v: VanCoachVehicle): DisposalVehicle {
 }
 
 function ResultsContent() {
+  const { format: formatCurrency } = useCurrency();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -273,7 +275,7 @@ function ResultsContent() {
                   <div className="relative h-28 sm:h-48 bg-slate-100 overflow-hidden">
                     <img src={v.image} alt={v.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                     <div className="absolute top-2 right-2 z-10">
-                      <Badge className="rounded-full bg-navy/90 text-gold border-0 px-2 py-0.5 text-[9px] sm:text-xs font-black shadow-sm">€{v.hourlyRate}/hr</Badge>
+                      <Badge className="rounded-full bg-navy/90 text-gold border-0 px-2 py-0.5 text-[9px] sm:text-xs font-black shadow-sm">{formatCurrency(v.hourlyRate)}/hr</Badge>
                     </div>
                   </div>
                   <div className="p-3 sm:p-5 space-y-1.5 sm:space-y-3">
@@ -290,7 +292,7 @@ function ResultsContent() {
                     <div className="pt-2 border-t border-gray-100 flex items-center justify-between gap-1">
                       <div>
                         <span className="text-[8px] sm:text-[10px] font-bold text-gray-400">Total ({numericHours}h)</span>
-                        <p className="text-xs sm:text-lg font-black text-navy">€{totalPrice}</p>
+                        <p className="text-xs sm:text-lg font-black text-navy">{formatCurrency(totalPrice)}</p>
                       </div>
                       <Button onClick={() => handleOpenDetail(v)}
                         className="rounded-xl bg-gold hover:bg-gold-light text-navy font-black text-[10px] sm:text-xs px-2 sm:px-4 py-1 sm:py-2 cursor-pointer shadow-xs">
@@ -337,11 +339,11 @@ function ResultsContent() {
               <div className="p-4 rounded-2xl bg-slate-50 border border-gray-200/80 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-navy">Estimated Hourly Rate</span>
-                  <span className="text-base font-black text-navy">€{selectedVehicle.hourlyRate} / hour</span>
+                  <span className="text-base font-black text-navy">{formatCurrency(selectedVehicle.hourlyRate)} / hour</span>
                 </div>
                 <div className="flex items-center justify-between border-t border-gray-200/60 pt-2 text-xs">
                   <span className="text-gray-500 font-medium">Estimated Total ({numericHours} Hours)</span>
-                  <span className="text-lg font-black text-gold">€{selectedVehicle.hourlyRate * numericHours}</span>
+                  <span className="text-lg font-black text-gold">{formatCurrency(selectedVehicle.hourlyRate * numericHours)}</span>
                 </div>
               </div>
               <div>
@@ -425,7 +427,7 @@ function ResultsContent() {
               <DialogTitle className="text-base font-black text-white leading-snug">Complete Fleet Booking</DialogTitle>
               <div className="mt-2 space-y-1">
                 <p className="text-xs text-gray-300 font-medium">{selectedVehicle.name} · {numericHours}h Disposal</p>
-                <p className="text-lg font-black text-gold">€{Math.round(selectedVehicle.hourlyRate * numericHours)}</p>
+                <p className="text-lg font-black text-gold">{formatCurrency(selectedVehicle.hourlyRate * numericHours)}</p>
               </div>
             </div>
             <form onSubmit={handlePaymentSubmit} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
@@ -454,7 +456,7 @@ function ResultsContent() {
                 {paymentLoading ? (
                   <span className="flex items-center gap-2"><IconLoader2 className="h-4 w-4 animate-spin" /> Processing Payment...</span>
                 ) : (
-                  <span className="flex items-center gap-2"><IconCreditCard className="h-4 w-4" /> Pay €{Math.round(selectedVehicle.hourlyRate * numericHours)} Now</span>
+                  <span className="flex items-center gap-2"><IconCreditCard className="h-4 w-4" /> Pay {formatCurrency(selectedVehicle.hourlyRate * numericHours)} Now</span>
                 )}
               </Button>
               <p className="text-[10px] text-gray-400 text-center font-medium">Secured by Razorpay. Your payment details are encrypted.</p>

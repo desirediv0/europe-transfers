@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { useCurrency } from "@/context/CurrencyContext";
 import type { Package } from "@/lib/types";
 import {
   IconCalendar,
@@ -49,6 +50,9 @@ export function PackageDetailClient({ pkg }: Props) {
   const imageSrc = pkg.coverImage || "/images/hero_swiss_alps.png";
   const countryName = pkg.country?.name || "Europe";
   const priceDisplay = pkg.priceFrom ? Number(pkg.priceFrom).toFixed(0) : "1,195";
+  const priceNumber = pkg.priceFrom ? Number(pkg.priceFrom) : 1195;
+  const { format } = useCurrency();
+  const formattedPrice = format(priceNumber);
 
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
@@ -153,7 +157,7 @@ export function PackageDetailClient({ pkg }: Props) {
           {/* Starting Price Pill */}
           <div className="mt-6 sm:mt-8 inline-flex items-baseline gap-2.5 sm:gap-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 px-5 py-3 sm:px-6 sm:py-3.5 shadow-xl">
             <span className="text-[10px] sm:text-xs font-bold text-gray-300 uppercase tracking-wider">Starting From</span>
-            <span className="text-2xl sm:text-4xl font-black text-gold">€{priceDisplay}</span>
+            <span className="text-2xl sm:text-4xl font-black text-gold">{formattedPrice}</span>
             <span className="text-xs text-gray-300 font-medium">/ person</span>
           </div>
 
@@ -291,7 +295,7 @@ export function PackageDetailClient({ pkg }: Props) {
                   <div className="mb-5 flex items-baseline justify-between">
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Price</span>
                     <div>
-                      <span className="text-2xl sm:text-3xl font-black text-navy">€{priceDisplay}</span>
+                      <span className="text-2xl sm:text-3xl font-black text-navy">{formattedPrice}</span>
                       <span className="text-xs text-gray-500 font-medium"> / person</span>
                     </div>
                   </div>
@@ -337,7 +341,7 @@ export function PackageDetailClient({ pkg }: Props) {
         <div>
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Total Price</span>
           <div className="flex items-baseline gap-1">
-            <span className="text-xl font-black text-gold">€{priceDisplay}</span>
+            <span className="text-xl font-black text-gold">{formattedPrice}</span>
             <span className="text-[10px] text-gray-300">/ person</span>
           </div>
         </div>
@@ -361,7 +365,7 @@ export function PackageDetailClient({ pkg }: Props) {
             <h2 className="text-lg font-black text-white leading-snug">{pkg.title}</h2>
             <div className="flex items-center gap-3 mt-2 text-xs">
               <span className="text-gray-300 font-medium">{pkg.durationDays} Days / {pkg.durationDays - 1} Nights</span>
-              <span className="text-gold font-black text-sm">€{priceDisplay} / person</span>
+              <span className="text-gold font-black text-sm">{formattedPrice} / person</span>
             </div>
           </div>
 
@@ -457,7 +461,7 @@ export function PackageDetailClient({ pkg }: Props) {
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
-                  <IconSend className="h-4 w-4" /> Send Tour Enquiry (€{priceDisplay} / person)
+                  <IconSend className="h-4 w-4" /> Send Tour Enquiry ({formattedPrice} / person)
                 </span>
               )}
             </Button>

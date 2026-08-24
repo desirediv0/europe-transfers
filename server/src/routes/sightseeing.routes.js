@@ -31,13 +31,14 @@ const enquirySchema = z.object({
 
 // Public Routes
 router.get("/", getSightseeingTours);
-router.get("/:slug", getSightseeingBySlug);
 router.post("/enquire", validate(enquirySchema), submitSightseeingEnquiry);
 
-// Admin Routes
+// Admin Routes (must be registered before "/:slug" so they aren't shadowed)
 router.get("/admin/enquiries", protectAdmin, getSightseeingEnquiries);
 router.post("/admin/tours", protectAdmin, createSightseeingTour);
 router.put("/admin/tours/:id", protectAdmin, updateSightseeingTour);
 router.delete("/admin/tours/:id", protectAdmin, deleteSightseeingTour);
+
+router.get("/:slug", getSightseeingBySlug);
 
 export default router;

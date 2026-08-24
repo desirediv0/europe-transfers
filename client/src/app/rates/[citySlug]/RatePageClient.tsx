@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useCurrency } from "@/context/CurrencyContext";
 import type { Location, Route, RoutePrice } from "@/lib/types";
 import {
   IconArrowLeft,
@@ -55,6 +56,7 @@ function VehicleCard({
   rp: RoutePrice;
   route: Route & { routePrices: RoutePrice[] };
 }) {
+  const { format } = useCurrency();
   return (
     <Card className="group overflow-hidden border border-gray-200/80 bg-white rounded-2xl transition-all hover:shadow-xl hover:shadow-navy/10 hover:border-gold/50 hover:-translate-y-1">
       <CardContent className="p-5 flex flex-col justify-between h-full space-y-4">
@@ -64,7 +66,7 @@ function VehicleCard({
               <IconCar className="h-6 w-6" strokeWidth={1.5} />
             </div>
             <div className="text-right">
-              <p className="text-2xl font-black text-navy tracking-tight">€{Number(rp.price).toFixed(2)}</p>
+              <p className="text-2xl font-black text-navy tracking-tight">{format(Number(rp.price))}</p>
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Fixed Total Price</p>
             </div>
           </div>
