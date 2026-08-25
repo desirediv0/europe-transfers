@@ -8,10 +8,11 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
+    const apiBase = (process.env.API_INTERNAL_URL || "http://localhost:4000/api/v1").replace(/\/api\/v1\/?$/, "");
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:4000/api/:path*",
+        destination: `${apiBase}/api/:path*`,
       },
     ];
   },
