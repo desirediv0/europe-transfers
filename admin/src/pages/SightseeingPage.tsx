@@ -141,6 +141,24 @@ export default function SightseeingPage() {
     loadTours();
   }, [loadEnquiries, loadTours]);
 
+  const slugify = (text: string) => {
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  };
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const title = e.target.value;
+    setForm((prev) => ({
+      ...prev,
+      title,
+      slug: !editing && (!prev.slug || prev.slug === slugify(prev.title)) ? slugify(title) : prev.slug,
+    }));
+  };
+
   const resetInlineEditStates = () => {
     setEditingHighlightIndex(null);
     setEditingHighlightText("");
@@ -824,7 +842,7 @@ export default function SightseeingPage() {
                   <Label className="font-bold">Activity Title *</Label>
                   <Input
                     value={form.title}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                    onChange={handleTitleChange}
                     placeholder="e.g. Summit Eiffel Tower Ticket with Audio Guide"
                     className="mt-1 bg-white font-semibold"
                   />

@@ -283,10 +283,10 @@ async function main() {
 
   // Seed Van & Coach vehicles (Alphard, Hiace, V-Class, S-Class)
   const vanCoachVehicles = [
-    { id: "vc-alphard", name: "Alphard", seats: 6, order: 0, rate8h: 500, rate10h: 600, overtimeRate: 100 },
-    { id: "vc-hiace", name: "Hiace", seats: 10, order: 1, rate8h: 580, rate10h: 700, overtimeRate: 110 },
-    { id: "vc-vclass", name: "V-Class", seats: 7, order: 2, rate8h: 740, rate10h: 900, overtimeRate: 130 },
-    { id: "vc-sclass", name: "S-Class", seats: 3, order: 3, rate8h: 900, rate10h: 1100, overtimeRate: 150 },
+    { id: "vc-alphard", name: "Alphard", seats: 6, order: 0, rate8h: 500, rate10h: 600, overtimeRate: 100, image: "https://images.unsplash.com/photo-1617469165786-8007eda3caa7?q=80&w=1000&auto=format&fit=crop", category: "Luxury Minivan" },
+    { id: "vc-hiace", name: "Hiace", seats: 10, order: 1, rate8h: 580, rate10h: 700, overtimeRate: 110, image: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?q=80&w=1000&auto=format&fit=crop", category: "Group Van" },
+    { id: "vc-vclass", name: "V-Class", seats: 7, order: 2, rate8h: 740, rate10h: 900, overtimeRate: 130, image: "/images/why_choose_us_chauffeur.png", category: "Business Minivan" },
+    { id: "vc-sclass", name: "S-Class", seats: 3, order: 3, rate8h: 900, rate10h: 1100, overtimeRate: 150, image: "/images/hero_swiss_alps.png", category: "First-Class VIP Sedan" },
   ];
 
   const vanCoachRoutePrices = {
@@ -343,7 +343,7 @@ async function main() {
   for (const v of vanCoachVehicles) {
     await prisma.vanCoachVehicle.upsert({
       where: { id: v.id },
-      update: {},
+      update: { image: v.image, category: v.category },
       create: { ...v, currency: "USD" },
     });
 
@@ -363,6 +363,7 @@ async function main() {
       name: "London",
       slug: "london",
       order: 0,
+      coverImage: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=1000&q=80",
       routes: [
         { description: "London Station – Central London Hotel or vice versa", sedanPrice: 65, minivanPrice: 95 },
         { description: "Heathrow Airport – Central London Hotel", sedanPrice: 75, minivanPrice: 110 },
@@ -374,6 +375,7 @@ async function main() {
       name: "Edinburgh",
       slug: "edinburgh",
       order: 1,
+      coverImage: "https://images.unsplash.com/photo-1506377585622-bedcbb027afc?w=1000&q=80",
       routes: [
         { description: "Train Station (Waverley) – Edinburgh Hotel or vice versa", sedanPrice: 75, minivanPrice: 95 },
         { description: "Edinburgh Airport – Edinburgh Hotel", sedanPrice: 75, minivanPrice: 95 },
@@ -415,7 +417,7 @@ async function main() {
     const { routes, ...cityData } = city;
     await prisma.privateTransferCity.upsert({
       where: { id: cityData.id },
-      update: {},
+      update: { coverImage: cityData.coverImage },
       create: cityData,
     });
 
@@ -427,6 +429,97 @@ async function main() {
     }
   }
   console.log("Private transfer cities seeded:", privateTransferCities.length);
+
+  // ─── Sightseeing Tours ───────────────────────────────────
+  const sightseeingTours = [
+    {
+      id: "st-eiffel-tower",
+      title: "Eiffel Tower Summit Reserved Access",
+      slug: "eiffel-tower-summit-reserved-access",
+      cityName: "Paris",
+      countryName: "France",
+      duration: "2-3 Hours",
+      priceFrom: 87,
+      coverImage: "/images/hero_paris_twilight.png",
+      galleryImages: JSON.stringify([
+        "/images/hero_paris_twilight.png",
+        "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=1000&auto=format&fit=crop",
+      ]),
+      summary: "Skip-the-line summit access to the Eiffel Tower with an audio guide and panoramic Paris views.",
+      description: "Reserved-access tickets to the Eiffel Tower summit, avoiding the general admission queues. Includes an audio guide covering the tower's history and architecture, plus unobstructed panoramic views of Paris from the top level.",
+      highlights: JSON.stringify([
+        "Skip-the-line summit access",
+        "Audio guide included",
+        "Panoramic views of Paris",
+        "Flexible time slots",
+      ]),
+      includes: JSON.stringify([
+        "Reserved entry ticket",
+        "Audio guide",
+        "Access to 1st, 2nd & summit levels",
+      ]),
+      options: JSON.stringify([
+        { name: "Standard Access", price: 87, duration: "2-3 Hours" },
+        { name: "VIP Skip-the-Line + Champagne", price: 149, duration: "2-3 Hours" },
+      ]),
+      schedule: JSON.stringify([
+        { type: "Departure", address: "Meeting point at Eiffel Tower South Pillar", time: "Flexible Departure" },
+        { type: "Arrival", address: "Return to meeting location", time: "2-3 hours duration" },
+      ]),
+      seoTitle: "Eiffel Tower Summit Reserved Access | Europe Transfers",
+      seoDescription: "Book skip-the-line reserved access to the Eiffel Tower summit with audio guide included.",
+      isActive: true,
+      order: 0,
+    },
+    {
+      id: "st-colosseum-rome",
+      title: "Colosseum & Roman Forum Guided Tour",
+      slug: "colosseum-roman-forum-guided-tour",
+      cityName: "Rome",
+      countryName: "Italy",
+      duration: "3 Hours",
+      priceFrom: 65,
+      coverImage: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1000&auto=format&fit=crop",
+      galleryImages: JSON.stringify([
+        "https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1000&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1529260830199-42c24126f198?q=80&w=1000&auto=format&fit=crop",
+      ]),
+      summary: "Skip-the-line guided tour of the Colosseum, Roman Forum, and Palatine Hill with an expert local guide.",
+      description: "Explore ancient Rome with priority entrance to the Colosseum, followed by a guided walk through the Roman Forum and Palatine Hill. Learn the history of gladiatorial combat and the seat of the Roman Empire from a licensed local guide.",
+      highlights: JSON.stringify([
+        "Skip-the-line Colosseum entry",
+        "Expert licensed guide",
+        "Roman Forum & Palatine Hill included",
+        "Small group experience",
+      ]),
+      includes: JSON.stringify([
+        "Colosseum priority entrance",
+        "Roman Forum & Palatine Hill access",
+        "Licensed English-speaking guide",
+      ]),
+      options: JSON.stringify([
+        { name: "Standard Group Tour", price: 65, duration: "3 Hours" },
+        { name: "Private Guide Tour", price: 220, duration: "3 Hours" },
+      ]),
+      schedule: JSON.stringify([
+        { type: "Departure", address: "Meeting point at Colosseum Metro Station", time: "Flexible Departure" },
+        { type: "Arrival", address: "Tour ends at Roman Forum exit", time: "3 hours duration" },
+      ]),
+      seoTitle: "Colosseum & Roman Forum Guided Tour | Europe Transfers",
+      seoDescription: "Skip-the-line guided tour of the Colosseum, Roman Forum, and Palatine Hill in Rome.",
+      isActive: true,
+      order: 1,
+    },
+  ];
+
+  for (const tour of sightseeingTours) {
+    await prisma.sightseeingTour.upsert({
+      where: { id: tour.id },
+      update: { coverImage: tour.coverImage, galleryImages: tour.galleryImages },
+      create: tour,
+    });
+  }
+  console.log("Sightseeing tours seeded:", sightseeingTours.length);
 
   console.log("Seed complete!");
 }
