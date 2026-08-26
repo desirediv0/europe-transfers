@@ -276,7 +276,9 @@ function AuthOverlay({ type, onLogin, onVerify }: { type: "login" | "verify"; on
   );
 }
 
-function FleetGallery({ carTypes, loading }: { carTypes: CarType[]; loading: boolean }) {
+function FleetGallery({ carTypes, loading, basePath }: { carTypes: CarType[]; loading: boolean; basePath: string }) {
+  const isPrivateTransfers = basePath === "/private-transfers";
+
   return (
     <>
       {/* Hero Banner */}
@@ -302,159 +304,163 @@ function FleetGallery({ carTypes, loading }: { carTypes: CarType[]; loading: boo
         </div>
       </section>
 
-      {/* Client Handwritten Process Flow Steps Bar */}
-      <section className="bg-white border-b border-gray-200/80 py-8 shadow-xs">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {processSteps.map((s) => (
-              <div key={s.step} className="p-4 rounded-2xl bg-slate-50 border border-gray-100 space-y-2 hover:border-gold/30 transition-all">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-gold uppercase tracking-widest">{s.step}</span>
-                  <s.icon className="h-4 w-4 text-navy" />
-                </div>
-                <h4 className="text-xs sm:text-sm font-extrabold text-navy leading-snug">{s.title}</h4>
-                <p className="text-[10px] text-gray-500 font-medium leading-tight">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Step 01: Process Flow & Highlights */}
-      <section className="bg-slate-50 border-b border-gray-200/80 py-12 sm:py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="relative rounded-3xl overflow-hidden shadow-2xl min-h-[380px] group border border-gray-200/80">
-            <img
-              src="/images/about_luxury_chauffeur.png"
-              alt="Luxury Chauffeured Transfer Europe"
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
-
-            <div className="absolute top-6 right-6 z-10">
-              <Badge className="rounded-full bg-gold text-navy border-0 px-4 py-1.5 text-xs font-black shadow-md">
-                All-Inclusive Fixed Rates
-              </Badge>
-            </div>
-
-            <div className="absolute bottom-6 left-6 right-6 text-white z-10 space-y-3">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md px-3.5 py-1 text-xs font-bold text-white border border-white/30">
-                <IconSparkles className="h-3.5 w-3.5 text-gold" /> Guaranteed Mercedes-Benz Fleet
-              </div>
-
-              <h3 className="text-xl sm:text-3xl font-black text-white leading-tight">
-                First-Class Chauffeured Journeys
-              </h3>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 text-xs font-semibold text-gray-200">
-                <div className="flex items-center gap-2">
-                  <IconCheck className="h-4 w-4 text-gold flex-shrink-0" />
-                  <span>60 Min Free Airport Wait</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <IconCheck className="h-4 w-4 text-gold flex-shrink-0" />
-                  <span>Real-Time Flight Tracking</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <IconCheck className="h-4 w-4 text-gold flex-shrink-0" />
-                  <span>Non-Smoking Luxury Fleet</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <IconCheck className="h-4 w-4 text-gold flex-shrink-0" />
-                  <span>24/7 Live Concierge Team</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Vehicle Benefits Bar */}
-      <section className="bg-white border-b border-gray-200/80 py-6">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {fleetBenefits.map((benefit) => (
-              <div key={benefit} className="flex items-center gap-2.5">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gold/15 text-gold flex-shrink-0">
-                  <IconCheck className="h-3.5 w-3.5 stroke-[3]" />
-                </div>
-                <span className="text-xs font-bold text-navy">{benefit}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Step 02: Vehicle Fleet Cards Grid */}
-      <section className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-12 sm:py-20">
-        <div className="text-center mb-10 sm:mb-14">
-          <span className="text-xs font-bold tracking-widest text-gold uppercase">Step 02: Product Selection</span>
-          <h2 className="mt-1 text-2xl sm:text-4xl font-black text-navy">Choose Your Luxury Ride</h2>
-          <p className="mt-2 text-xs sm:text-sm text-gray-500 max-w-xl mx-auto">
-            All rates include meet & greet, flight tracking, luggage assistance, and 60 minutes free wait time.
-          </p>
-        </div>
-
-        {/* 2-Column Mobile Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8">
-          {loading
-            ? Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i} className="overflow-hidden rounded-3xl">
-                <Skeleton className="h-44 sm:h-56 w-full" />
-                <CardContent className="p-4 space-y-3">
-                  <Skeleton className="h-5 w-1/2" />
-                  <Skeleton className="h-4 w-1/3" />
-                  <Skeleton className="h-8 w-full" />
-                </CardContent>
-              </Card>
-            ))
-            : carTypes.map((ct) => {
-              const fallbackImg = CAR_IMAGE_FALLBACKS[ct.id.toLowerCase()] || CAR_IMAGE_FALLBACKS.sedan;
-              const imgSrc = ct.image || fallbackImg;
-
-              return (
-                <Card key={ct.id} className="group overflow-hidden rounded-3xl border-gray-200/80 bg-white transition-all duration-300 hover:shadow-xl hover:border-gold/40 hover:-translate-y-1 flex flex-col justify-between">
-                  <CardContent className="p-0">
-                    <div className="relative h-36 sm:h-56 bg-slate-100 overflow-hidden">
-                      <img src={imgSrc} alt={ct.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                      <div className="absolute top-3 right-3 z-10">
-                        <Badge className="rounded-full bg-navy text-gold border-0 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-bold">{ct.name}</Badge>
-                      </div>
+      {!isPrivateTransfers && (
+        <>
+          {/* Client Handwritten Process Flow Steps Bar */}
+          <section className="bg-white border-b border-gray-200/80 py-8 shadow-xs">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {processSteps.map((s) => (
+                  <div key={s.step} className="p-4 rounded-2xl bg-slate-50 border border-gray-100 space-y-2 hover:border-gold/30 transition-all">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black text-gold uppercase tracking-widest">{s.step}</span>
+                      <s.icon className="h-4 w-4 text-navy" />
                     </div>
-                    <div className="p-3.5 sm:p-6 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm sm:text-xl font-black text-navy">{ct.name}</h3>
-                        <div className="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-gray-500 bg-slate-100 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full">
-                          <IconUsers className="h-3 w-3 text-gold" />
-                          <span>{ct.seats} seats</span>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-1">
-                        {featureMap.map(({ key, label, icon: Icon }) =>
-                          ct[key as keyof CarType] ? (
-                            <div key={key} className="flex items-center gap-1 rounded-md bg-gold/10 px-2 py-0.5 text-[9px] sm:text-xs font-bold text-navy">
-                              <Icon className="h-3 w-3 text-gold" />
-                              <span className="hidden sm:inline">{label}</span>
-                            </div>
-                          ) : null
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-
-                  <div className="p-3.5 sm:p-6 pt-0 mt-auto">
-                    <Link href={`/contact?service=${encodeURIComponent(ct.name)}`} className="block">
-                      <Button className="w-full rounded-xl py-2.5 text-xs font-extrabold bg-gold hover:bg-gold-light text-navy shadow-md cursor-pointer">
-                        Book {ct.name} <IconArrowRight className="ml-1 h-3.5 w-3.5" />
-                      </Button>
-                    </Link>
+                    <h4 className="text-xs sm:text-sm font-extrabold text-navy leading-snug">{s.title}</h4>
+                    <p className="text-[10px] text-gray-500 font-medium leading-tight">{s.desc}</p>
                   </div>
-                </Card>
-              );
-            })}
-        </div>
-      </section>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Step 01: Process Flow & Highlights */}
+          <section className="bg-slate-50 border-b border-gray-200/80 py-12 sm:py-16">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl min-h-[380px] group border border-gray-200/80">
+                <img
+                  src="/images/about_luxury_chauffeur.png"
+                  alt="Luxury Chauffeured Transfer Europe"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+
+                <div className="absolute top-6 right-6 z-10">
+                  <Badge className="rounded-full bg-gold text-navy border-0 px-4 py-1.5 text-xs font-black shadow-md">
+                    All-Inclusive Fixed Rates
+                  </Badge>
+                </div>
+
+                <div className="absolute bottom-6 left-6 right-6 text-white z-10 space-y-3">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md px-3.5 py-1 text-xs font-bold text-white border border-white/30">
+                    <IconSparkles className="h-3.5 w-3.5 text-gold" /> Guaranteed Mercedes-Benz Fleet
+                  </div>
+
+                  <h3 className="text-xl sm:text-3xl font-black text-white leading-tight">
+                    First-Class Chauffeured Journeys
+                  </h3>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 text-xs font-semibold text-gray-200">
+                    <div className="flex items-center gap-2">
+                      <IconCheck className="h-4 w-4 text-gold flex-shrink-0" />
+                      <span>60 Min Free Airport Wait</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <IconCheck className="h-4 w-4 text-gold flex-shrink-0" />
+                      <span>Real-Time Flight Tracking</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <IconCheck className="h-4 w-4 text-gold flex-shrink-0" />
+                      <span>Non-Smoking Luxury Fleet</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <IconCheck className="h-4 w-4 text-gold flex-shrink-0" />
+                      <span>24/7 Live Concierge Team</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Vehicle Benefits Bar */}
+          <section className="bg-white border-b border-gray-200/80 py-6">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                {fleetBenefits.map((benefit) => (
+                  <div key={benefit} className="flex items-center gap-2.5">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gold/15 text-gold flex-shrink-0">
+                      <IconCheck className="h-3.5 w-3.5 stroke-[3]" />
+                    </div>
+                    <span className="text-xs font-bold text-navy">{benefit}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Step 02: Vehicle Fleet Cards Grid */}
+          <section className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-12 sm:py-20">
+            <div className="text-center mb-10 sm:mb-14">
+              <span className="text-xs font-bold tracking-widest text-gold uppercase">Step 02: Product Selection</span>
+              <h2 className="mt-1 text-2xl sm:text-4xl font-black text-navy">Choose Your Luxury Ride</h2>
+              <p className="mt-2 text-xs sm:text-sm text-gray-500 max-w-xl mx-auto">
+                All rates include meet & greet, flight tracking, luggage assistance, and 60 minutes free wait time.
+              </p>
+            </div>
+
+            {/* 2-Column Mobile Grid */}
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8">
+              {loading
+                ? Array.from({ length: 6 }).map((_, i) => (
+                  <Card key={i} className="overflow-hidden rounded-3xl">
+                    <Skeleton className="h-44 sm:h-56 w-full" />
+                    <CardContent className="p-4 space-y-3">
+                      <Skeleton className="h-5 w-1/2" />
+                      <Skeleton className="h-4 w-1/3" />
+                      <Skeleton className="h-8 w-full" />
+                    </CardContent>
+                  </Card>
+                ))
+                : carTypes.map((ct) => {
+                  const fallbackImg = CAR_IMAGE_FALLBACKS[ct.id.toLowerCase()] || CAR_IMAGE_FALLBACKS.sedan;
+                  const imgSrc = ct.image || fallbackImg;
+
+                  return (
+                    <Card key={ct.id} className="group overflow-hidden rounded-3xl border-gray-200/80 bg-white transition-all duration-300 hover:shadow-xl hover:border-gold/40 hover:-translate-y-1 flex flex-col justify-between">
+                      <CardContent className="p-0">
+                        <div className="relative h-36 sm:h-56 bg-slate-100 overflow-hidden">
+                          <img src={imgSrc} alt={ct.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                          <div className="absolute top-3 right-3 z-10">
+                            <Badge className="rounded-full bg-navy text-gold border-0 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-bold">{ct.name}</Badge>
+                          </div>
+                        </div>
+                        <div className="p-3.5 sm:p-6 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-sm sm:text-xl font-black text-navy">{ct.name}</h3>
+                            <div className="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-gray-500 bg-slate-100 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full">
+                              <IconUsers className="h-3 w-3 text-gold" />
+                              <span>{ct.seats} seats</span>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap gap-1">
+                            {featureMap.map(({ key, label, icon: Icon }) =>
+                              ct[key as keyof CarType] ? (
+                                <div key={key} className="flex items-center gap-1 rounded-md bg-gold/10 px-2 py-0.5 text-[9px] sm:text-xs font-bold text-navy">
+                                  <Icon className="h-3 w-3 text-gold" />
+                                  <span className="hidden sm:inline">{label}</span>
+                                </div>
+                              ) : null
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+
+                      <div className="p-3.5 sm:p-6 pt-0 mt-auto">
+                        <Link href={`/contact?service=${encodeURIComponent(ct.name)}`} className="block">
+                          <Button className="w-full rounded-xl py-2.5 text-xs font-extrabold bg-gold hover:bg-gold-light text-navy shadow-md cursor-pointer">
+                            Book {ct.name} <IconArrowRight className="ml-1 h-3.5 w-3.5" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </Card>
+                  );
+                })}
+            </div>
+          </section>
+        </>
+      )}
     </>
   );
 }
@@ -572,7 +578,7 @@ export default function FleetContent({
   };
 
   if (!isSearchMode) {
-    return <FleetGallery carTypes={carTypes} loading={loadingCars} />;
+    return <FleetGallery carTypes={carTypes} loading={loadingCars} basePath={basePath} />;
   }
 
   if (!searchData && !error) return <ResultsSkeleton />;
