@@ -207,20 +207,28 @@ function ResultsContent() {
                 <IconFilter className="h-3 w-3" /> Active Filters
               </span>
               {debouncedSearch && (
-                <Badge variant="secondary" className="rounded-full bg-navy text-white text-[10px] font-bold px-2.5 py-0.5">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-navy text-white text-[10px] font-bold pl-2.5 pr-1.5 py-1">
                   &quot;{debouncedSearch}&quot;
-                  <button onClick={handleClearSearch} className="ml-1.5 text-white/60 hover:text-white">
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="flex h-4 w-4 items-center justify-center rounded-full text-white/70 hover:text-white hover:bg-white/20 transition-colors cursor-pointer"
+                  >
                     <IconX className="h-3 w-3" />
                   </button>
-                </Badge>
+                </span>
               )}
               {selectedCountry !== "all" && (
-                <Badge variant="secondary" className="rounded-full bg-navy text-white text-[10px] font-bold px-2.5 py-0.5">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-navy text-white text-[10px] font-bold pl-2.5 pr-1.5 py-1">
                   {selectedCountry}
-                  <button onClick={() => handleCountrySelect("all")} className="ml-1.5 text-white/60 hover:text-white">
+                  <button
+                    type="button"
+                    onClick={() => handleCountrySelect("all")}
+                    className="flex h-4 w-4 items-center justify-center rounded-full text-white/70 hover:text-white hover:bg-white/20 transition-colors cursor-pointer"
+                  >
                     <IconX className="h-3 w-3" />
                   </button>
-                </Badge>
+                </span>
               )}
             </div>
             <Button

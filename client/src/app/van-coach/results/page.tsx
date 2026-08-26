@@ -92,7 +92,7 @@ function ResultsContent() {
   const router = useRouter();
 
   const [fleet, setFleet] = useState<DisposalVehicle[]>([]);
-  const selectedLocationName = searchParams.get("location") || "Milan, Italy";
+  const selectedLocationName = searchParams.get("location") || "Europe";
   const [vehicleSearch, setVehicleSearch] = useState(searchParams.get("search") || "");
   const hours = searchParams.get("hours") || "8";
   const pickupDateParam = searchParams.get("date");
@@ -223,12 +223,16 @@ function ResultsContent() {
               <span className="text-[10px] font-black text-gold uppercase tracking-widest flex items-center gap-1.5">
                 <IconFilter className="h-3 w-3" /> Active Filters
               </span>
-              <Badge variant="secondary" className="rounded-full bg-navy text-white text-[10px] font-bold px-2.5 py-0.5">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-navy text-white text-[10px] font-bold pl-2.5 pr-1.5 py-1">
                 &quot;{vehicleSearch}&quot;
-                <button onClick={() => { setVehicleSearch(""); updateUrl(""); }} className="ml-1.5 text-white/60 hover:text-white">
+                <button
+                  type="button"
+                  onClick={() => { setVehicleSearch(""); updateUrl(""); }}
+                  className="flex h-4 w-4 items-center justify-center rounded-full text-white/70 hover:text-white hover:bg-white/20 transition-colors cursor-pointer"
+                >
                   <IconX className="h-3 w-3" />
                 </button>
-              </Badge>
+              </span>
             </div>
             <Button variant="outline" size="sm" onClick={() => { setVehicleSearch(""); updateUrl(""); }}
               className="text-[10px] font-bold text-navy border-gray-200 rounded-lg px-3 py-1.5 h-auto cursor-pointer hover:bg-slate-50">

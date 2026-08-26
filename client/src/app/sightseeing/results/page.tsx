@@ -42,7 +42,6 @@ interface PaginationInfo {
   pages: number;
 }
 
-const CITIES = ["ALL", "Paris", "Rome", "Tuscany", "Switzerland"];
 const LIMIT = 20;
 
 function ResultsContent() {
@@ -55,6 +54,7 @@ function ResultsContent() {
   const initialSearch = searchParams.get("search") || "";
 
   const [tours, setTours] = useState<SightseeingTour[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo>({ page: initialPage, limit: LIMIT, total: 0, pages: 1 });
   const [loading, setLoading] = useState(true);
 
@@ -129,6 +129,18 @@ function ResultsContent() {
 
     fetchTours();
   }, [currentPage, debouncedSearch, selectedCity]);
+
+  useEffect(() => {
+    api
+      .get<{ items: SightseeingTour[] }>("/sightseeing?limit=100")
+      .then((res) => {
+        const names = Array.from(
+          new Set((res.items || []).map((t) => t.cityName).filter((c): c is string => Boolean(c)))
+        ).sort();
+        setCities(names);
+      })
+      .catch(() => setCities([]));
+  }, []);
 
   const handleCitySelect = (city: string) => {
     setSelectedCity(city);
@@ -211,7 +223,7 @@ function ResultsContent() {
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
               <IconFilter className="h-3 w-3 text-gold" /> City:
             </span>
-            {CITIES.map((city) => (
+            {["ALL", ...cities].map((city) => (
               <button
                 key={city}
                 onClick={() => handleCitySelect(city)}
@@ -238,20 +250,28 @@ function ResultsContent() {
                 <IconFilter className="h-3 w-3" /> Active Filters
               </span>
               {debouncedSearch && (
-                <Badge variant="secondary" className="rounded-full bg-navy text-white text-[10px] font-bold px-2.5 py-0.5">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-navy text-white text-[10px] font-bold pl-2.5 pr-1.5 py-1">
                   &quot;{debouncedSearch}&quot;
-                  <button onClick={clearSearch} className="ml-1.5 text-white/60 hover:text-white">
+                  <button
+                    type="button"
+                    onClick={clearSearch}
+                    className="flex h-4 w-4 items-center justify-center rounded-full text-white/70 hover:text-white hover:bg-white/20 transition-colors cursor-pointer"
+                  >
                     <IconX className="h-3 w-3" />
                   </button>
-                </Badge>
+                </span>
               )}
               {selectedCity !== "ALL" && (
-                <Badge variant="secondary" className="rounded-full bg-navy text-white text-[10px] font-bold px-2.5 py-0.5">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-navy text-white text-[10px] font-bold pl-2.5 pr-1.5 py-1">
                   {selectedCity}
-                  <button onClick={() => handleCitySelect("ALL")} className="ml-1.5 text-white/60 hover:text-white">
+                  <button
+                    type="button"
+                    onClick={() => handleCitySelect("ALL")}
+                    className="flex h-4 w-4 items-center justify-center rounded-full text-white/70 hover:text-white hover:bg-white/20 transition-colors cursor-pointer"
+                  >
                     <IconX className="h-3 w-3" />
                   </button>
-                </Badge>
+                </span>
               )}
             </div>
             <Button
