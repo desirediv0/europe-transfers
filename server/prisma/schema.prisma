@@ -436,6 +436,26 @@ model JobApplication {
   @@index([jobId])
 }
 
+// ─── Drive & Fleet Partners ─────────────────────────────
+
+model FleetPartnerApplication {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String
+  phone         String?
+  country       String?
+  city          String?
+  vehicleType   String?
+  vehicleDetails String?
+  images        Json     @default("[]")
+  step          Int      @default(1)
+  status        String   @default("DRAFT") // DRAFT, SUBMITTED, REVIEWED, APPROVED, REJECTED
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([email])
+}
+
 // ─── SEO Pages ──────────────────────────────────────────
 
 model SeoPage {

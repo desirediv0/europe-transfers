@@ -29,6 +29,7 @@ import {
   Ship,
   Settings,
   Briefcase,
+  Handshake,
 } from "lucide-react";
 
 const topNavItems = [
@@ -61,6 +62,10 @@ const sightseeingNavItems = [
 const careersNavItems = [
   { label: "Jobs", icon: Briefcase, href: "/careers" },
   { label: "Applicants", icon: Users, href: "/careers/applicants" },
+];
+
+const fleetPartnersNavItems = [
+  { label: "Applications", icon: Handshake, href: "/fleet-partners" },
 ];
 
 const otherNavItems = [
@@ -132,6 +137,7 @@ function SidebarContent({ collapsed, onToggle }: { collapsed: boolean; onToggle:
         {renderSection("Packages (/packages)", packagesNavItems)}
         {renderSection("Sightseeing (/sightseeing)", sightseeingNavItems)}
         {renderSection("Careers (/careers)", careersNavItems)}
+        {renderSection("Fleet Partners (/fleet-partners)", fleetPartnersNavItems)}
         {renderSection("Users & Site", otherNavItems)}
         {renderSection("Blog", blogNavItems)}
       </ScrollArea>

@@ -49,6 +49,7 @@ const navigation = {
         { name: "Tour Packages", href: "/packages" },
         { name: "Europe Transfers Blog", href: "/blog" },
         { name: "Careers", href: "/careers" },
+        { name: "Drive & Fleet Partners", href: "/fleet-partners" },
       ],
     },
     {

@@ -130,11 +130,7 @@ function MobileNav() {
                   Sign In
                 </Button>
               </Link>
-              <Link href="/contact" onClick={handleNav} className="block">
-                <Button className="w-full h-11 rounded-xl bg-gold hover:bg-gold-light font-extrabold text-navy">
-                  Book Now <IconArrowRight className="h-4 w-4 ml-1" />
-                </Button>
-              </Link>
+
             </div>
           )}
         </nav>
@@ -247,11 +243,7 @@ export function Header() {
                 </Button>
               </Link>
 
-              <Link href="/contact">
-                <Button className="h-8 sm:h-10 rounded-xl px-3 sm:px-5 bg-gold hover:bg-gold-light font-extrabold text-navy shadow-md transition-all cursor-pointer text-[11px] sm:text-xs whitespace-nowrap">
-                  Book Now
-                </Button>
-              </Link>
+
             </div>
           )}
 

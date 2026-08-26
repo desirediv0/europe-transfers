@@ -21,6 +21,7 @@ import TestimonialsPage from "@/pages/TestimonialsPage";
 import UploadsPage from "@/pages/UploadsPage";
 import JobsPage from "@/pages/JobsPage";
 import JobApplicantsPage from "@/pages/JobApplicantsPage";
+import FleetPartnersPage from "@/pages/FleetPartnersPage";
 
 // SEO & Blog Pages
 import SeoPagesPage from "@/pages/SeoPagesPage";
@@ -93,6 +94,7 @@ export default function App() {
                       <Route path="/uploads" element={<UploadsPage />} />
                       <Route path="/careers" element={<JobsPage />} />
                       <Route path="/careers/applicants" element={<JobApplicantsPage />} />
+                      <Route path="/fleet-partners" element={<FleetPartnersPage />} />
                     </Routes>
                   </AdminLayout>
                 </DataProvider>

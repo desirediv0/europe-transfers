@@ -226,6 +226,24 @@ export interface JobApplication {
   createdAt: string;
 }
 
+// ─── Drive & Fleet Partners ────────────────────────
+
+export interface FleetPartnerApplication {
+  id: string;
+  name: string | null;
+  email: string;
+  phone: string | null;
+  country: string | null;
+  city: string | null;
+  vehicleType: string | null;
+  vehicleDetails: string | null;
+  images: { url: string; key: string }[];
+  step: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ─── Private Transfers ────────────────────────────
 
 export interface PrivateTransferRoute {
