@@ -12,8 +12,10 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { usePayment } from "@/hooks/usePayment";
+import { useAuth } from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import {
   IconClock,
@@ -90,6 +92,8 @@ export function SightseeingDetailClient({ tour }: Props) {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [selectedForPayment, setSelectedForPayment] = useState<{ name: string; price: number } | null>(null);
   const { initiatePayment, loading: paymentLoading } = usePayment();
+  const { user } = useAuth();
+  const router = useRouter();
 
   const parseJson = <T,>(str?: string, fallback: T = [] as T): T => {
     if (!str) return fallback;
@@ -141,6 +145,12 @@ export function SightseeingDetailClient({ tour }: Props) {
 
   const handleEnquireSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      toast.error("Please login to book this tour");
+      setEnquiryOpen(false);
+      router.push("/auth/login");
+      return;
+    }
     if (!form.name || !form.email || !form.phone) {
       toast.error("Please enter your name, email, and phone number.");
       return;

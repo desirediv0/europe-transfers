@@ -38,7 +38,7 @@ const updateBookingSchema = z.object({
   paymentId: z.string().optional(),
 });
 
-router.post("/", bookingRateLimiter, validate(bookingSchema), createBooking);
+router.post("/", protectUser, bookingRateLimiter, validate(bookingSchema), createBooking);
 router.get("/my", protectUser, getMyBookings);
 router.get("/find", getBookingByPhone);
 router.post("/:id/cancel", protectUser, cancelBooking);

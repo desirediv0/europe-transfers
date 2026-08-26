@@ -9,6 +9,7 @@ import {
   deleteSightseeingTour,
 } from "../controllers/sightseeing.controller.js";
 import protectAdmin from "../middlewares/adminAuth.middleware.js";
+import protectUser from "../middlewares/auth.middleware.js";
 import validate from "../middlewares/validate.middleware.js";
 import { z } from "zod";
 
@@ -31,7 +32,7 @@ const enquirySchema = z.object({
 
 // Public Routes
 router.get("/", getSightseeingTours);
-router.post("/enquire", validate(enquirySchema), submitSightseeingEnquiry);
+router.post("/enquire", protectUser, validate(enquirySchema), submitSightseeingEnquiry);
 
 // Admin Routes (must be registered before "/:slug" so they aren't shadowed)
 router.get("/admin/enquiries", protectAdmin, getSightseeingEnquiries);
