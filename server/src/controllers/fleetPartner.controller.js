@@ -7,7 +7,7 @@ import { sendEmail } from "../config/mailer.js";
 
 const paginateArgs = (page = 1, limit = 20) => ({ skip: (page - 1) * limit, take: limit });
 
-const MIN_IMAGES = 2;
+const MIN_IMAGES = 1;
 const MAX_IMAGES = 4;
 
 // ─── Step 1: Personal + Vehicle Info ───────────────────
@@ -161,7 +161,7 @@ export const submitApplication = asyncHandler(async (req, res) => {
       .join("");
 
     const adminHtml = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1B2A4A;">
-      <h2 style="margin:0 0 16px;">New Drive & Fleet Partner Application</h2>
+      <h2 style="margin:0 0 16px;">New Driver & Fleet Partner Application</h2>
       <table style="width:100%;border-collapse:collapse;font-size:14px;">${detailsTable}</table>
       <p style="margin:20px 0 8px;color:#6b7280;font-size:13px;">Vehicle Photos</p>
       <div>${imagesHtml}</div>
@@ -178,7 +178,7 @@ export const submitApplication = asyncHandler(async (req, res) => {
     const applicantHtml = `<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:24px;color:#1B2A4A;">
       <h2 style="margin:0 0 16px;">Thank You for Applying, ${application.name}!</h2>
       <p style="font-size:14px;line-height:1.6;">
-        We've received your application to become a Drive & Fleet Partner with Europe Transfers.
+        We've received your application to become a Driver & Fleet Partner with Europe Transfers.
         Our team will carefully review your submission, and you can expect to hear back from us
         within <strong>12–24 hours</strong>.
       </p>

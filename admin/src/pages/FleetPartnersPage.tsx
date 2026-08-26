@@ -61,7 +61,7 @@ export default function FleetPartnersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Drive & Fleet Partners</h1>
+          <h1 className="text-2xl font-bold">Driver & Fleet Partners</h1>
           <p className="text-sm text-muted-foreground mt-1">Applications submitted via theeuropetransfers.com/fleet-partners</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => load(pagination.page)} className="gap-2">

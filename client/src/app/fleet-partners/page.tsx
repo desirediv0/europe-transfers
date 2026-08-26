@@ -32,7 +32,7 @@ interface DraftApplication {
 }
 
 const MAX_IMAGES = 4;
-const MIN_IMAGES = 2;
+const MIN_IMAGES = 1;
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -232,7 +232,7 @@ export default function FleetPartnersPage() {
         <div className="relative z-20 mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20 text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-gold/15 px-4 py-1.5 text-xs font-black text-gold uppercase tracking-wider mb-6 border border-gold/30">
             <IconSteeringWheel className="h-4 w-4 text-gold" />
-            Drive & Fleet Partners
+            Driver & Fleet Partners
           </div>
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-[1.1]">
             Partner Your <span className="text-gold">Vehicle</span> With Us
