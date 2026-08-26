@@ -33,6 +33,17 @@ export const getAllRoutes = asyncHandler(async (req, res) => {
   return apiResponse(res, 200, "Routes retrieved", routes);
 });
 
+export const getFeaturedRoutes = asyncHandler(async (req, res) => {
+  const limit = parseInt(req.query.limit, 10) || 6;
+  const routes = await prisma.route.findMany({
+    where: { isActive: true, showOnHomepage: true },
+    include: { fromLocation: true, toLocation: true, routePrices: { include: { carType: true } } },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+  return apiResponse(res, 200, "Featured routes retrieved", routes);
+});
+
 export const getRouteById = asyncHandler(async (req, res) => {
   const route = await prisma.route.findUnique({
     where: { id: req.params.id },
@@ -49,7 +60,7 @@ export const getRouteById = asyncHandler(async (req, res) => {
 });
 
 export const createRoute = asyncHandler(async (req, res) => {
-  const { fromLocationId, toLocationId } = req.body;
+  const { fromLocationId, toLocationId, showOnHomepage } = req.body;
   if (!fromLocationId || !toLocationId) {
     throw new ApiError(400, "fromLocationId and toLocationId are required");
   }
@@ -76,7 +87,7 @@ export const createRoute = asyncHandler(async (req, res) => {
   }
 
   const route = await prisma.route.create({
-    data: { fromLocationId, toLocationId },
+    data: { fromLocationId, toLocationId, showOnHomepage: showOnHomepage ?? false },
     include: { fromLocation: true, toLocation: true },
   });
 
@@ -84,7 +95,7 @@ export const createRoute = asyncHandler(async (req, res) => {
 });
 
 export const updateRoute = asyncHandler(async (req, res) => {
-  const { isActive, fromLocationId, toLocationId } = req.body;
+  const { isActive, showOnHomepage, fromLocationId, toLocationId } = req.body;
 
   const existing = await prisma.route.findUnique({ where: { id: req.params.id } });
   if (!existing) {
@@ -93,6 +104,7 @@ export const updateRoute = asyncHandler(async (req, res) => {
 
   const data = {};
   if (typeof isActive === "boolean") data.isActive = isActive;
+  if (typeof showOnHomepage === "boolean") data.showOnHomepage = showOnHomepage;
 
   if (fromLocationId !== undefined || toLocationId !== undefined) {
     const newFrom = fromLocationId || existing.fromLocationId;

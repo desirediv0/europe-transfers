@@ -19,6 +19,7 @@ const packageSchema = z.object({
   summary: z.string().optional(),
   priceFrom: z.number().min(0).optional(),
   isActive: z.boolean().optional(),
+  showOnHomepage: z.boolean().optional(),
 });
 
 const itinerarySchema = z.object({

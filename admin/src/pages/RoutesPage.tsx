@@ -31,6 +31,7 @@ interface RouteForm {
   fromLocationId: string;
   toLocationId: string;
   isActive: boolean;
+  showOnHomepage: boolean;
   prices: Record<string, string>;
 }
 
@@ -50,6 +51,7 @@ export default function RoutesPage() {
     fromLocationId: "",
     toLocationId: "",
     isActive: true,
+    showOnHomepage: false,
     prices: {},
   });
   const [saving, setSaving] = useState(false);
@@ -98,7 +100,7 @@ export default function RoutesPage() {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ fromLocationId: "", toLocationId: "", isActive: true, prices: {} });
+    setForm({ fromLocationId: "", toLocationId: "", isActive: true, showOnHomepage: false, prices: {} });
     setDialogOpen(true);
   };
 
@@ -110,6 +112,7 @@ export default function RoutesPage() {
       fromLocationId: route.fromLocationId,
       toLocationId: route.toLocationId,
       isActive: route.isActive,
+      showOnHomepage: route.showOnHomepage,
       prices: initialPrices,
     });
     setDialogOpen(true);
@@ -140,11 +143,13 @@ export default function RoutesPage() {
           fromLocationId: form.fromLocationId,
           toLocationId: form.toLocationId,
           isActive: form.isActive,
+          showOnHomepage: form.showOnHomepage,
         });
       } else {
         const newRoute = await api.post<Route>("/routes", {
           fromLocationId: form.fromLocationId,
           toLocationId: form.toLocationId,
+          showOnHomepage: form.showOnHomepage,
         });
         routeId = newRoute.id;
       }
@@ -314,6 +319,11 @@ export default function RoutesPage() {
                             <span className="flex items-center gap-1"><IconX className="h-3 w-3" /> Inactive</span>
                           )}
                         </Badge>
+                        {item.showOnHomepage && (
+                          <Badge variant="outline" className="ml-1.5 rounded-full px-2 text-[10px] border-gold/30 text-gold bg-gold/5">
+                            On Homepage
+                          </Badge>
+                        )}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
@@ -416,6 +426,17 @@ export default function RoutesPage() {
                   />
                 </div>
               )}
+
+              <div className="flex items-center justify-between rounded-lg border border-border/50 bg-muted/30 px-4 py-3">
+                <div className="space-y-0.5">
+                  <Label className="text-sm">Show on Homepage</Label>
+                  <p className="text-xs text-muted-foreground">Feature this route in the homepage&apos;s Featured Routes section</p>
+                </div>
+                <Switch
+                  checked={form.showOnHomepage}
+                  onCheckedChange={(v) => setForm({ ...form, showOnHomepage: v })}
+                />
+              </div>
             </div>
 
             {/* Prices */}

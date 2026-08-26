@@ -12,7 +12,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { api } from "@/lib/api";
-import type { Package } from "@/lib/types";
+import type { Package, Route } from "@/lib/types";
 import CTASection from "@/components/CTASection";
 import { FullScreenScrollFX } from "@/components/ui/full-screen-scroll-fx";
 import PackageCard, { PackageCardSkeleton } from "@/components/PackageCard";
@@ -31,6 +31,8 @@ import {
   IconUsers,
   IconBus,
   IconCompass,
+  IconUsersGroup,
+  IconRoute,
 } from "@tabler/icons-react";
 
 interface SiteSettings {
@@ -96,10 +98,38 @@ interface LocationSummary {
   city: string;
 }
 
+interface FeaturedRoute extends Route {
+  routePrices?: { price: number; currency: string; carType: { name: string } }[];
+}
+
+interface FeaturedVehicle {
+  id: string;
+  name: string;
+  seats: number;
+  image?: string;
+  category?: string;
+  rate8h: number;
+  currency: string;
+}
+
+interface FeaturedTour {
+  id: string;
+  title: string;
+  slug: string;
+  cityName?: string;
+  countryName?: string;
+  duration: string;
+  priceFrom: number;
+  coverImage?: string;
+}
+
 export default function HomePage() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [cities, setCities] = useState<FeaturedCity[]>([]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [featuredRoutes, setFeaturedRoutes] = useState<FeaturedRoute[]>([]);
+  const [featuredVehicles, setFeaturedVehicles] = useState<FeaturedVehicle[]>([]);
+  const [featuredTours, setFeaturedTours] = useState<FeaturedTour[]>([]);
   const [loading, setLoading] = useState(true);
   const [_, setCurrentImageIndex] = useState(0);
 
@@ -107,11 +137,14 @@ export default function HomePage() {
 
   useEffect(() => {
     Promise.all([
-      api.get<{ items: Package[] }>("/packages?limit=3"),
+      api.get<{ items: Package[] }>("/packages?featured=true&limit=6"),
       api.get<LocationSummary[]>("/locations/all"),
       api.get<SiteSettings>("/site-settings").catch(() => null),
+      api.get<FeaturedRoute[]>("/routes/featured?limit=6").catch(() => []),
+      api.get<FeaturedVehicle[]>("/van-coach/all?featured=true").catch(() => []),
+      api.get<{ items: FeaturedTour[] }>("/sightseeing?featured=true&limit=6").catch(() => ({ items: [] })),
     ])
-      .then(([p, locations, s]) => {
+      .then(([p, locations, s, routes, vehicles, tours]) => {
         setPackages(p.items);
 
         const byCity = new Map<string, number>();
@@ -128,6 +161,9 @@ export default function HomePage() {
 
         setCities(featuredCities);
         setSettings(s);
+        setFeaturedRoutes(routes);
+        setFeaturedVehicles(vehicles);
+        setFeaturedTours(tours.items);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -543,6 +579,159 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Featured Routes Section (admin-controlled per-item) */}
+      {featuredRoutes.length > 0 && (
+        <section className="bg-white py-12 lg:py-16 relative overflow-hidden border-b border-gray-100">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+              <div className="max-w-2xl">
+                <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-xs font-bold text-gold uppercase tracking-widest mb-4">
+                  <IconRoute className="h-4 w-4 text-gold" />
+                  Popular Transfer Routes
+                </div>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-navy tracking-tight leading-[1.15]">
+                  Featured <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-500 to-yellow-600">Routes</span>
+                </h2>
+              </div>
+              <Link
+                href="/private-transfers"
+                className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-gold hover:bg-gold-light text-navy px-6 py-3.5 text-sm font-bold shadow-lg shadow-gold/25 hover:shadow-gold/40 hover:-translate-y-0.5 transition-all duration-300 self-start md:self-auto flex-shrink-0"
+              >
+                See All Routes <IconArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredRoutes.map((route) => {
+                const minPrice = route.routePrices?.length
+                  ? Math.min(...route.routePrices.map((rp) => Number(rp.price)))
+                  : null;
+                return (
+                  <Link
+                    key={route.id}
+                    href="/private-transfers"
+                    className="group bg-white border border-gray-200/80 rounded-2xl p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                  >
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy/5 text-navy mb-4 group-hover:bg-gold/10 group-hover:text-gold transition-colors">
+                      <IconRoute className="h-5 w-5" />
+                    </div>
+                    <p className="text-sm font-black text-navy leading-snug">
+                      {route.fromLocation?.name} <span className="text-gold mx-1">→</span> {route.toLocation?.name}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">{route.fromLocation?.city} to {route.toLocation?.city}</p>
+                    {minPrice !== null && (
+                      <p className="text-sm font-bold text-gold mt-3">From €{minPrice.toFixed(0)}</p>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Featured Van & Coach Section (admin-controlled per-item) */}
+      {featuredVehicles.length > 0 && (
+        <section className="bg-slate-50/70 py-12 lg:py-16 relative overflow-hidden border-b border-gray-100">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+              <div className="max-w-2xl">
+                <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-xs font-bold text-gold uppercase tracking-widest mb-4">
+                  <IconBus className="h-4 w-4 text-gold" />
+                  Vehicle Disposal
+                </div>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-navy tracking-tight leading-[1.15]">
+                  Featured <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-500 to-yellow-600">Van & Coach</span>
+                </h2>
+              </div>
+              <Link
+                href="/van-coach"
+                className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-gold hover:bg-gold-light text-navy px-6 py-3.5 text-sm font-bold shadow-lg shadow-gold/25 hover:shadow-gold/40 hover:-translate-y-0.5 transition-all duration-300 self-start md:self-auto flex-shrink-0"
+              >
+                See All Vehicles <IconArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredVehicles.map((vehicle) => (
+                <Link
+                  key={vehicle.id}
+                  href="/van-coach"
+                  className="group bg-white border border-gray-200/80 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="relative h-40 bg-navy/5">
+                    {vehicle.image ? (
+                      <img src={vehicle.image} alt={vehicle.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        <IconBus className="h-10 w-10 text-navy/20" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-5">
+                    <p className="text-sm font-black text-navy">{vehicle.name}</p>
+                    <p className="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
+                      <IconUsersGroup className="h-3.5 w-3.5 text-gold" /> {vehicle.seats} seats {vehicle.category ? `· ${vehicle.category}` : ""}
+                    </p>
+                    <p className="text-sm font-bold text-gold mt-3">{vehicle.currency} {Number(vehicle.rate8h).toFixed(0)} / 8h</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Featured Sightseeing Section (admin-controlled per-item) */}
+      {featuredTours.length > 0 && (
+        <section className="bg-white py-12 lg:py-16 relative overflow-hidden border-b border-gray-100">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+              <div className="max-w-2xl">
+                <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-xs font-bold text-gold uppercase tracking-widest mb-4">
+                  <IconCompass className="h-4 w-4 text-gold" />
+                  Tours & Activities
+                </div>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-navy tracking-tight leading-[1.15]">
+                  Featured <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-500 to-yellow-600">Sightseeing</span>
+                </h2>
+              </div>
+              <Link
+                href="/sightseeing"
+                className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-gold hover:bg-gold-light text-navy px-6 py-3.5 text-sm font-bold shadow-lg shadow-gold/25 hover:shadow-gold/40 hover:-translate-y-0.5 transition-all duration-300 self-start md:self-auto flex-shrink-0"
+              >
+                See All Tours <IconArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredTours.map((tour) => (
+                <Link
+                  key={tour.id}
+                  href={`/sightseeing/${tour.slug}`}
+                  className="group bg-white border border-gray-200/80 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="relative h-40 bg-navy/5">
+                    {tour.coverImage ? (
+                      <img src={tour.coverImage} alt={tour.title} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        <IconCompass className="h-10 w-10 text-navy/20" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-5">
+                    <p className="text-sm font-black text-navy leading-snug">{tour.title}</p>
+                    <p className="text-xs text-gray-500 mt-1">{tour.cityName}{tour.countryName ? `, ${tour.countryName}` : ""} · {tour.duration}</p>
+                    <p className="text-sm font-bold text-gold mt-3">From €{Number(tour.priceFrom).toFixed(0)}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Top Destinations Carousel Section */}
       <section className="bg-slate-100/60 py-12 lg:py-16 relative overflow-hidden border-b border-gray-100">

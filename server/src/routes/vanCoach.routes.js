@@ -33,6 +33,8 @@ const vehicleSchema = z.object({
   overtimeRate: z.number(),
   currency: z.string().optional(),
   order: z.number().optional(),
+  isActive: z.boolean().optional(),
+  showOnHomepage: z.boolean().optional(),
   routePrices: z.array(routePriceSchema).optional(),
 });
 

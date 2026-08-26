@@ -34,6 +34,7 @@ export const getAllVanCoachVehicles = asyncHandler(async (req, res) => {
   const search = req.query.search;
 
   const where = { isActive: true };
+  if (req.query.featured === "true") where.showOnHomepage = true;
   if (search) {
     where.OR = [
       { name: { contains: search, mode: "insensitive" } },
@@ -73,6 +74,8 @@ export const createVanCoachVehicle = asyncHandler(async (req, res) => {
     overtimeRate,
     currency,
     order,
+    isActive,
+    showOnHomepage,
     routePrices,
   } = req.body;
 
@@ -92,6 +95,8 @@ export const createVanCoachVehicle = asyncHandler(async (req, res) => {
       overtimeRate,
       currency: currency || "USD",
       order: order ?? 0,
+      isActive: isActive ?? true,
+      showOnHomepage: showOnHomepage ?? false,
       routePrices:
         Array.isArray(routePrices) && routePrices.length > 0
           ? {
@@ -123,6 +128,7 @@ export const updateVanCoachVehicle = asyncHandler(async (req, res) => {
     currency,
     order,
     isActive,
+    showOnHomepage,
     routePrices,
   } = req.body;
 
@@ -143,6 +149,7 @@ export const updateVanCoachVehicle = asyncHandler(async (req, res) => {
   if (currency !== undefined) dataToUpdate.currency = currency;
   if (order !== undefined) dataToUpdate.order = order;
   if (isActive !== undefined) dataToUpdate.isActive = isActive;
+  if (showOnHomepage !== undefined) dataToUpdate.showOnHomepage = showOnHomepage;
 
   if (Array.isArray(routePrices)) {
     await prisma.vanCoachRoutePrice.deleteMany({ where: { vehicleId: req.params.id } });

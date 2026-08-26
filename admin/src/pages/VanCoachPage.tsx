@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -31,6 +32,7 @@ const emptyForm = {
   rate10h: "",
   overtimeRate: "",
   currency: "USD",
+  showOnHomepage: false,
 };
 
 export default function VanCoachPage() {
@@ -94,6 +96,7 @@ export default function VanCoachPage() {
       rate10h: item.rate10h.toString(),
       overtimeRate: item.overtimeRate.toString(),
       currency: item.currency,
+      showOnHomepage: item.showOnHomepage,
     });
     setPriceRows(
       (item.routePrices || []).map((rp) => ({ group: rp.group, label: rp.label, price: rp.price.toString() }))
@@ -130,6 +133,7 @@ export default function VanCoachPage() {
         rate10h: parseFloat(form.rate10h),
         overtimeRate: parseFloat(form.overtimeRate),
         currency: form.currency || "USD",
+        showOnHomepage: form.showOnHomepage,
         routePrices: priceRows
           .filter((r) => r.label && r.price !== "")
           .map((r, i) => ({ group: r.group, label: r.label, price: parseFloat(r.price), order: i })),
@@ -379,6 +383,14 @@ export default function VanCoachPage() {
             <div className="space-y-2">
               <Label>Description</Label>
               <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Short description" />
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg border border-border/50 bg-muted/30 px-4 py-3">
+              <div className="space-y-0.5">
+                <Label className="text-sm">Show on Homepage</Label>
+                <p className="text-xs text-muted-foreground">Feature this vehicle in the homepage&apos;s Featured Van & Coach section</p>
+              </div>
+              <Switch checked={form.showOnHomepage} onCheckedChange={(v) => setForm({ ...form, showOnHomepage: v })} />
             </div>
 
             <div className="grid grid-cols-3 gap-4">

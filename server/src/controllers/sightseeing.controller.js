@@ -33,10 +33,15 @@ const ensureTablesExist = async () => {
         "seoTitle" TEXT,
         "seoDescription" TEXT,
         "isActive" BOOLEAN DEFAULT true,
+        "showOnHomepage" BOOLEAN DEFAULT false,
         "order" INTEGER DEFAULT 0,
         "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
+    `);
+
+    await prisma.$executeRawUnsafe(`
+      ALTER TABLE "SightseeingTour" ADD COLUMN IF NOT EXISTS "showOnHomepage" BOOLEAN DEFAULT false;
     `);
 
     await prisma.$executeRawUnsafe(`
@@ -75,6 +80,7 @@ export const getSightseeingTours = asyncHandler(async (req, res) => {
 
   const where = {
     ...(isAdmin ? {} : { isActive: true }),
+    ...(req.query.featured === "true" ? { showOnHomepage: true } : {}),
     ...(city ? { cityName: { contains: city, mode: "insensitive" } } : {}),
     ...(search
       ? {
@@ -286,6 +292,7 @@ export const createSightseeingTour = asyncHandler(async (req, res) => {
     seoTitle,
     seoDescription,
     isActive,
+    showOnHomepage,
   } = req.body;
 
   if (!title || !slug || !duration || priceFrom === undefined) {
@@ -313,6 +320,7 @@ export const createSightseeingTour = asyncHandler(async (req, res) => {
       seoTitle: seoTitle || title,
       seoDescription: seoDescription || summary,
       isActive: isActive !== undefined ? Boolean(isActive) : true,
+      showOnHomepage: showOnHomepage !== undefined ? Boolean(showOnHomepage) : false,
     },
   });
 

@@ -72,6 +72,7 @@ export default function SightseeingPage() {
     seoTitle: "",
     seoDescription: "",
     isActive: true,
+    showOnHomepage: false,
   });
 
   // Dynamic Lists Sub-State (No JSON Textareas!)
@@ -195,6 +196,7 @@ export default function SightseeingPage() {
       seoTitle: "",
       seoDescription: "",
       isActive: true,
+      showOnHomepage: false,
     });
     setHighlightsList([]);
     setIncludesList([]);
@@ -221,6 +223,7 @@ export default function SightseeingPage() {
       seoTitle: tour.seoTitle || "",
       seoDescription: tour.seoDescription || "",
       isActive: tour.isActive,
+      showOnHomepage: tour.showOnHomepage,
     });
 
     setHighlightsList(safeParseJson(tour.highlights, []));
@@ -447,6 +450,7 @@ export default function SightseeingPage() {
         seoTitle: form.seoTitle || form.title,
         seoDescription: form.seoDescription || form.summary,
         isActive: form.isActive,
+        showOnHomepage: form.showOnHomepage,
       };
 
       if (editing) {
@@ -1495,6 +1499,15 @@ export default function SightseeingPage() {
                 <p className="text-[11px] text-muted-foreground">Show this sightseeing activity live on client website</p>
               </div>
               <Switch checked={form.isActive} onCheckedChange={(v) => setForm({ ...form, isActive: v })} />
+            </div>
+
+            {/* Show on Homepage Switch */}
+            <div className="flex items-center justify-between rounded-2xl border bg-slate-50 p-4">
+              <div>
+                <Label className="font-bold text-sm">Show on Homepage</Label>
+                <p className="text-[11px] text-muted-foreground">Feature this tour in the homepage&apos;s Featured Sightseeing section</p>
+              </div>
+              <Switch checked={form.showOnHomepage} onCheckedChange={(v) => setForm({ ...form, showOnHomepage: v })} />
             </div>
 
           </div>

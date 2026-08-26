@@ -29,6 +29,10 @@ export const getPackages = asyncHandler(async (req, res) => {
       { summary: { contains: search, mode: "insensitive" } },
     ];
   }
+  if (req.query.featured === "true") {
+    where.showOnHomepage = true;
+    where.isActive = true;
+  }
 
   const [packages, total] = await Promise.all([
     prisma.package.findMany({
@@ -58,7 +62,7 @@ export const getPackageById = asyncHandler(async (req, res) => {
 });
 
 export const createPackage = asyncHandler(async (req, res) => {
-  const { title, slug, countryId, durationDays, coverImage, summary, priceFrom, isActive } = req.body;
+  const { title, slug, countryId, durationDays, coverImage, summary, priceFrom, isActive, showOnHomepage } = req.body;
   if (!title || !slug || !countryId || !durationDays) {
     throw new ApiError(400, "Title, slug, country ID, and duration days are required");
   }
@@ -74,14 +78,14 @@ export const createPackage = asyncHandler(async (req, res) => {
   }
 
   const pkg = await prisma.package.create({
-    data: { title, slug, countryId, durationDays, coverImage, summary, priceFrom, isActive },
+    data: { title, slug, countryId, durationDays, coverImage, summary, priceFrom, isActive, showOnHomepage },
     include: { country: true },
   });
   return apiResponse(res, 201, "Package created", pkg);
 });
 
 export const updatePackage = asyncHandler(async (req, res) => {
-  const { title, slug, countryId, durationDays, coverImage, summary, priceFrom, isActive } = req.body;
+  const { title, slug, countryId, durationDays, coverImage, summary, priceFrom, isActive, showOnHomepage } = req.body;
 
   const existing = await prisma.package.findUnique({ where: { id: req.params.id } });
   if (!existing) {
@@ -97,7 +101,7 @@ export const updatePackage = asyncHandler(async (req, res) => {
 
   const pkg = await prisma.package.update({
     where: { id: req.params.id },
-    data: { title, slug, countryId, durationDays, coverImage, summary, priceFrom, isActive },
+    data: { title, slug, countryId, durationDays, coverImage, summary, priceFrom, isActive, showOnHomepage },
     include: { country: true },
   });
   return apiResponse(res, 200, "Package updated", pkg);

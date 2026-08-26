@@ -84,6 +84,7 @@ export interface VanCoachVehicle {
   overtimeRate: number;
   currency: string;
   isActive: boolean;
+  showOnHomepage: boolean;
   order: number;
   routePrices?: VanCoachRoutePrice[];
   createdAt: string;
@@ -110,6 +111,7 @@ export interface Route {
   fromLocationId: string;
   toLocationId: string;
   isActive: boolean;
+  showOnHomepage: boolean;
   fromLocation?: Location;
   toLocation?: Location;
   routePrices?: RoutePrice[];
@@ -145,6 +147,7 @@ export interface Package {
   summary?: string;
   priceFrom?: number;
   isActive: boolean;
+  showOnHomepage: boolean;
   country?: Country;
   itineraryDays?: ItineraryDay[];
   createdAt: string;
@@ -321,6 +324,7 @@ export interface SightseeingTour {
   seoTitle?: string;
   seoDescription?: string;
   isActive: boolean;
+  showOnHomepage: boolean;
   order: number;
   createdAt: string;
 }

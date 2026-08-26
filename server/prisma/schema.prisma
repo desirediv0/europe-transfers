@@ -116,6 +116,7 @@ model Package {
   summary       String?
   priceFrom     Decimal?       @db.Decimal(10, 2)
   isActive      Boolean        @default(true)
+  showOnHomepage Boolean       @default(false)
   itineraryDays ItineraryDay[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -168,6 +169,7 @@ model SightseeingTour {
   seoTitle       String?
   seoDescription String?
   isActive       Boolean  @default(true)
+  showOnHomepage Boolean  @default(false)
   order          Int      @default(0)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -231,6 +233,7 @@ model Route {
   toLocationId   String
   toLocation     Location     @relation("ToLocation", fields: [toLocationId], references: [id], onDelete: Cascade)
   isActive       Boolean      @default(true)
+  showOnHomepage Boolean      @default(false)
   routePrices    RoutePrice[]
   bookings       Booking[]
   createdAt      DateTime     @default(now())
@@ -267,6 +270,7 @@ model VanCoachVehicle {
   overtimeRate    Decimal              @db.Decimal(10, 2)
   currency        String               @default("USD")
   isActive        Boolean              @default(true)
+  showOnHomepage  Boolean              @default(false)
   order           Int                  @default(0)
   routePrices     VanCoachRoutePrice[]
   createdAt       DateTime             @default(now())

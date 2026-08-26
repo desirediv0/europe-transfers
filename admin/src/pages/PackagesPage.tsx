@@ -44,7 +44,7 @@ export default function PackagesPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Package | null>(null);
-  const [form, setForm] = useState({ title: "", slug: "", countryId: "", durationDays: 1, coverImage: "", summary: "", priceFrom: 0, isActive: true });
+  const [form, setForm] = useState({ title: "", slug: "", countryId: "", durationDays: 1, coverImage: "", summary: "", priceFrom: 0, isActive: true, showOnHomepage: false });
   const [saving, setSaving] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState<Package | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -91,8 +91,8 @@ export default function PackagesPage() {
     loadEnquiries();
   }, [loadPackages, loadEnquiries]);
 
-  const openCreate = () => { setEditing(null); setForm({ title: "", slug: "", countryId: "", durationDays: 1, coverImage: "", summary: "", priceFrom: 0, isActive: true }); setDialogOpen(true); };
-  const openEdit = (item: Package) => { setEditing(item); setForm({ title: item.title, slug: item.slug, countryId: item.countryId, durationDays: item.durationDays, coverImage: item.coverImage || "", summary: item.summary || "", priceFrom: Number(item.priceFrom) || 0, isActive: item.isActive }); setDialogOpen(true); };
+  const openCreate = () => { setEditing(null); setForm({ title: "", slug: "", countryId: "", durationDays: 1, coverImage: "", summary: "", priceFrom: 0, isActive: true, showOnHomepage: false }); setDialogOpen(true); };
+  const openEdit = (item: Package) => { setEditing(item); setForm({ title: item.title, slug: item.slug, countryId: item.countryId, durationDays: item.durationDays, coverImage: item.coverImage || "", summary: item.summary || "", priceFrom: Number(item.priceFrom) || 0, isActive: item.isActive, showOnHomepage: item.showOnHomepage }); setDialogOpen(true); };
 
   const handleSave = async () => {
     if (!form.title || !form.slug || !form.countryId || !form.durationDays) {
@@ -393,6 +393,11 @@ export default function PackagesPage() {
                             <span className="flex items-center gap-1"><IconX className="h-3 w-3" /> Inactive</span>
                           )}
                         </Badge>
+                        {item.showOnHomepage && (
+                          <Badge variant="outline" className="ml-1.5 rounded-full px-2 text-[10px] border-gold/30 text-gold bg-gold/5">
+                            On Homepage
+                          </Badge>
+                        )}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
@@ -542,6 +547,13 @@ export default function PackagesPage() {
                 <p className="text-xs text-muted-foreground">Inactive packages are hidden from customers</p>
               </div>
               <Switch checked={form.isActive} onCheckedChange={(v) => setForm({ ...form, isActive: v })} />
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border/50 bg-muted/30 px-4 py-3">
+              <div className="space-y-0.5">
+                <Label className="text-sm">Show on Homepage</Label>
+                <p className="text-xs text-muted-foreground">Feature this package in the homepage&apos;s Featured Packages section</p>
+              </div>
+              <Switch checked={form.showOnHomepage} onCheckedChange={(v) => setForm({ ...form, showOnHomepage: v })} />
             </div>
           </div>
           <DialogFooter className="gap-2">
