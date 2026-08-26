@@ -106,7 +106,9 @@ export function Footer() {
           </div>
         </Link>
         <p className="bg-transparent text-center text-xs leading-5 text-gray-600 md:text-left max-w-3xl font-medium">
-          Welcome to <strong className="text-navy font-bold">Europe Transfers</strong>, where luxury chauffeuring meets reliability and punctuality across Europe. We specialize in crafting bespoke airport transfers, intercity long-distance rides, and curated VIP tour packages across France, Switzerland, Italy, and Scandinavia. Our mission is to empower travelers with effortless, comfortable, and first-class transportation.
+          <strong className="text-navy font-bold">The Europe Transfers</strong>, sponsored by Euro Fleet Private Limited, is a trusted B2B supplier of Europe, UK &amp; Scandinavia ground transportation and destination management company with 25 years of industry experience. We specialize in private transfers, airport transfers, coaches, vehicle-at-disposal services, sightseeing, and customized tour packages across Europe, the UK and Scandinavia. Our extensive network and experienced operations team enable us to deliver reliable, comfortable and seamless travel solutions for both B2B travel partners and their clients.
+          <br className="hidden md:block" />
+          <span className="text-navy font-semibold">25 Years of Experience</span> | DMC of Europe • UK • Scandinavia | Transfers • Coaches • Tours • Sightseeing
         </p>
       </div>
 
