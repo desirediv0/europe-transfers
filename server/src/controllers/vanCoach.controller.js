@@ -237,7 +237,7 @@ export const submitVanCoachEnquiry = asyncHandler(async (req, res) => {
 
   const rateInr = await convertFromEur(rate, "INR");
 
-  const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "codeshorts007@gmail.com";
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "info@theeuropetransfers.com";
   try {
     await sendEmail({
       to: adminEmail,

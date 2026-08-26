@@ -193,7 +193,7 @@ export const cancelBooking = asyncHandler(async (req, res) => {
 
   // Send Email Notification to Admin
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "admin@europetransfers.com";
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "info@theeuropetransfers.com";
     await sendEmail({
       to: adminEmail,
       subject: `🚨 Booking Cancelled #${updated.id} - ${updated.customerName}`,

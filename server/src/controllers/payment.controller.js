@@ -140,7 +140,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
   const order = await prisma.order.findUnique({ where: { id: orderId } });
 
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "codeshorts007@gmail.com";
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "info@theeuropetransfers.com";
     await sendEmail({
       to: adminEmail,
       subject: `Payment Received: ${order.productName}`,

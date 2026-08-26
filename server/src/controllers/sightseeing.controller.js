@@ -185,7 +185,7 @@ export const submitSightseeingEnquiry = asyncHandler(async (req, res) => {
 
   const priceInr = await priceToInrDisplay(priceDisplay);
 
-  const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "codeshorts007@gmail.com";
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "info@theeuropetransfers.com";
   try {
     await sendEmail({
       to: adminEmail,
