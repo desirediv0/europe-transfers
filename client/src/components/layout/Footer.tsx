@@ -57,8 +57,6 @@ const navigation = {
       name: "Support",
       items: [
         { name: "24/7 Concierge Desk", href: "/contact" },
-        { name: "Flight Tracking Policy", href: "/about" },
-        { name: "Booking Guide", href: "/contact" },
         { name: "Contact Us", href: "/contact" },
       ],
     },
