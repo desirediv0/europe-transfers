@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -104,6 +105,7 @@ const PROCESS_STEPS = [
 ];
 
 function VanCoachFleetContent() {
+  const router = useRouter();
   const { format: formatCurrency } = useCurrency();
   const [locations, setLocations] = useState<Location[]>([]);
   const [fleet, setFleet] = useState<DisposalVehicle[]>([]);
@@ -155,8 +157,12 @@ function VanCoachFleetContent() {
   });
 
   const handleSearch = () => {
-    const el = document.getElementById("fleet-grid");
-    el?.scrollIntoView({ behavior: "smooth" });
+    const params = new URLSearchParams();
+    if (selectedLocationName) params.set("location", selectedLocationName);
+    params.set("hours", hours);
+    if (pickupDate) params.set("date", pickupDate.toISOString().split("T")[0]);
+    params.set("time", pickupTime);
+    router.push(`/van-coach/results?${params.toString()}`);
   };
 
   const handleEnquirySubmit = async (e: React.FormEvent) => {
