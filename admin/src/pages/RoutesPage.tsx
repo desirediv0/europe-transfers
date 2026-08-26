@@ -228,7 +228,7 @@ export default function RoutesPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Routes & Prices</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage transfer routes and set vehicle prices in one place</p>
+          <p className="text-sm text-muted-foreground mt-1">Used by Private Transfers (theeuropetransfers.com/private-transfers) — manage routes and set vehicle prices in one place</p>
         </div>
         <Button onClick={openCreate} className="bg-[#1B2A4A] hover:bg-[#1B2A4A]/90 w-fit">
           <IconPlus className="mr-2 h-4 w-4" /> Add Route

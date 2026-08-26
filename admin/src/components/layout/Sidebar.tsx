@@ -30,19 +30,35 @@ import {
   Settings,
 } from "lucide-react";
 
-const mainNavItems = [
+const topNavItems = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/" },
   { label: "Homepage Settings", icon: Settings, href: "/homepage-settings" },
-  { label: "Locations", icon: MapPin, href: "/locations" },
-  { label: "Car Types", icon: Car, href: "/car-types" },
-  { label: "Routes & Prices", icon: Route, href: "/routes" },
+];
+
+// Everything below powers /private-transfers on the website (uses Location/CarType/Route/Booking models)
+const privateTransfersNavItems = [
+  { label: "Locations (Private Transfers)", icon: MapPin, href: "/locations" },
+  { label: "Car Types (Private Transfers)", icon: Car, href: "/car-types" },
+  { label: "Routes & Prices (Private Transfers)", icon: Route, href: "/routes" },
+  { label: "Bookings (Private Transfers)", icon: CalendarCheck, href: "/bookings" },
+];
+
+const vanCoachNavItems = [
   { label: "Van & Coach", icon: Bus, href: "/van-coach" },
+  { label: "Van & Coach Orders", icon: Ship, href: "/fleet-orders" },
+];
+
+const packagesNavItems = [
   { label: "Packages", icon: Package, href: "/packages" },
+];
+
+const sightseeingNavItems = [
   { label: "Sightseeing", icon: Compass, href: "/sightseeing" },
-  { label: "Bookings", icon: CalendarCheck, href: "/bookings" },
   { label: "Sightseeing Orders", icon: CreditCard, href: "/sightseeing-orders" },
-  { label: "Fleet Orders", icon: Ship, href: "/fleet-orders" },
-  { label: "Users", icon: Users, href: "/users" },
+];
+
+const otherNavItems = [
+  { label: "Users (KYC)", icon: Users, href: "/users" },
   { label: "Testimonials", icon: Star, href: "/testimonials" },
   { label: "Uploads", icon: Upload, href: "/uploads" },
 ];
@@ -80,6 +96,17 @@ function SidebarContent({ collapsed, onToggle }: { collapsed: boolean; onToggle:
     );
   };
 
+  const renderSection = (title: string, items: typeof topNavItems) => (
+    <div className="mt-4 pt-4 border-t border-white/10 first:mt-0 first:pt-0 first:border-t-0">
+      {!collapsed && (
+        <div className="px-5 mb-2 text-[11px] font-semibold tracking-wider text-white/40 uppercase">
+          {title}
+        </div>
+      )}
+      <div className="space-y-1">{items.map(renderLink)}</div>
+    </div>
+  );
+
   return (
     <div className="flex h-full flex-col bg-[#1B2A4A]">
       <div className="flex h-14 items-center justify-between px-4">
@@ -91,19 +118,15 @@ function SidebarContent({ collapsed, onToggle }: { collapsed: boolean; onToggle:
       <Separator className="bg-white/10" />
       <ScrollArea className="flex-1 py-2">
         <div className="space-y-1">
-          {mainNavItems.map(renderLink)}
+          {topNavItems.map(renderLink)}
         </div>
 
-        <div className="mt-4 pt-4 border-t border-white/10">
-          {!collapsed && (
-            <div className="px-5 mb-2 text-[11px] font-semibold tracking-wider text-white/40 uppercase">
-              BLOG
-            </div>
-          )}
-          <div className="space-y-1">
-            {blogNavItems.map(renderLink)}
-          </div>
-        </div>
+        {renderSection("Private Transfers (/private-transfers)", privateTransfersNavItems)}
+        {renderSection("Van & Coach (/van-coach)", vanCoachNavItems)}
+        {renderSection("Packages (/packages)", packagesNavItems)}
+        {renderSection("Sightseeing (/sightseeing)", sightseeingNavItems)}
+        {renderSection("Users & Site", otherNavItems)}
+        {renderSection("Blog", blogNavItems)}
       </ScrollArea>
 
       <Separator className="bg-white/10" />

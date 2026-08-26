@@ -83,7 +83,10 @@ export default function CarTypesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Car Types</h1>
+        <div>
+          <h1 className="text-2xl font-bold">Car Types</h1>
+          <p className="text-sm text-muted-foreground mt-1">Used by Private Transfers (theeuropetransfers.com/private-transfers)</p>
+        </div>
         <Button onClick={openCreate} className="bg-[#1B2A4A] hover:bg-[#1B2A4A]/90">
           <Plus className="mr-2 h-4 w-4" /> Add Car Type
         </Button>

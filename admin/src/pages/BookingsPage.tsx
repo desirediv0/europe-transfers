@@ -63,7 +63,10 @@ export default function BookingsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Bookings</h1>
+        <div>
+          <h1 className="text-2xl font-bold">Bookings</h1>
+          <p className="text-sm text-muted-foreground mt-1">Private Transfers bookings (theeuropetransfers.com/private-transfers)</p>
+        </div>
         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v === "ALL" ? "" : v)}>
           <SelectTrigger className="w-40"><SelectValue placeholder="All Status" /></SelectTrigger>
           <SelectContent>
