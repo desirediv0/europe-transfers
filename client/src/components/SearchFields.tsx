@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -120,6 +120,7 @@ export function DatePickerField({
   minDate?: Date;
 }) {
   const [open, setOpen] = useState(false);
+  const disabledBefore = useMemo(() => minDate || new Date(new Date().setHours(0, 0, 0, 0)), [minDate]);
 
   return (
     <SearchField icon={IconCalendar} label={label} divider={divider}>
@@ -136,8 +137,8 @@ export function DatePickerField({
           <Calendar
             mode="single"
             selected={date || undefined}
-            onSelect={(d) => { if (d) { onChange(d); setOpen(false); } }}
-            disabled={{ before: minDate || new Date(new Date().setHours(0, 0, 0, 0)) }}
+            onSelect={(d) => { if (d) onChange(d); setOpen(false); }}
+            disabled={{ before: disabledBefore }}
           />
         </PopoverContent>
       </Popover>

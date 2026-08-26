@@ -44,11 +44,11 @@ const navigation = {
       id: "services",
       name: "Services",
       items: [
-        { name: "Airport Transfers", href: "/fleet" },
-        { name: "Intercity Transfers", href: "/fleet" },
+        { name: "Airport Transfers", href: "/private-transfers" },
+        { name: "Intercity Transfers", href: "/private-transfers" },
         { name: "Private Hire (UK)", href: "/private-transfers" },
         { name: "Van & Coach Disposal", href: "/van-coach" },
-        { name: "Chauffeur By Hour", href: "/fleet" },
+        { name: "Chauffeur By Hour", href: "/private-transfers" },
         { name: "Private VIP Tours", href: "/packages" },
       ],
     },
@@ -67,10 +67,10 @@ const navigation = {
       id: "fleet",
       name: "Fleet",
       items: [
-        { name: "Mercedes S-Class", href: "/fleet" },
-        { name: "Mercedes V-Class Van", href: "/fleet" },
-        { name: "Executive Sedans", href: "/fleet" },
-        { name: "Private Minibuses", href: "/fleet" },
+        { name: "Mercedes S-Class", href: "/private-transfers" },
+        { name: "Mercedes V-Class Van", href: "/private-transfers" },
+        { name: "Executive Sedans", href: "/private-transfers" },
+        { name: "Private Minibuses", href: "/private-transfers" },
       ],
     },
     {
@@ -79,7 +79,7 @@ const navigation = {
       items: [
         { name: "About Us", href: "/about" },
         { name: "Leadership Team", href: "/about" },
-        { name: "Fleet Standards", href: "/fleet" },
+        { name: "Fleet Standards", href: "/private-transfers" },
         { name: "Tour Packages", href: "/packages" },
         { name: "Europe Transfers Blog", href: "/blog" },
 

@@ -252,7 +252,7 @@ export function PackageDetailClient({ pkg }: Props) {
                   Travel in unmatched comfort with air-conditioned luxury sedans & VIP passenger vans.
                 </p>
               </div>
-              <Link href="/fleet" className="relative z-10 flex-shrink-0 w-full sm:w-auto">
+              <Link href="/private-transfers" className="relative z-10 flex-shrink-0 w-full sm:w-auto">
                 <Button size="lg" className="w-full sm:w-auto rounded-xl px-6 py-3 text-xs sm:text-sm font-extrabold bg-gold hover:bg-gold-light text-navy shadow-md cursor-pointer">
                   View Our Fleet
                 </Button>

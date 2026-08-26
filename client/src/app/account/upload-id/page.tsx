@@ -154,7 +154,7 @@ export default function UploadIdPage() {
 
             <Button
               className="w-full h-12 rounded-xl bg-gold hover:bg-gold-light text-navy font-black text-xs shadow-lg shadow-gold/20 cursor-pointer"
-              onClick={() => router.push("/fleet")}
+              onClick={() => router.push("/private-transfers")}
             >
               Book Private Transfer Now
             </Button>

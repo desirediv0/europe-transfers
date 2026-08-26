@@ -18,7 +18,7 @@ export default function CTASection({
   imageSrc = "/images/cta_luxury_banner.png",
   bannerText = "READY FOR A FIRST-CLASS JOURNEY ACROSS EUROPE?",
   buttonText = "Book a Transfer",
-  buttonLink = "/fleet",
+  buttonLink = "/private-transfers",
 }: CTASectionProps) {
   return (
     <section className="py-12 lg:py-16 bg-white border-t border-gray-100">

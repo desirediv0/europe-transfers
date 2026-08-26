@@ -10,7 +10,6 @@ import SiteSettingsPage from "@/pages/SiteSettingsPage";
 import LocationsPage from "@/pages/LocationsPage";
 import CarTypesPage from "@/pages/CarTypesPage";
 import VanCoachPage from "@/pages/VanCoachPage";
-import PrivateTransfersPage from "@/pages/PrivateTransfersPage";
 import RoutesPage from "@/pages/RoutesPage";
 import PackagesPage from "@/pages/PackagesPage";
 import SightseeingPage from "@/pages/SightseeingPage";
@@ -81,7 +80,6 @@ export default function App() {
                       <Route path="/locations" element={<LocationsPage />} />
                       <Route path="/car-types" element={<CarTypesPage />} />
                       <Route path="/van-coach" element={<VanCoachPage />} />
-                      <Route path="/private-transfers" element={<PrivateTransfersPage />} />
                       <Route path="/routes" element={<RoutesPage />} />
                       <Route path="/packages" element={<PackagesPage />} />
                       <Route path="/sightseeing" element={<SightseeingPage />} />

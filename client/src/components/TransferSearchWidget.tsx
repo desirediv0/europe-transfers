@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { format } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -159,6 +159,8 @@ function TimePicker({ value, onChange }: { value: string; onChange: (v: string) 
 
 export default function TransferSearchWidget() {
   const router = useRouter();
+  const pathname = usePathname();
+  const basePath = pathname?.startsWith("/private-transfers") ? "/private-transfers" : "/fleet";
   const { search, updateSearch } = useBooking();
   const [locations, setLocations] = useState<Location[]>([]);
   const [searching, setSearching] = useState(false);
@@ -178,7 +180,7 @@ export default function TransferSearchWidget() {
         passengers: search.passengers,
       });
       router.push(
-        `/fleet?from=${encodeURIComponent(search.fromLocationName || "")}&to=${encodeURIComponent(search.toLocationName || "")}&fromId=${search.fromLocationId}&toId=${search.toLocationId}&date=${format(search.pickupDate, "yyyy-MM-dd")}&time=${search.pickupTime}&pax=${search.passengers}`
+        `${basePath}?from=${encodeURIComponent(search.fromLocationName || "")}&to=${encodeURIComponent(search.toLocationName || "")}&fromId=${search.fromLocationId}&toId=${search.toLocationId}&date=${format(search.pickupDate, "yyyy-MM-dd")}&time=${search.pickupTime}&pax=${search.passengers}`
       );
     } catch {
       // error handled by api wrapper

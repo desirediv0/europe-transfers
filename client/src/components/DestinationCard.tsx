@@ -2,15 +2,12 @@
 
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCurrency } from "@/context/CurrencyContext";
 import { IconMapPin, IconRoute } from "@tabler/icons-react";
 
 export interface FeaturedCity {
-  id: string;
-  name: string;
-  slug: string;
-  coverImage?: string | null;
-  routes: { sedanPrice: number }[];
+  city: string;
+  locationCount: number;
+  image?: string | null;
 }
 
 interface DestinationCardProps {
@@ -34,16 +31,11 @@ export function DestinationCardSkeleton() {
 }
 
 export default function DestinationCard({ city, loading }: DestinationCardProps) {
-  const { format } = useCurrency();
-
   if (loading || !city) {
     return <DestinationCardSkeleton />;
   }
 
-  const imageSrc = city.coverImage || FALLBACK_IMAGE;
-  const minSedanPrice = city.routes.length > 0
-    ? Math.min(...city.routes.map((r) => r.sedanPrice))
-    : null;
+  const imageSrc = city.image || FALLBACK_IMAGE;
 
   return (
     <Link href="/private-transfers" className="group block w-full h-80 sm:h-[26rem]">
@@ -51,34 +43,25 @@ export default function DestinationCard({ city, loading }: DestinationCardProps)
         {/* Background Image */}
         <img
           src={imageSrc}
-          alt={city.name}
+          alt={city.city}
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
 
         {/* Gradient Overlay for Legibility */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/10" />
 
-        {/* Top Right Starts-at Badge */}
-        {minSedanPrice != null && (
-          <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10">
-            <div className="rounded-full bg-white/90 backdrop-blur-md px-2.5 py-1 sm:px-3.5 sm:py-1.5 text-[10px] sm:text-xs font-black text-navy shadow-md border border-white/40">
-              starts at <span className="text-gold font-extrabold">{format(minSedanPrice)}</span>
-            </div>
-          </div>
-        )}
-
         {/* Bottom Content Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-3.5 sm:p-6 z-10 text-white">
           {/* City Name */}
           <h3 className="text-lg sm:text-3xl font-black tracking-tight text-white group-hover:text-gold transition-colors line-clamp-1">
-            {city.name}
+            {city.city}
           </h3>
 
-          {/* Route Count */}
+          {/* Location Count */}
           <div className="flex flex-wrap items-center gap-1.5 text-[10px] sm:text-xs font-semibold text-gray-300 mt-1">
             <span className="flex items-center gap-1">
               <IconRoute className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gold" />
-              {city.routes.length} Chauffeured Route{city.routes.length === 1 ? "" : "s"}
+              {city.locationCount} Pickup Location{city.locationCount === 1 ? "" : "s"}
             </span>
           </div>
 

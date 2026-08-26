@@ -82,6 +82,21 @@ const HERO_IMAGES = [
 
 
 
+const CITY_IMAGE_FALLBACKS: Record<string, string> = {
+  london: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&q=80",
+  paris: "/images/hero_paris_twilight.png",
+  milan: "https://images.unsplash.com/photo-1513581166391-887a96ddeafd?q=80&w=1000&auto=format&fit=crop",
+  rome: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1000&auto=format&fit=crop",
+  zurich: "/images/hero_swiss_alps.png",
+  barcelona: "https://images.unsplash.com/photo-1583422409516-2895a771deda?q=80&w=1000&auto=format&fit=crop",
+};
+
+interface LocationSummary {
+  id: string;
+  name: string;
+  city: string;
+}
+
 export default function HomePage() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [cities, setCities] = useState<FeaturedCity[]>([]);
@@ -94,12 +109,25 @@ export default function HomePage() {
   useEffect(() => {
     Promise.all([
       api.get<{ items: Package[] }>("/packages?limit=3"),
-      api.get<FeaturedCity[]>("/private-transfers/all"),
+      api.get<LocationSummary[]>("/locations/all"),
       api.get<SiteSettings>("/site-settings").catch(() => null),
     ])
-      .then(([p, c, s]) => {
+      .then(([p, locations, s]) => {
         setPackages(p.items);
-        setCities(c.slice(0, 6));
+
+        const byCity = new Map<string, number>();
+        for (const loc of locations) {
+          byCity.set(loc.city, (byCity.get(loc.city) || 0) + 1);
+        }
+        const featuredCities: FeaturedCity[] = Array.from(byCity.entries())
+          .map(([city, locationCount]) => ({
+            city,
+            locationCount,
+            image: CITY_IMAGE_FALLBACKS[city.toLowerCase()] || null,
+          }))
+          .slice(0, 6);
+
+        setCities(featuredCities);
         setSettings(s);
       })
       .finally(() => setLoading(false));
@@ -420,7 +448,7 @@ export default function HomePage() {
 
               {/* CTA Buttons */}
               <div className="flex flex-wrap items-center gap-4">
-                <Link href="/fleet">
+                <Link href="/private-transfers">
                   <Button
                     size="lg"
                     className="h-12 px-7 rounded-xl text-sm font-bold bg-navy hover:bg-navy/90 text-white shadow-xl shadow-navy/20 transition-all duration-300"
@@ -548,7 +576,7 @@ export default function HomePage() {
                   </CarouselItem>
                 ))
                 : cities.map((city) => (
-                  <CarouselItem key={city.id} className="pl-2 md:pl-4 basis-1/2 sm:basis-1/3 lg:basis-1/4">
+                  <CarouselItem key={city.city} className="pl-2 md:pl-4 basis-1/2 sm:basis-1/3 lg:basis-1/4">
                     <DestinationCard city={city} />
                   </CarouselItem>
                 ))}

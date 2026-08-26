@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -467,6 +467,8 @@ export default function FleetContent({
   searchParams: sp,
 }: FleetContentProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const basePath = pathname?.startsWith("/private-transfers") ? "/private-transfers" : "/fleet";
   const { user, verificationStep, loading: authLoading } = useAuth();
   const { format } = useCurrency();
   const [carTypes, setCarTypes] = useState<CarType[]>([]);
@@ -585,7 +587,7 @@ export default function FleetContent({
             <h2 className="mt-6 text-xl font-bold">Something went wrong</h2>
             <p className="mt-2 text-sm text-gray-500">{error}</p>
             <div className="mt-6 flex items-center justify-center gap-3">
-              <Button variant="outline" onClick={() => router.push("/fleet")} className="rounded-xl"><IconArrowLeft className="mr-2 h-4 w-4" /> Back</Button>
+              <Button variant="outline" onClick={() => router.push(basePath)} className="rounded-xl"><IconArrowLeft className="mr-2 h-4 w-4" /> Back</Button>
               <Button onClick={fetchData} variant="gold" className="rounded-xl"><IconRefresh className="mr-2 h-4 w-4" /> Try Again</Button>
             </div>
           </CardContent>
@@ -610,7 +612,7 @@ export default function FleetContent({
             <p className="mt-3 text-sm text-gray-500 max-w-md mx-auto leading-relaxed">
               We currently do not have active transfer vehicles assigned for this specific route. Please select a different pickup or destination location, or contact customer support.
             </p>
-            <Button onClick={() => router.push("/fleet")} variant="gold" className="mt-8 rounded-2xl font-black text-sm px-8 py-3.5 shadow-lg shadow-gold/20 hover:scale-105 transition-all">
+            <Button onClick={() => router.push(basePath)} variant="gold" className="mt-8 rounded-2xl font-black text-sm px-8 py-3.5 shadow-lg shadow-gold/20 hover:scale-105 transition-all">
               <IconArrowLeft className="mr-2 h-4 w-4 stroke-[3]" /> Back to Fleet
             </Button>
           </CardContent>
@@ -639,7 +641,7 @@ export default function FleetContent({
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
           <div className="flex items-center justify-between gap-4 mb-4">
             <button
-              onClick={() => router.push("/fleet")}
+              onClick={() => router.push(basePath)}
               className="inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-gold hover:text-navy px-4 py-2 text-xs font-black text-white/90 backdrop-blur-md border border-white/10 transition-all shadow-md cursor-pointer"
             >
               <IconArrowLeft className="h-4 w-4 stroke-[3]" /> Back to Fleet Search

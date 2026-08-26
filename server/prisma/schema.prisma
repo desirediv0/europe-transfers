@@ -291,52 +291,6 @@ model VanCoachRoutePrice {
   updatedAt DateTime            @updatedAt
 }
 
-// ─── Private Transfers (City-wise Sedan/Minivan Pricing) ────
-
-model PrivateTransferCity {
-  id        String                 @id @default(cuid())
-  name      String
-  slug      String                 @unique
-  coverImage String?
-  isActive  Boolean                @default(true)
-  order     Int                    @default(0)
-  routes    PrivateTransferRoute[]
-  createdAt DateTime               @default(now())
-  updatedAt DateTime               @updatedAt
-}
-
-model PrivateTransferRoute {
-  id          String              @id @default(cuid())
-  cityId      String
-  city        PrivateTransferCity @relation(fields: [cityId], references: [id], onDelete: Cascade)
-  description String
-  sedanPrice  Decimal             @db.Decimal(10, 2)
-  minivanPrice Decimal            @db.Decimal(10, 2)
-  currency    String              @default("GBP")
-  isActive    Boolean             @default(true)
-  order       Int                 @default(0)
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
-}
-
-model PrivateTransferEnquiry {
-  id               String   @id @default(cuid())
-  cityName         String
-  routeDescription String
-  vehicleType      String
-  price            Decimal  @db.Decimal(10, 2)
-  currency         String   @default("GBP")
-  customerName     String
-  phone            String
-  email            String
-  pickupDate       String?
-  pickupTime       String?
-  notes            String?
-  status           String   @default("PENDING")
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-}
-
 model VanCoachEnquiry {
   id           String   @id @default(cuid())
   vehicleId    String?

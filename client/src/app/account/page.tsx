@@ -338,7 +338,7 @@ export default function AccountPage() {
                     Explore our luxury Mercedes fleet and book fixed rate transfers across Europe.
                   </p>
                 </div>
-                <Link href="/fleet">
+                <Link href="/private-transfers">
                   <Button className="rounded-xl bg-gold hover:bg-gold-light text-navy font-black text-xs px-5 py-2.5 shadow-sm cursor-pointer">
                     Book Transfer Now <IconArrowRight className="ml-1.5 h-4 w-4" />
                   </Button>

@@ -97,7 +97,7 @@ export default function AboutPage() {
           </p>
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Link href="/fleet">
+            <Link href="/private-transfers">
               <Button size="lg" className="rounded-xl px-8 py-4 text-xs sm:text-sm font-extrabold bg-gold hover:bg-gold-light text-navy shadow-xl shadow-gold/25 transition-all cursor-pointer">
                 Explore Our Fleet <IconArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -232,7 +232,7 @@ export default function AboutPage() {
         subtitle="Book your private airport transfer, intercity ride, or tour package with instant confirmation."
         bannerText="24/7 Chauffeured Transfers Across France, Switzerland, Italy & Spain"
         buttonText="Book Your Journey"
-        buttonLink="/fleet"
+        buttonLink="/private-transfers"
       />
 
     </div>
