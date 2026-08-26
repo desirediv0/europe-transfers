@@ -6,6 +6,14 @@ import { api, ApiError } from "@/lib/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   IconSteeringWheel,
   IconCheck,
   IconLoader2,
@@ -33,6 +41,33 @@ interface DraftApplication {
 
 const MAX_IMAGES = 4;
 const MIN_IMAGES = 1;
+
+const COUNTRIES = [
+  "United Kingdom",
+  "France",
+  "Germany",
+  "Italy",
+  "Spain",
+  "Portugal",
+  "Switzerland",
+  "Austria",
+  "Netherlands",
+  "Belgium",
+  "Luxembourg",
+  "Ireland",
+  "Denmark",
+  "Sweden",
+  "Norway",
+  "Finland",
+  "Iceland",
+  "Poland",
+  "Czech Republic",
+  "Greece",
+  "Croatia",
+  "Hungary",
+  "Monaco",
+  "Other",
+];
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -310,8 +345,18 @@ export default function FleetPartnersPage() {
                   className="w-full rounded-lg border border-gray-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold/40" />
                 <input type="tel" placeholder="Phone Number *" value={phone} onChange={(e) => setPhone(e.target.value)}
                   className="w-full rounded-lg border border-gray-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold/40" />
-                <input type="text" placeholder="Country *" value={country} onChange={(e) => setCountry(e.target.value)}
-                  className="w-full rounded-lg border border-gray-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold/40" />
+                <Select value={country} onValueChange={setCountry}>
+                  <SelectTrigger className="w-full h-auto rounded-lg border-gray-200 px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-gold/40 cursor-pointer">
+                    <SelectValue placeholder="Country *" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white rounded-xl border border-gray-100 shadow-xl max-h-72">
+                    <SelectGroup>
+                      {COUNTRIES.map((c) => (
+                        <SelectItem key={c} value={c} className="cursor-pointer">{c}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
                 <input type="text" placeholder="City *" value={city} onChange={(e) => setCity(e.target.value)}
                   className="w-full rounded-lg border border-gray-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold/40" />
                 <input type="text" placeholder="Vehicle Type * (e.g. Mercedes S-Class)" value={vehicleType} onChange={(e) => setVehicleType(e.target.value)}
