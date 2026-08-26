@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/carousel";
 import { api } from "@/lib/api";
 import type { Package } from "@/lib/types";
-import TeamShowcase from "@/components/ui/team-showcase";
 import CTASection from "@/components/CTASection";
 import { FullScreenScrollFX } from "@/components/ui/full-screen-scroll-fx";
 import PackageCard, { PackageCardSkeleton } from "@/components/PackageCard";
@@ -708,24 +707,6 @@ export default function HomePage() {
 
           </div>
         </div>
-      </section>
-
-      {/* Leadership & Chauffeur Team Showcase Section */}
-      <section className="bg-slate-50/70 py-12 lg:py-16 relative overflow-hidden border-b border-gray-100">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center mb-10">
-          <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-xs font-bold text-gold uppercase tracking-widest mb-3">
-            <IconUsers className="h-4 w-4 text-gold" />
-            Meet Our Leadership & Chauffeurs
-          </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-navy tracking-tight">
-            The Experts Behind Your Journey
-          </h2>
-          <p className="mt-3 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-            From executive concierge planners to licensed VIP chauffeurs, our team guarantees first-class luxury travel across Europe.
-          </p>
-        </div>
-
-        <TeamShowcase />
       </section>
 
       {/* Reusable Dribbble-Style CTA Section */}
