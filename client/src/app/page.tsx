@@ -846,7 +846,7 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {blogPosts.map((post) => (
+              {blogPosts.slice(0, 8).map((post) => (
                 <Link
                   key={post.id}
                   href={`/blog/${post.slug}`}
@@ -854,7 +854,7 @@ export default function HomePage() {
                 >
                   <div className="relative h-24 sm:h-28 bg-navy/5">
                     {post.coverImage ? (
-                      <img src={post.coverImage} alt={post.title} className="h-full w-full object-cover" />
+                      <Image src={post.coverImage} alt={post.title} fill className="object-cover" />
                     ) : (
                       <div className="flex h-full items-center justify-center bg-gradient-to-br from-navy to-navy/70">
                         <IconArticle className="h-6 w-6 text-gold/60" />
