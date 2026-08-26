@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useCurrency } from "@/context/CurrencyContext";
+import { HeroSearchBar } from "@/components/HeroSearchBar";
+import { DropdownPickerField, DatePickerField, StepperField } from "@/components/SearchFields";
 import {
   IconMapPin,
   IconCar,
@@ -26,7 +28,6 @@ import {
   IconClock,
   IconChevronRight,
   IconSparkles,
-  IconSearch,
   IconPlaneArrival,
 } from "@tabler/icons-react";
 
@@ -63,6 +64,14 @@ export default function PrivateTransfersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState<TransferCity | null>(null);
   const [selectedRouteId, setSelectedRouteId] = useState<string>("");
+
+  // Hero search bar state
+  const [barCityId, setBarCityId] = useState("");
+  const [barRouteId, setBarRouteId] = useState("");
+  const [barDate, setBarDate] = useState<Date | null>(new Date());
+  const [barPax, setBarPax] = useState(2);
+  const [barSearching, setBarSearching] = useState(false);
+  const [highlightedCityId, setHighlightedCityId] = useState<string | null>(null);
   const [vehicleType, setVehicleType] = useState<"sedan" | "minivan">("sedan");
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [form, setForm] = useState({
@@ -161,6 +170,27 @@ export default function PrivateTransfersPage() {
     );
   });
 
+  const barCity = cities.find((c) => c.id === barCityId);
+  const barRouteOptions = (barCity?.routes || []).map((r) => ({ id: r.id, label: r.description }));
+
+  const handleBarSearch = () => {
+    if (!barCity) {
+      toast.error("Please select a city first");
+      return;
+    }
+    setBarSearching(true);
+    setSearchQuery("");
+    setHighlightedCityId(barCity.id);
+    requestAnimationFrame(() => {
+      document.getElementById(`city-${barCity.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setBarSearching(false);
+    });
+    if (barRouteId) {
+      const route = barCity.routes.find((r) => r.id === barRouteId);
+      if (route) handleEnquire(barCity, route, "sedan");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50/60 font-sans pb-24">
       
@@ -186,26 +216,41 @@ export default function PrivateTransfersPage() {
             Fixed-price private airport, hotel & intercity transfers. Travel in luxury Mercedes-Benz sedans & minivans with flight tracking & 60 mins complimentary wait time.
           </p>
 
-          {/* Search Bar */}
-          <div className="mt-8 max-w-lg mx-auto flex items-center bg-white rounded-2xl p-2 shadow-2xl border border-gray-200">
-            <div className="flex items-center gap-2 pl-3 flex-1 text-gray-400">
-              <IconSearch className="h-5 w-5 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search transfer city or airport route..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="border-0 shadow-none focus-visible:ring-0 text-navy font-semibold text-xs sm:text-sm placeholder:text-gray-400"
-              />
-            </div>
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="px-3 text-xs text-gray-400 font-bold hover:text-navy"
-              >
-                Clear
-              </button>
-            )}
+          {/* Hero Search Bar */}
+          <div className="mt-8">
+            <HeroSearchBar
+              fieldCount={4}
+              submitting={barSearching}
+              onSubmit={handleBarSearch}
+              fields={
+                <>
+                  <DropdownPickerField
+                    label="City"
+                    icon={IconMapPin}
+                    value={barCityId}
+                    placeholder="Select city"
+                    options={cities.map((c) => ({ id: c.id, label: c.name, sublabel: `${c.routes.length} routes` }))}
+                    onChange={(id) => { setBarCityId(id); setBarRouteId(""); }}
+                  />
+                  <DropdownPickerField
+                    label="Route"
+                    icon={IconRoute}
+                    value={barRouteId}
+                    placeholder={barCityId ? "Select route" : "Choose city first"}
+                    options={barRouteOptions}
+                    onChange={(id) => setBarRouteId(id)}
+                  />
+                  <DatePickerField date={barDate} onChange={setBarDate} />
+                  <StepperField
+                    label="Passengers"
+                    value={barPax}
+                    onChange={setBarPax}
+                    unitLabel={(n) => (n === 1 ? "passenger" : "passengers")}
+                    divider={false}
+                  />
+                </>
+              }
+            />
           </div>
 
           {/* Feature Guarantee Badges */}
@@ -262,7 +307,11 @@ export default function PrivateTransfersPage() {
               return (
                 <Card
                   key={city.id}
-                  className="group overflow-hidden rounded-3xl border border-gray-200/80 bg-white transition-all duration-300 hover:shadow-xl hover:border-gold/40 flex flex-col justify-between"
+                  id={`city-${city.id}`}
+                  className={cn(
+                    "group overflow-hidden rounded-3xl border bg-white transition-all duration-300 hover:shadow-xl hover:border-gold/40 flex flex-col justify-between",
+                    highlightedCityId === city.id ? "border-gold ring-2 ring-gold/50 shadow-xl" : "border-gray-200/80"
+                  )}
                 >
                   <div>
                     {/* City Image Header */}

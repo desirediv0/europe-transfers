@@ -1,36 +1,52 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  IconSearch,
   IconSparkles,
   IconShieldCheck,
   IconStar,
   IconFilter,
-  IconX,
+  IconMapPin,
+  IconUsers,
 } from "@tabler/icons-react";
+import { api } from "@/lib/api";
+import { HeroSearchBar } from "@/components/HeroSearchBar";
+import { DropdownPickerField, DatePickerField, StepperField } from "@/components/SearchFields";
 
-const CITIES = ["ALL", "Paris", "Rome", "Tuscany", "Switzerland"];
+interface SightseeingTourSummary {
+  id: string;
+  cityName?: string;
+}
 
 function SightseeingSearchContent() {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState("ALL");
+  const [cities, setCities] = useState<string[]>([]);
+  const [barCity, setBarCity] = useState("");
+  const [barDate, setBarDate] = useState<Date | null>(null);
+  const [barTravelers, setBarTravelers] = useState(2);
+
+  useEffect(() => {
+    api
+      .get<{ items: SightseeingTourSummary[] }>("/sightseeing?limit=100")
+      .then((res) => {
+        const names = Array.from(
+          new Set((res.items || []).map((t) => t.cityName).filter((c): c is string => Boolean(c)))
+        ).sort();
+        setCities(names);
+      })
+      .catch(() => setCities([]));
+  }, []);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
-    if (searchQuery.trim()) params.set("search", searchQuery.trim());
-    if (selectedCity !== "ALL") params.set("city", selectedCity);
+    if (barCity) params.set("city", barCity);
+    if (barDate) params.set("date", barDate.toISOString().split("T")[0]);
+    params.set("pax", String(barTravelers));
     const qs = params.toString();
     router.push(`/sightseeing/results${qs ? `?${qs}` : ""}`);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") handleSearch();
   };
 
   return (
@@ -58,52 +74,66 @@ function SightseeingSearchContent() {
             Partnered with leading travel & tour experiences across Paris, France, Rome & Switzerland.
           </p>
 
-          {/* Search Box */}
-          <div className="mt-8 max-w-xl mx-auto flex items-center bg-white rounded-2xl p-2 shadow-2xl border border-gray-200">
-            <div className="flex items-center gap-2 pl-3 flex-1 text-gray-400">
-              <IconSearch className="h-5 w-5 text-gray-400 flex-shrink-0" />
-              <Input
-                type="text"
-                placeholder="Search tours… Eiffel Tower, Seine Cruise, Versailles..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="border-0 shadow-none focus-visible:ring-0 text-navy font-semibold text-xs sm:text-sm placeholder:text-gray-400"
-              />
-              {searchQuery && (
-                <button onClick={() => setSearchQuery("")} className="p-1 hover:text-red-500 transition-colors flex-shrink-0">
-                  <IconX className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-            <Button
-              onClick={handleSearch}
-              variant="gold"
-              className="rounded-xl px-5 py-2.5 font-extrabold text-xs text-navy shadow-md flex-shrink-0 cursor-pointer"
-            >
-              Search
-            </Button>
+          {/* Hero Search Bar */}
+          <div className="mt-8">
+            <HeroSearchBar
+              fieldCount={3}
+              onSubmit={handleSearch}
+              fields={
+                <>
+                  <DropdownPickerField
+                    label="City"
+                    icon={IconMapPin}
+                    value={barCity}
+                    placeholder="Any city"
+                    options={cities.map((c) => ({ id: c, label: c }))}
+                    onChange={(_id, label) => { setBarCity(label); setSelectedCity(label); }}
+                  />
+                  <DatePickerField label="Activity date" date={barDate} onChange={setBarDate} />
+                  <StepperField
+                    label="Travelers"
+                    icon={IconUsers}
+                    value={barTravelers}
+                    onChange={setBarTravelers}
+                    unitLabel={(n) => (n === 1 ? "traveler" : "travelers")}
+                    divider={false}
+                  />
+                </>
+              }
+            />
           </div>
 
           {/* City Filter Pills */}
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-            <span className="text-xs text-gray-400 font-bold mr-1 flex items-center gap-1">
-              <IconFilter className="h-3.5 w-3.5 text-gold" /> City:
-            </span>
-            {CITIES.map((city) => (
+          {cities.length > 0 && (
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+              <span className="text-xs text-gray-400 font-bold mr-1 flex items-center gap-1">
+                <IconFilter className="h-3.5 w-3.5 text-gold" /> City:
+              </span>
               <button
-                key={city}
-                onClick={() => setSelectedCity(city)}
+                onClick={() => { setSelectedCity("ALL"); setBarCity(""); }}
                 className={`rounded-full px-4 py-1.5 text-xs font-extrabold transition-all cursor-pointer ${
-                  selectedCity === city
+                  selectedCity === "ALL"
                     ? "bg-gold text-navy shadow-md"
                     : "bg-white/10 text-white hover:bg-white/20 backdrop-blur-md"
                 }`}
               >
-                {city}
+                All
               </button>
-            ))}
-          </div>
+              {cities.map((city) => (
+                <button
+                  key={city}
+                  onClick={() => { setSelectedCity(city); setBarCity(city); }}
+                  className={`rounded-full px-4 py-1.5 text-xs font-extrabold transition-all cursor-pointer ${
+                    selectedCity === city
+                      ? "bg-gold text-navy shadow-md"
+                      : "bg-white/10 text-white hover:bg-white/20 backdrop-blur-md"
+                  }`}
+                >
+                  {city}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

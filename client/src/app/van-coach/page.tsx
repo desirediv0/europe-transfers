@@ -8,20 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { usePayment } from "@/hooks/usePayment";
 import { useCurrency } from "@/context/CurrencyContext";
+import { HeroSearchBar } from "@/components/HeroSearchBar";
+import { DropdownPickerField, DatePickerField } from "@/components/SearchFields";
 import type { Location } from "@/lib/types";
 import {
   IconClock,
   IconMapPin,
-  IconCalendar,
-  IconChevronDown,
-  IconCircleCheck,
   IconLoader2,
   IconSearch,
   IconUsers,
@@ -92,96 +88,6 @@ function mapToDisposalVehicle(v: VanCoachVehicle): DisposalVehicle {
   };
 }
 
-function LocationPicker({
-  value,
-  name,
-  placeholder,
-  locations,
-  onChange,
-}: {
-  value: string;
-  name: string;
-  placeholder: string;
-  locations: Location[];
-  onChange: (id: string, name: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const selected = locations.find((l) => l.id === value || l.name === value);
-
-  const filtered = locations.filter((l) => {
-    if (!query) return true;
-    const q = query.toLowerCase();
-    return l.name.toLowerCase().includes(q) || l.city.toLowerCase().includes(q);
-  });
-
-  return (
-    <Popover open={open} onOpenChange={(o) => { setOpen(o); if (!o) setQuery(""); }}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="flex h-12 w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy shadow-sm transition-colors hover:border-gold/50 focus:outline-none"
-        >
-          {selected ? (
-            <span className="flex items-center gap-2 truncate">
-              <IconMapPin className="h-4 w-4 shrink-0 text-gold" />
-              <span className="truncate font-bold">{selected.name}</span>
-              <span className="text-gray-400 font-medium">({selected.city})</span>
-            </span>
-          ) : (
-            <span className="flex items-center gap-2 text-gray-400 font-medium">
-              <IconMapPin className="h-4 w-4 shrink-0 text-gold" />
-              {value || placeholder}
-            </span>
-          )}
-          <IconChevronDown className="h-4 w-4 shrink-0 text-gray-400" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)] z-50 bg-white shadow-2xl rounded-2xl border border-gray-100" align="start" side="bottom" sideOffset={4}>
-        <div className="max-h-80 overflow-auto">
-          <div className="sticky top-0 bg-white p-2 border-b border-gray-100">
-            <div className="relative">
-              <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder={`Search ${name}...`}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="flex h-10 w-full rounded-lg border border-gray-200 pl-9 pr-3 py-1 text-xs font-medium focus:outline-none focus:border-gold"
-                autoFocus
-              />
-            </div>
-          </div>
-          <div className="p-1.5">
-            {filtered.length === 0 ? (
-              <div className="py-6 text-center text-xs text-gray-400">No location found.</div>
-            ) : (
-              filtered.map((loc) => (
-                <button
-                  key={loc.id}
-                  type="button"
-                  onClick={() => {
-                    onChange(loc.id, loc.name);
-                    setOpen(false);
-                    setQuery("");
-                  }}
-                  className={`flex w-full items-start rounded-lg px-3 py-2.5 text-xs text-left transition-colors hover:bg-slate-100 ${value === loc.id || value === loc.name ? "bg-slate-100 font-bold" : ""}`}
-                >
-                  <div className="flex flex-col">
-                    <span className="font-bold text-navy">{loc.name}</span>
-                    <span className="text-[10px] text-gray-400">{loc.city}</span>
-                  </div>
-                  {(value === loc.id || value === loc.name) && <IconCircleCheck className="ml-auto h-4 w-4 text-gold" />}
-                </button>
-              ))
-            )}
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-}
-
 const FLEET_FEATURES = [
   { icon: IconShieldCheck, title: "Licensed & Insured", desc: "Fully authorized European transport operator" },
   { icon: IconClock, title: "60 Min Free Wait", desc: "Complimentary waiting time at airports" },
@@ -205,7 +111,6 @@ function VanCoachFleetContent() {
   const [hours, setHours] = useState("8");
   const [pickupDate, setPickupDate] = useState<Date | null>(new Date());
   const [pickupTime, setPickupTime] = useState("09:00 AM");
-  const [calendarOpen, setCalendarOpen] = useState(false);
   const [vehicleSearch, setVehicleSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -370,98 +275,63 @@ function VanCoachFleetContent() {
 
       {/* Search Form */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <Card className="border-gray-200/80 bg-white rounded-3xl shadow-xl p-6 sm:p-8">
-          <div className="mb-6">
+        <Card className="border-gray-200/80 bg-white rounded-3xl shadow-xl p-4 sm:p-6">
+          <div className="mb-5">
             <span className="text-xs font-bold tracking-widest text-gold uppercase">Step 01: Search Engine</span>
             <h2 className="text-2xl font-black text-navy mt-1">Configure Hourly Disposal</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-navy flex items-center gap-1.5 uppercase">
-                <IconMapPin className="h-3.5 w-3.5 text-gold" /> Service Location
-              </Label>
-              <LocationPicker
-                value={selectedLocationName}
-                name="city"
-                placeholder="e.g. Milan, Zurich, Paris"
-                locations={locations}
-                onChange={(_id, name) => { setSelectedLocationName(name); }}
-              />
-            </div>
+          <HeroSearchBar
+            fieldCount={4}
+            submitLabel="Browse Fleet"
+            onSubmit={handleSearch}
+            fields={
+              <>
+                <DropdownPickerField
+                  label="Location"
+                  icon={IconMapPin}
+                  value={selectedLocationName}
+                  placeholder="e.g. Milan, Zurich, Paris"
+                  options={locations.map((l) => ({ id: l.id, label: l.name, sublabel: l.city }))}
+                  onChange={(_id, name) => setSelectedLocationName(name)}
+                />
+                <DropdownPickerField
+                  label="Duration"
+                  icon={IconClock}
+                  value={hours}
+                  placeholder="Select duration"
+                  options={[
+                    { id: "4", label: "4 Hours Half-Day" },
+                    { id: "8", label: "8 Hours Full-Day" },
+                    { id: "10", label: "10 Hours Extended Day" },
+                    { id: "12", label: "12 Hours Grand Day" },
+                    { id: "24", label: "24 Hours Multi-Day" },
+                  ]}
+                  onChange={(id) => setHours(id)}
+                />
+                <DatePickerField date={pickupDate} onChange={setPickupDate} />
+                <DropdownPickerField
+                  label="Pickup Time"
+                  icon={IconClock}
+                  value={pickupTime}
+                  placeholder="Select time"
+                  options={times.map((t) => ({ id: t, label: t }))}
+                  onChange={(id) => setPickupTime(id)}
+                  divider={false}
+                />
+              </>
+            }
+          />
 
-            <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-navy flex items-center gap-1.5 uppercase">
-                <IconClock className="h-3.5 w-3.5 text-gold" /> Duration
-              </Label>
-              <Select value={hours} onValueChange={setHours}>
-                <SelectTrigger className="h-12 rounded-xl bg-white px-3.5 text-xs font-bold text-navy border-gray-200">
-                  <SelectValue placeholder="Select duration" />
-                </SelectTrigger>
-                <SelectContent className="z-50 bg-white">
-                  <SelectItem value="4">4 Hours Half-Day</SelectItem>
-                  <SelectItem value="8">8 Hours Full-Day</SelectItem>
-                  <SelectItem value="10">10 Hours Extended Day</SelectItem>
-                  <SelectItem value="12">12 Hours Grand Day</SelectItem>
-                  <SelectItem value="24">24 Hours Multi-Day Charter</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-navy flex items-center gap-1.5 uppercase">
-                <IconCalendar className="h-3.5 w-3.5 text-gold" /> Date
-              </Label>
-              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full h-12 justify-start text-left font-normal rounded-xl bg-white px-3.5 text-xs font-semibold text-navy border-gray-200">
-                    <IconCalendar className="mr-2 h-4 w-4 text-gold shrink-0" />
-                    <span className="truncate">{pickupDate ? format(pickupDate, "dd MMM yyyy") : "Pick date"}</span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[300px] sm:w-[320px] p-0 z-50 rounded-2xl bg-white shadow-2xl border border-gray-100" align="start" side="bottom" sideOffset={4}>
-                  <Calendar
-                    mode="single"
-                    selected={pickupDate || undefined}
-                    onSelect={(d) => { if (d) { setPickupDate(d); setCalendarOpen(false); } }}
-                    disabled={{ before: new Date(new Date().setHours(0, 0, 0, 0)) }}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-navy flex items-center gap-1.5 uppercase">
-                <IconClock className="h-3.5 w-3.5 text-gold" /> Time
-              </Label>
-              <Select value={pickupTime} onValueChange={setPickupTime}>
-                <SelectTrigger className="h-12 rounded-xl bg-white px-3.5 text-xs font-bold text-navy border-gray-200">
-                  <IconClock className="mr-2 h-4 w-4 text-gold shrink-0" />
-                  <SelectValue placeholder="Select time" />
-                </SelectTrigger>
-                <SelectContent className="max-h-60 z-50 bg-white">
-                  {times.map((t) => (
-                    <SelectItem key={t} value={t}>{t}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="mt-6 flex flex-col sm:flex-row gap-3">
-            <Button onClick={handleSearch} className="h-12 rounded-xl bg-gold hover:bg-yellow-400 text-navy font-black text-xs shadow-lg shadow-gold/20 cursor-pointer px-8">
-              <IconSearch className="h-4 w-4 mr-2" /> Browse Fleet
-            </Button>
-            <div className="relative flex-1 max-w-md">
-              <IconSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Quick search vehicles..."
-                value={vehicleSearch}
-                onChange={(e) => setVehicleSearch(e.target.value)}
-                className="flex h-12 w-full rounded-xl border border-gray-200 bg-white pl-10 pr-4 py-2 text-xs font-semibold text-navy shadow-sm focus:outline-none focus:border-gold transition-colors"
-              />
-            </div>
+          <div className="mt-4 relative max-w-md">
+            <IconSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Quick search vehicles..."
+              value={vehicleSearch}
+              onChange={(e) => setVehicleSearch(e.target.value)}
+              className="flex h-11 w-full rounded-xl border border-gray-200 bg-white pl-10 pr-4 py-2 text-xs font-semibold text-navy shadow-sm focus:outline-none focus:border-gold transition-colors"
+            />
           </div>
         </Card>
       </section>

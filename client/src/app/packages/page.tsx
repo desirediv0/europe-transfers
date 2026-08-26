@@ -2,17 +2,19 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
-import { IconPackage, IconSearch, IconFilter, IconX } from "@tabler/icons-react";
+import { IconPackage, IconFilter, IconMapPin, IconUsers } from "@tabler/icons-react";
 import { api } from "@/lib/api";
 import type { Country } from "@/lib/types";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { HeroSearchBar } from "@/components/HeroSearchBar";
+import { DropdownPickerField, DatePickerField, StepperField } from "@/components/SearchFields";
 
 function PackagesSearchContent() {
   const router = useRouter();
   const [countries, setCountries] = useState<Country[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("all");
+  const [barCountrySlug, setBarCountrySlug] = useState("");
+  const [barDate, setBarDate] = useState<Date | null>(null);
+  const [barTravelers, setBarTravelers] = useState(2);
 
   useEffect(() => {
     api.get<{ items: Country[] }>("/countries?limit=100")
@@ -25,14 +27,11 @@ function PackagesSearchContent() {
 
   const handleSearch = () => {
     const params = new URLSearchParams();
-    if (searchQuery.trim()) params.set("search", searchQuery.trim());
-    if (selectedCountry !== "all") params.set("country", selectedCountry);
+    if (barCountrySlug) params.set("country", barCountrySlug);
+    if (barDate) params.set("date", barDate.toISOString().split("T")[0]);
+    params.set("travelers", String(barTravelers));
     const qs = params.toString();
     router.push(`/packages/results${qs ? `?${qs}` : ""}`);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") handleSearch();
   };
 
   return (
@@ -54,31 +53,33 @@ function PackagesSearchContent() {
             Hand-picked luxury chauffeured tour itineraries across Europe, designed for uncompromised comfort, scenic beauty, and memorable journeys.
           </p>
 
-          {/* Search Box */}
-          <div className="mt-8 max-w-xl mx-auto flex items-center bg-white rounded-2xl p-2 shadow-2xl border border-gray-200">
-            <div className="flex items-center gap-2 pl-3 flex-1 text-gray-400">
-              <IconSearch className="h-5 w-5 text-gray-400 flex-shrink-0" />
-              <Input
-                type="text"
-                placeholder="Search packages... Italy, Switzerland, France..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="border-0 shadow-none focus-visible:ring-0 text-navy font-semibold text-xs sm:text-sm placeholder:text-gray-400"
-              />
-              {searchQuery && (
-                <button onClick={() => setSearchQuery("")} className="p-1 hover:text-red-500 transition-colors flex-shrink-0">
-                  <IconX className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-            <Button
-              onClick={handleSearch}
-              variant="gold"
-              className="rounded-xl px-5 py-2.5 font-extrabold text-xs text-navy shadow-md flex-shrink-0 cursor-pointer"
-            >
-              Search
-            </Button>
+          {/* Hero Search Bar */}
+          <div className="mt-8">
+            <HeroSearchBar
+              fieldCount={3}
+              onSubmit={handleSearch}
+              fields={
+                <>
+                  <DropdownPickerField
+                    label="Destination"
+                    icon={IconMapPin}
+                    value={barCountrySlug}
+                    placeholder="Any destination"
+                    options={countries.map((c) => ({ id: c.slug, label: c.name }))}
+                    onChange={(id) => { setBarCountrySlug(id); setSelectedCountry(id); }}
+                  />
+                  <DatePickerField label="Travel date" date={barDate} onChange={setBarDate} />
+                  <StepperField
+                    label="Travelers"
+                    icon={IconUsers}
+                    value={barTravelers}
+                    onChange={setBarTravelers}
+                    unitLabel={(n) => (n === 1 ? "traveler" : "travelers")}
+                    divider={false}
+                  />
+                </>
+              }
+            />
           </div>
 
           {/* Country Filter Pills */}
@@ -87,7 +88,7 @@ function PackagesSearchContent() {
               <IconFilter className="h-3.5 w-3.5 text-gold" /> Country:
             </span>
             <button
-              onClick={() => setSelectedCountry("all")}
+              onClick={() => { setSelectedCountry("all"); setBarCountrySlug(""); }}
               className={`rounded-full px-4 py-1.5 text-xs font-extrabold transition-all cursor-pointer ${
                 selectedCountry === "all"
                   ? "bg-gold text-navy shadow-md"
@@ -99,7 +100,7 @@ function PackagesSearchContent() {
             {(Array.isArray(countries) ? countries : []).map((c) => (
               <button
                 key={c.id}
-                onClick={() => setSelectedCountry(c.slug)}
+                onClick={() => { setSelectedCountry(c.slug); setBarCountrySlug(c.slug); }}
                 className={`rounded-full px-4 py-1.5 text-xs font-extrabold transition-all cursor-pointer ${
                   selectedCountry === c.slug
                     ? "bg-gold text-navy shadow-md"
