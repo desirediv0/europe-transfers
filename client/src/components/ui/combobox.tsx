@@ -1,18 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { IconCheck, IconChevronDown } from "@tabler/icons-react";
+import { useState, useRef, useEffect } from "react";
+import { IconCheck, IconChevronDown, IconSearch } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface ComboboxProps {
   value: string;
@@ -40,83 +30,108 @@ export function Combobox({
 }: ComboboxProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        setSearch("");
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  useEffect(() => {
+    if (open) {
+      requestAnimationFrame(() => inputRef.current?.focus());
+    }
+  }, [open]);
+
+  const filtered = search.trim()
+    ? options.filter((o) => o.toLowerCase().includes(search.trim().toLowerCase()))
+    : options;
+
+  const selectOption = (option: string) => {
+    onChange(option === value ? "" : option);
+    setSearch("");
+    setOpen(false);
+  };
+
+  const applyCustomValue = () => {
+    if (!search.trim()) return;
+    onChange(search.trim());
+    setSearch("");
+    setOpen(false);
+  };
 
   return (
-    <Popover
-      open={open}
-      onOpenChange={(next) => {
-        setOpen(next);
-        if (!next) setSearch("");
-      }}
-    >
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          disabled={disabled}
-          className={cn(
-            "w-full justify-between rounded-lg border-gray-200 px-3.5 py-2.5 h-auto text-sm font-normal cursor-pointer",
-            !value && "text-muted-foreground",
-            className
-          )}
-        >
-          {value || placeholder}
-          <IconChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-        <Command shouldFilter={!allowCustomValue}>
-          <CommandInput
-            placeholder={searchPlaceholder}
-            className="text-sm"
-            value={search}
-            onValueChange={setSearch}
-          />
-          <CommandList>
-            <CommandEmpty>
-              {allowCustomValue && search.trim() ? (
+    <div ref={containerRef} className={cn("relative", className)}>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setOpen((o) => !o)}
+        className={cn(
+          "w-full flex items-center justify-between rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold/40 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
+          !value && "text-muted-foreground"
+        )}
+      >
+        <span className="truncate">{value || placeholder}</span>
+        <IconChevronDown className={cn("ml-2 h-4 w-4 shrink-0 opacity-50 transition-transform", open && "rotate-180")} />
+      </button>
+
+      {open && (
+        <div className="absolute z-[100] mt-1 w-full rounded-lg border border-gray-100 bg-white shadow-xl overflow-hidden">
+          <div className="flex items-center gap-2 border-b border-gray-100 px-3 py-2">
+            <IconSearch className="h-4 w-4 shrink-0 text-gray-400" />
+            <input
+              ref={inputRef}
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={searchPlaceholder}
+              className="w-full text-sm outline-none placeholder:text-muted-foreground bg-transparent"
+              onKeyDown={(e) => {
+                if (e.key === "Escape") { setOpen(false); setSearch(""); }
+                if (e.key === "Enter" && allowCustomValue && filtered.length === 0) {
+                  e.preventDefault();
+                  applyCustomValue();
+                }
+              }}
+            />
+          </div>
+          <div className="max-h-60 overflow-y-auto py-1">
+            {filtered.length === 0 ? (
+              allowCustomValue && search.trim() ? (
                 <button
                   type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => {
-                    onChange(search.trim());
-                    setSearch("");
-                    setOpen(false);
-                  }}
-                  className="w-full text-left px-2 py-1.5 text-sm hover:bg-accent rounded-sm cursor-pointer"
+                  onClick={applyCustomValue}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
                 >
                   Use &quot;{search.trim()}&quot;
                 </button>
               ) : (
-                emptyText
-              )}
-            </CommandEmpty>
-            <CommandGroup>
-              {(allowCustomValue
-                ? options.filter((o) => o.toLowerCase().includes(search.toLowerCase()))
-                : options
-              ).map((option) => (
-                <CommandItem
+                <p className="px-3 py-4 text-center text-sm text-muted-foreground">{emptyText}</p>
+              )
+            ) : (
+              filtered.map((option) => (
+                <button
                   key={option}
-                  value={option}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onSelect={() => {
-                    onChange(option === value ? "" : option);
-                    setSearch("");
-                    setOpen(false);
-                  }}
-                  className="cursor-pointer"
+                  type="button"
+                  onClick={() => selectOption(option)}
+                  className="w-full flex items-center px-3 py-2 text-sm text-left hover:bg-gray-50 cursor-pointer"
                 >
-                  <IconCheck className={cn("mr-2 h-4 w-4", value === option ? "opacity-100" : "opacity-0")} />
-                  {option}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+                  <IconCheck className={cn("mr-2 h-4 w-4 shrink-0", value === option ? "opacity-100 text-gold" : "opacity-0")} />
+                  <span className="truncate">{option}</span>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
