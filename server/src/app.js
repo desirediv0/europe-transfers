@@ -33,6 +33,7 @@ import vanCoachRoutes from "./routes/vanCoach.routes.js";
 import currencyRoutes from "./routes/currency.routes.js";
 import sightseeingRoutes from "./routes/sightseeing.routes.js";
 import siteSettingsRoutes from "./routes/siteSettings.routes.js";
+import jobRoutes from "./routes/job.routes.js";
 
 const app = express();
 
@@ -72,6 +73,7 @@ app.use("/api/v1/route-prices", routePriceRoutes);
 app.use("/api/v1/packages", packageRoutes);
 app.use("/api/v1/bookings", bookingRoutes);
 app.use("/api/v1/testimonials", testimonialRoutes);
+app.use("/api/v1/jobs", jobRoutes);
 app.use("/api/v1/upload", uploadRoutes);
 app.use("/api/v1/search", searchRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -26,7 +26,7 @@ interface MapPickerProps {
 }
 
 function MarkerDragHandler({ onChange }: { onChange: (lat: number, lng: number) => void }) {
-  const markerRef = useRef<L.Marker>(null);
+
 
   useMapEvents({
     click(e) {

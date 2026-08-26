@@ -292,7 +292,7 @@ function FleetGallery({ carTypes, loading, basePath }: { carTypes: CarType[]; lo
             First-Class European Fleet
           </div>
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1]">
-            PRIVATE TRANSFERS: <span className="text-gold">SEARCH ENGINE</span>
+            PRIVATE TRANSFERS
           </h1>
           <p className="mt-3 text-sm sm:text-base text-gray-300 max-w-2xl mx-auto leading-relaxed font-normal mb-8">
             Select your pickup & drop-off locations across 120+ European cities for instant all-inclusive fixed pricing.

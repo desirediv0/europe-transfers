@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 import {
   LayoutDashboard,
@@ -28,6 +28,7 @@ import {
   CreditCard,
   Ship,
   Settings,
+  Briefcase,
 } from "lucide-react";
 
 const topNavItems = [
@@ -55,6 +56,11 @@ const packagesNavItems = [
 const sightseeingNavItems = [
   { label: "Sightseeing", icon: Compass, href: "/sightseeing" },
   { label: "Sightseeing Orders", icon: CreditCard, href: "/sightseeing-orders" },
+];
+
+const careersNavItems = [
+  { label: "Jobs", icon: Briefcase, href: "/careers" },
+  { label: "Applicants", icon: Users, href: "/careers/applicants" },
 ];
 
 const otherNavItems = [
@@ -125,6 +131,7 @@ function SidebarContent({ collapsed, onToggle }: { collapsed: boolean; onToggle:
         {renderSection("Van & Coach (/van-coach)", vanCoachNavItems)}
         {renderSection("Packages (/packages)", packagesNavItems)}
         {renderSection("Sightseeing (/sightseeing)", sightseeingNavItems)}
+        {renderSection("Careers (/careers)", careersNavItems)}
         {renderSection("Users & Site", otherNavItems)}
         {renderSection("Blog", blogNavItems)}
       </ScrollArea>

@@ -197,6 +197,35 @@ export interface Pagination {
   pages: number;
 }
 
+// ─── Careers ───────────────────────────────────────
+
+export interface Job {
+  id: string;
+  title: string;
+  slug: string;
+  location: string;
+  type: string;
+  description: string;
+  isActive: boolean;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { applications: number };
+}
+
+export interface JobApplication {
+  id: string;
+  jobId: string;
+  job: { title: string; slug: string };
+  name: string;
+  email: string;
+  phone: string;
+  coverNote: string | null;
+  cvUrl: string;
+  status: string;
+  createdAt: string;
+}
+
 // ─── Private Transfers ────────────────────────────
 
 export interface PrivateTransferRoute {

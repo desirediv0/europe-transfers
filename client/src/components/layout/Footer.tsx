@@ -49,7 +49,7 @@ const navigation = {
         { name: "Fleet Standards", href: "/private-transfers" },
         { name: "Tour Packages", href: "/packages" },
         { name: "Europe Transfers Blog", href: "/blog" },
-
+        { name: "Careers", href: "/careers" },
       ],
     },
     {

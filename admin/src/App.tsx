@@ -19,6 +19,8 @@ import FleetOrdersPage from "@/pages/FleetOrdersPage";
 import UsersPage from "@/pages/UsersPage";
 import TestimonialsPage from "@/pages/TestimonialsPage";
 import UploadsPage from "@/pages/UploadsPage";
+import JobsPage from "@/pages/JobsPage";
+import JobApplicantsPage from "@/pages/JobApplicantsPage";
 
 // SEO & Blog Pages
 import SeoPagesPage from "@/pages/SeoPagesPage";
@@ -89,6 +91,8 @@ export default function App() {
                       <Route path="/users" element={<UsersPage />} />
                       <Route path="/testimonials" element={<TestimonialsPage />} />
                       <Route path="/uploads" element={<UploadsPage />} />
+                      <Route path="/careers" element={<JobsPage />} />
+                      <Route path="/careers/applicants" element={<JobApplicantsPage />} />
                     </Routes>
                   </AdminLayout>
                 </DataProvider>

@@ -11,7 +11,7 @@ interface ImageUploadProps {
   label?: string;
 }
 
-export function ImageUpload({ value, onChange, label = "Cover Image" }: ImageUploadProps) {
+export function ImageUpload({ value, onChange }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [showUrlInput, setShowUrlInput] = useState(false);
@@ -106,9 +106,8 @@ export function ImageUpload({ value, onChange, label = "Cover Image" }: ImageUpl
           onDragLeave={() => setDragActive(false)}
           onDrop={handleDrop}
           onClick={() => !uploading && inputRef.current?.click()}
-          className={`relative flex flex-col items-center justify-center h-48 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${
-            dragActive ? "border-gold bg-gold/5" : "border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/30"
-          }`}
+          className={`relative flex flex-col items-center justify-center h-48 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${dragActive ? "border-gold bg-gold/5" : "border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/30"
+            }`}
         >
           {uploading ? (
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
