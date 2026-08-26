@@ -150,23 +150,30 @@ export const applyToJob = asyncHandler(async (req, res) => {
 
   try {
     const admins = await prisma.admin.findMany({ select: { email: true } });
-    for (const admin of admins) {
-      await sendEmail({
-        to: admin.email,
-        subject: `New Job Application — ${job.title}`,
-        html: `<div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:20px;">
-          <h2>New Job Application</h2>
-          <p><strong>Job:</strong> ${job.title}</p>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Phone:</strong> ${phone}</p>
-          ${coverNote ? `<p><strong>Cover Note:</strong> ${coverNote}</p>` : ""}
-          <p><a href="${cvUrl}" target="_blank">View CV</a></p>
-        </div>`,
-      });
-    }
+    const emailHtml = `<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:24px;color:#1B2A4A;">
+      <h2 style="margin:0 0 16px;">New Job Application</h2>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <tr><td style="padding:4px 0;color:#6b7280;">Job</td><td style="padding:4px 0;font-weight:bold;">${job.title}</td></tr>
+        <tr><td style="padding:4px 0;color:#6b7280;">Name</td><td style="padding:4px 0;">${name}</td></tr>
+        <tr><td style="padding:4px 0;color:#6b7280;">Email</td><td style="padding:4px 0;">${email}</td></tr>
+        <tr><td style="padding:4px 0;color:#6b7280;">Phone</td><td style="padding:4px 0;">${phone}</td></tr>
+        ${coverNote ? `<tr><td style="padding:4px 0;color:#6b7280;vertical-align:top;">Cover Note</td><td style="padding:4px 0;">${coverNote}</td></tr>` : ""}
+      </table>
+      <a href="${cvUrl}" target="_blank" rel="noopener noreferrer"
+         style="display:inline-block;margin-top:20px;background:#C9A227;color:#1B2A4A;font-weight:bold;text-decoration:none;padding:10px 20px;border-radius:6px;">
+        View / Download CV
+      </a>
+    </div>`;
+
+    await Promise.allSettled(
+      admins.map((admin) =>
+        sendEmail({ to: admin.email, subject: `New Job Application — ${job.title}`, html: emailHtml }).catch((err) =>
+          console.error(`Failed to send job application email to ${admin.email}:`, err)
+        )
+      )
+    );
   } catch (err) {
-    console.error("Failed to send job application email:", err);
+    console.error("Failed to send job application emails:", err);
   }
 
   return apiResponse(res, 201, "Application submitted", application);

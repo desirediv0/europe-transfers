@@ -8,7 +8,7 @@ import {
   IconMapPin,
   IconClock,
   IconArrowRight,
-  IconLoader2,
+  IconAlertCircle,
 } from "@tabler/icons-react";
 
 interface Job {
@@ -20,17 +20,24 @@ interface Job {
   description: string;
 }
 
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+
 export default function CareersPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
+  const load = () => {
+    setLoading(true);
+    setError(false);
     api
       .get<{ items: Job[] }>("/jobs?limit=100")
       .then((res) => setJobs(res.items))
-      .catch(() => setJobs([]))
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { load(); }, []);
 
   return (
     <div className="bg-slate-50/50 min-h-screen font-sans">
@@ -55,8 +62,20 @@ export default function CareersPage() {
       {/* Job List */}
       <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         {loading ? (
-          <div className="flex justify-center py-20">
-            <IconLoader2 className="h-8 w-8 animate-spin text-gold" />
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-7 shadow-sm animate-pulse">
+                <div className="h-5 w-1/3 bg-gray-200 rounded" />
+                <div className="h-3 w-1/2 bg-gray-100 rounded mt-3" />
+                <div className="h-3 w-full bg-gray-100 rounded mt-4" />
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <IconAlertCircle className="h-8 w-8 text-red-400 mx-auto mb-3" />
+            <p className="text-gray-500 font-medium">Couldn&apos;t load open positions right now.</p>
+            <button onClick={load} className="mt-3 text-sm font-bold text-gold hover:underline">Try again</button>
           </div>
         ) : jobs.length === 0 ? (
           <div className="text-center py-20">
@@ -83,7 +102,7 @@ export default function CareersPage() {
                         <IconClock className="h-4 w-4 text-gold" /> {job.type}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-3 line-clamp-2">{job.description}</p>
+                    <p className="text-sm text-gray-600 mt-3 line-clamp-2">{stripHtml(job.description)}</p>
                   </div>
                   <div className="shrink-0 inline-flex items-center gap-1.5 text-xs font-black text-navy uppercase tracking-wider">
                     View & Apply <IconArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />

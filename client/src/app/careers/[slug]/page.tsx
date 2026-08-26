@@ -87,6 +87,10 @@ export default function JobDetailPage() {
       toast.error("Please fill in your name, email, and phone");
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
     if (!file) {
       toast.error("Please attach your CV");
       return;
@@ -179,7 +183,10 @@ export default function JobDetailPage() {
         {/* Description */}
         <div className="lg:col-span-3">
           <h2 className="text-lg font-black text-navy mb-3">About This Role</h2>
-          <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{job.description}</p>
+          <article
+            className="prose prose-sm prose-slate max-w-none text-gray-600 leading-relaxed font-sans prose-headings:font-extrabold prose-headings:text-navy prose-a:text-navy prose-a:font-bold hover:prose-a:text-gold"
+            dangerouslySetInnerHTML={{ __html: job.description }}
+          />
         </div>
 
         {/* Apply Form */}

@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { TipTapEditor } from "@/components/TipTapEditor";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -118,15 +118,19 @@ export default function JobsPage() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{editing ? "Edit Job" : "Add Job"}</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2"><Label>Title</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
+            <div className="space-y-2"><Label>Role / Job Title</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Executive Chauffeur" /></div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Location</Label><Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="e.g. Paris, France" /></div>
-              <div className="space-y-2"><Label>Type</Label><Input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder="e.g. Full-time" /></div>
+              <div className="space-y-2"><Label>Employment Type</Label><Input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder="e.g. Full-time" /></div>
             </div>
-            <div className="space-y-2"><Label>Description</Label><Textarea rows={5} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
+            <div className="space-y-2">
+              <Label>Job Description</Label>
+              <p className="text-xs text-muted-foreground -mt-1">Add responsibilities, requirements, and any other role details. This is shown to applicants on the job page.</p>
+              <TipTapEditor value={form.description} onChange={(html) => setForm({ ...form, description: html })} />
+            </div>
             <div className="grid grid-cols-2 gap-4 items-end">
               <div className="space-y-2"><Label>Display Order</Label><Input type="number" value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) })} /></div>
               <div className="flex items-center gap-2 pb-2">
@@ -137,7 +141,7 @@ export default function JobsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave} disabled={saving || !form.title || !form.location || !form.type || !form.description}>{saving ? "Saving..." : "Save"}</Button>
+            <Button onClick={handleSave} disabled={saving || !form.title || !form.location || !form.type || !form.description || form.description === "<p></p>"}>{saving ? "Saving..." : "Save"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
