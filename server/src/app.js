@@ -37,6 +37,10 @@ import siteSettingsRoutes from "./routes/siteSettings.routes.js";
 
 const app = express();
 
+// Behind a single reverse proxy (nginx) in production — trust its
+// X-Forwarded-For so express-rate-limit identifies real client IPs.
+app.set("trust proxy", 1);
+
 app.use(helmet());
 app.use(
   cors({
