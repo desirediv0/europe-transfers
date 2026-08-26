@@ -53,7 +53,7 @@ export function DropdownPickerField({
     <SearchField icon={icon} label={label} divider={divider}>
       <Popover open={open} onOpenChange={(o) => { setOpen(o); if (!o) setQuery(""); }}>
         <PopoverTrigger asChild>
-          <button type="button" className="flex w-full items-center text-left cursor-pointer">
+          <button type="button" className="flex w-full items-center text-left cursor-pointer outline-none border-0 bg-transparent p-0">
             <span className={cn("truncate text-sm", selected ? "text-navy font-semibold" : "text-gray-400 font-normal")}>
               {selected ? selected.label : placeholder}
             </span>
@@ -124,7 +124,7 @@ export function DatePickerField({
     <SearchField icon={IconCalendar} label={label} divider={divider}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <button type="button" className="flex w-full items-center text-left cursor-pointer">
+          <button type="button" className="flex w-full items-center text-left cursor-pointer outline-none border-0 bg-transparent p-0">
             <span className={cn("truncate text-sm", date ? "text-navy font-semibold" : "text-gray-400 font-normal")}>
               {date ? format(date, "EEE, MMM d") : "Select date"}
             </span>
@@ -180,7 +180,7 @@ export function DateTimePickerField({
     <SearchField icon={IconCalendar} label={label} divider={divider}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <button type="button" className="flex w-full items-center text-left cursor-pointer">
+          <button type="button" className="flex w-full items-center text-left cursor-pointer outline-none border-0 bg-transparent p-0">
             <span className={cn("truncate text-sm", date ? "text-navy font-semibold" : "text-gray-400 font-normal")}>
               {date ? `${format(date, "EEE, MMM d")}${time ? ` · ${time}` : ""}` : "Select date"}
             </span>

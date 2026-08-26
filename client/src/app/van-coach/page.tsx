@@ -96,14 +96,6 @@ const FLEET_FEATURES = [
   { icon: IconUsers, title: "English Speaking", desc: "Professional multilingual chauffeurs" },
 ];
 
-const PROCESS_STEPS = [
-  { step: "01", title: "Search Engine", desc: "Select city & disposal hours" },
-  { step: "02", title: "Choose Vehicle", desc: "Pick Mercedes S-Class or V-Class" },
-  { step: "03", title: "View Details", desc: "Check included km, rates & specs" },
-  { step: "04", title: "Register", desc: "Enter trip itinerary & passenger info" },
-  { step: "05", title: "Confirm", desc: "Pay securely or send enquiry" },
-];
-
 function VanCoachFleetContent() {
   const router = useRouter();
   const { format: formatCurrency } = useCurrency();
@@ -222,7 +214,7 @@ function VanCoachFleetContent() {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans pb-20">
-      {/* Hero Banner */}
+      {/* Hero Banner + Search */}
       <section className="relative bg-[#060C17] text-white overflow-hidden border-b border-white/10">
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-[#0B1426]/90 to-black/80 z-10" />
         <div className="absolute top-10 right-20 h-96 w-96 rounded-full bg-gold/10 blur-[120px] pointer-events-none" />
@@ -232,11 +224,55 @@ function VanCoachFleetContent() {
             First-Class European Fleet
           </div>
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1]">
-            Private Chauffeured <span className="text-gold">Fleet</span>
+            Van & Coach <span className="text-gold">Disposal</span>
           </h1>
-          <p className="mt-4 text-base sm:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed font-normal">
+          <p className="mt-4 text-base sm:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed font-normal mb-8">
             Hire a private Mercedes-Benz vehicle with dedicated English-speaking chauffeur by the hour for business roadshows, shopping, or custom European itineraries.
           </p>
+
+          <div className="max-w-4xl mx-auto text-left">
+            <HeroSearchBar
+              fieldCount={4}
+              submitLabel="Browse Fleet"
+              onSubmit={handleSearch}
+              fields={
+                <>
+                  <DropdownPickerField
+                    label="Location"
+                    icon={IconMapPin}
+                    value={selectedLocationName}
+                    placeholder="e.g. Milan, Zurich, Paris"
+                    options={locations.map((l) => ({ id: l.id, label: l.name, sublabel: l.city }))}
+                    onChange={(_id, name) => setSelectedLocationName(name)}
+                  />
+                  <DropdownPickerField
+                    label="Duration"
+                    icon={IconClock}
+                    value={hours}
+                    placeholder="Select duration"
+                    options={[
+                      { id: "4", label: "4 Hours Half-Day" },
+                      { id: "8", label: "8 Hours Full-Day" },
+                      { id: "10", label: "10 Hours Extended Day" },
+                      { id: "12", label: "12 Hours Grand Day" },
+                      { id: "24", label: "24 Hours Multi-Day" },
+                    ]}
+                    onChange={(id) => setHours(id)}
+                  />
+                  <DatePickerField date={pickupDate} onChange={setPickupDate} />
+                  <DropdownPickerField
+                    label="Pickup Time"
+                    icon={IconClock}
+                    value={pickupTime}
+                    placeholder="Select time"
+                    options={times.map((t) => ({ id: t, label: t }))}
+                    onChange={(id) => setPickupTime(id)}
+                    divider={false}
+                  />
+                </>
+              }
+            />
+          </div>
         </div>
       </section>
 
@@ -259,97 +295,24 @@ function VanCoachFleetContent() {
         </div>
       </section>
 
-      {/* Process Steps */}
-      <section className="bg-slate-50 border-b border-gray-200/80 py-6">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3 overflow-x-auto pb-2">
-            {PROCESS_STEPS.map((s, i) => (
-              <div key={s.step} className="flex items-center gap-3 flex-shrink-0">
-                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-gray-200 shadow-xs">
-                  <span className="text-[10px] font-black text-gold">{s.step}</span>
-                  <div>
-                    <p className="text-[11px] font-extrabold text-navy leading-tight">{s.title}</p>
-                    <p className="text-[9px] text-gray-400 font-medium">{s.desc}</p>
-                  </div>
-                </div>
-                {i < PROCESS_STEPS.length - 1 && <div className="w-6 h-px bg-gray-300 flex-shrink-0" />}
-              </div>
-            ))}
+      {/* Fleet Grid */}
+      <section id="fleet-grid" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-black text-navy">Choose Your Luxury Ride</h2>
+            <p className="text-xs text-gray-500 mt-1">All rates include chauffeur, fuel, insurance & taxes</p>
           </div>
-        </div>
-      </section>
-
-      {/* Search Form */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <Card className="border-gray-200/80 bg-white rounded-3xl shadow-xl p-4 sm:p-6">
-          <div className="mb-5">
-            <span className="text-xs font-bold tracking-widest text-gold uppercase">Step 01: Search Engine</span>
-            <h2 className="text-2xl font-black text-navy mt-1">Configure Hourly Disposal</h2>
-          </div>
-
-          <HeroSearchBar
-            fieldCount={4}
-            submitLabel="Browse Fleet"
-            onSubmit={handleSearch}
-            fields={
-              <>
-                <DropdownPickerField
-                  label="Location"
-                  icon={IconMapPin}
-                  value={selectedLocationName}
-                  placeholder="e.g. Milan, Zurich, Paris"
-                  options={locations.map((l) => ({ id: l.id, label: l.name, sublabel: l.city }))}
-                  onChange={(_id, name) => setSelectedLocationName(name)}
-                />
-                <DropdownPickerField
-                  label="Duration"
-                  icon={IconClock}
-                  value={hours}
-                  placeholder="Select duration"
-                  options={[
-                    { id: "4", label: "4 Hours Half-Day" },
-                    { id: "8", label: "8 Hours Full-Day" },
-                    { id: "10", label: "10 Hours Extended Day" },
-                    { id: "12", label: "12 Hours Grand Day" },
-                    { id: "24", label: "24 Hours Multi-Day" },
-                  ]}
-                  onChange={(id) => setHours(id)}
-                />
-                <DatePickerField date={pickupDate} onChange={setPickupDate} />
-                <DropdownPickerField
-                  label="Pickup Time"
-                  icon={IconClock}
-                  value={pickupTime}
-                  placeholder="Select time"
-                  options={times.map((t) => ({ id: t, label: t }))}
-                  onChange={(id) => setPickupTime(id)}
-                  divider={false}
-                />
-              </>
-            }
-          />
-
-          <div className="mt-4 relative max-w-md">
+          <div className="relative w-full max-w-xs hidden sm:block">
             <IconSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
             <input
               type="text"
               placeholder="Quick search vehicles..."
               value={vehicleSearch}
               onChange={(e) => setVehicleSearch(e.target.value)}
-              className="flex h-11 w-full rounded-xl border border-gray-200 bg-white pl-10 pr-4 py-2 text-xs font-semibold text-navy shadow-sm focus:outline-none focus:border-gold transition-colors"
+              className="flex h-10 w-full rounded-xl border border-gray-200 bg-white pl-10 pr-4 py-2 text-xs font-semibold text-navy shadow-sm focus:outline-none focus:border-gold transition-colors"
             />
           </div>
-        </Card>
-      </section>
-
-      {/* Fleet Grid */}
-      <section id="fleet-grid" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-12">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-black text-navy">Step 02: Choose Your Luxury Ride</h2>
-            <p className="text-xs text-gray-500 mt-1">All rates include chauffeur, fuel, insurance & taxes</p>
-          </div>
-          <Badge variant="secondary" className="text-xs font-bold">{filteredFleet.length} vehicles</Badge>
+          <Badge variant="secondary" className="text-xs font-bold shrink-0">{filteredFleet.length} vehicles</Badge>
         </div>
 
         {loading ? (
