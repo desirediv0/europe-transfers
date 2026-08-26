@@ -69,8 +69,13 @@ function MobileNav() {
       </SheetTrigger>
       <SheetContent side="left" className="w-80 p-0 bg-white">
         <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
-          <Link href="/" onClick={handleNav} className="relative h-10 w-40 shrink-0">
-            <Image src="/logo-2.jpeg" alt="The Europe Transfers" fill className="object-contain" priority />
+          <Link href="/" onClick={handleNav} className="flex flex-col shrink-0">
+            <span className="relative h-10 w-40">
+              <Image src="/logo-2.jpeg" alt="The Europe Transfers" fill className="object-contain" priority />
+            </span>
+            <span className="text-[10px] font-semibold text-gold tracking-wide text-center -mt-0.5">
+              Sponsored by Euro Fleet
+            </span>
           </Link>
         </div>
         <nav className="flex flex-col gap-1 p-4">
@@ -164,14 +169,19 @@ export function Header() {
         {/* Left: Logo & Mobile Menu */}
         <div className="flex items-center gap-1.5 sm:gap-3">
           <MobileNav />
-          <Link href="/" className="relative h-8 sm:h-10 w-28 sm:w-36 shrink-0">
-            <Image
-              src="/logo-2.jpeg"
-              alt="The Europe Transfers"
-              fill
-              className="object-contain"
-              priority
-            />
+          <Link href="/" className="flex flex-col shrink-0">
+            <span className="relative h-8 sm:h-10 w-28 sm:w-36">
+              <Image
+                src="/logo-2.jpeg"
+                alt="The Europe Transfers"
+                fill
+                className="object-contain"
+                priority
+              />
+            </span>
+            <span className="text-[9px] sm:text-[10px] font-semibold text-gold tracking-wide text-center -mt-0.5">
+              Sponsored by Euro Fleet
+            </span>
           </Link>
         </div>
 
