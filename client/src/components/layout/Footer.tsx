@@ -41,39 +41,6 @@ const navigation = {
       ],
     },
     {
-      id: "services",
-      name: "Services",
-      items: [
-        { name: "Airport Transfers", href: "/private-transfers" },
-        { name: "Intercity Transfers", href: "/private-transfers" },
-        { name: "Private Hire (UK)", href: "/private-transfers" },
-        { name: "Van & Coach Disposal", href: "/van-coach" },
-        { name: "Chauffeur By Hour", href: "/private-transfers" },
-        { name: "Private VIP Tours", href: "/packages" },
-      ],
-    },
-    {
-      id: "destinations",
-      name: "Destinations",
-      items: [
-        { name: "Paris & France", href: "/rates/paris-france" },
-        { name: "Swiss Alps & Zurich", href: "/rates/swiss-zurich" },
-        { name: "Amalfi & Rome", href: "/rates/amalfi-rome" },
-        { name: "Milan & Venice", href: "/rates/milan-venice" },
-        { name: "Vienna & Prague", href: "/rates/vienna-prague" },
-      ],
-    },
-    {
-      id: "fleet",
-      name: "Fleet",
-      items: [
-        { name: "Mercedes S-Class", href: "/private-transfers" },
-        { name: "Mercedes V-Class Van", href: "/private-transfers" },
-        { name: "Executive Sedans", href: "/private-transfers" },
-        { name: "Private Minibuses", href: "/private-transfers" },
-      ],
-    },
-    {
       id: "company",
       name: "Company",
       items: [
@@ -148,7 +115,7 @@ export function Footer() {
         <div className="border-b border-dotted border-gray-300" />
 
         <div className="py-10">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-8 leading-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 leading-6">
             {navigation.sections.map((section) => (
               <div key={section.id}>
                 <h4 className="text-xs font-black uppercase tracking-wider text-navy mb-3 border-b border-gold/40 pb-1.5 inline-block">
