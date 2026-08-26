@@ -44,8 +44,8 @@ const defaultSearch: SearchFormData = {
   fromLocationName: "",
   toLocationId: "",
   toLocationName: "",
-  pickupDate: null,
-  pickupTime: "",
+  pickupDate: new Date(),
+  pickupTime: "09:00 AM",
   passengers: 1,
 };
 
