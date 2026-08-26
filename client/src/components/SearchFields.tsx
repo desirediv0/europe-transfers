@@ -12,7 +12,6 @@ import {
   IconUsers,
   IconMinus,
   IconPlus,
-  IconChevronDown,
   IconSearch,
   IconCircleCheck,
 } from "@tabler/icons-react";
@@ -54,11 +53,10 @@ export function DropdownPickerField({
     <SearchField icon={icon} label={label} divider={divider}>
       <Popover open={open} onOpenChange={(o) => { setOpen(o); if (!o) setQuery(""); }}>
         <PopoverTrigger asChild>
-          <button type="button" className="flex w-full items-center justify-between gap-1 text-left mt-0.5 cursor-pointer">
-            <span className={cn("truncate text-sm font-bold", selected ? "text-navy" : "text-gray-400 font-medium")}>
+          <button type="button" className="flex w-full items-center text-left cursor-pointer">
+            <span className={cn("truncate text-sm", selected ? "text-navy font-semibold" : "text-gray-400 font-normal")}>
               {selected ? selected.label : placeholder}
             </span>
-            <IconChevronDown className="h-3.5 w-3.5 shrink-0 text-gray-400" />
           </button>
         </PopoverTrigger>
         <PopoverContent className="p-0 w-[280px] z-50 bg-white shadow-2xl rounded-2xl border border-gray-100" align="start" side="bottom" sideOffset={8}>
@@ -126,11 +124,10 @@ export function DatePickerField({
     <SearchField icon={IconCalendar} label={label} divider={divider}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <button type="button" className="flex w-full items-center justify-between gap-1 text-left mt-0.5 cursor-pointer">
-            <span className={cn("truncate text-sm font-bold", date ? "text-navy" : "text-gray-400 font-medium")}>
+          <button type="button" className="flex w-full items-center text-left cursor-pointer">
+            <span className={cn("truncate text-sm", date ? "text-navy font-semibold" : "text-gray-400 font-normal")}>
               {date ? format(date, "EEE, MMM d") : "Select date"}
             </span>
-            <IconChevronDown className="h-3.5 w-3.5 shrink-0 text-gray-400" />
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0 z-50 bg-white shadow-2xl rounded-2xl border border-gray-100" align="start" side="bottom" sideOffset={8}>
@@ -146,13 +143,84 @@ export function DatePickerField({
   );
 }
 
+const TIME_OPTIONS: string[] = (() => {
+  const times: string[] = [];
+  for (let h = 0; h < 24; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      const hr = h % 12 || 12;
+      const ampm = h < 12 ? "AM" : "PM";
+      const min = m.toString().padStart(2, "0");
+      times.push(`${hr}:${min} ${ampm}`);
+    }
+  }
+  return times;
+})();
+
+export function DateTimePickerField({
+  label = "Pickup date",
+  date,
+  time,
+  onDateChange,
+  onTimeChange,
+  divider = true,
+  minDate,
+}: {
+  label?: string;
+  date: Date | null;
+  time: string;
+  onDateChange: (date: Date) => void;
+  onTimeChange: (time: string) => void;
+  divider?: boolean;
+  minDate?: Date;
+}) {
+  const [open, setOpen] = useState(false);
+  const disabledBefore = useMemo(() => minDate || new Date(new Date().setHours(0, 0, 0, 0)), [minDate]);
+
+  return (
+    <SearchField icon={IconCalendar} label={label} divider={divider}>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button type="button" className="flex w-full items-center text-left cursor-pointer">
+            <span className={cn("truncate text-sm", date ? "text-navy font-semibold" : "text-gray-400 font-normal")}>
+              {date ? `${format(date, "EEE, MMM d")}${time ? ` · ${time}` : ""}` : "Select date"}
+            </span>
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="p-0 z-50 bg-white shadow-2xl rounded-2xl border border-gray-100 flex" align="start" side="bottom" sideOffset={8}>
+          <Calendar
+            mode="single"
+            selected={date || undefined}
+            onSelect={(d) => { if (d) onDateChange(d); }}
+            disabled={{ before: disabledBefore }}
+          />
+          <div className="w-36 border-l border-gray-100 max-h-[340px] overflow-y-auto p-2">
+            <span className="block text-[10px] font-bold uppercase tracking-wide text-gray-400 px-2 py-1">Time</span>
+            {TIME_OPTIONS.map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => { onTimeChange(t); setOpen(false); }}
+                className={cn(
+                  "block w-full text-left rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-slate-100",
+                  time === t ? "bg-navy text-white hover:bg-navy" : "text-navy"
+                )}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+    </SearchField>
+  );
+}
+
 export function StepperField({
   label,
   icon = IconUsers,
   value,
   min = 1,
   max = 20,
-  unitLabel,
   onChange,
   divider = false,
 }: {
@@ -167,28 +235,26 @@ export function StepperField({
 }) {
   return (
     <SearchField icon={icon} label={label} divider={divider}>
-      <div className="flex items-center justify-between gap-1 mt-0.5">
-        <span className="text-sm font-bold text-navy">
-          {value} {unitLabel ? unitLabel(value) : ""}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => onChange(Math.max(min, value - 1))}
+          disabled={value <= min}
+          className="flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 text-gray-600 disabled:opacity-30 hover:border-gray-400 transition-colors cursor-pointer shrink-0"
+        >
+          <IconMinus className="h-3 w-3" />
+        </button>
+        <span className="text-sm text-navy font-semibold w-4 text-center shrink-0">
+          {value}
         </span>
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => onChange(Math.max(min, value - 1))}
-            disabled={value <= min}
-            className="flex h-6 w-6 items-center justify-center rounded-full bg-navy text-white disabled:opacity-30 hover:bg-navy/90 transition-colors cursor-pointer"
-          >
-            <IconMinus className="h-3 w-3" />
-          </button>
-          <button
-            type="button"
-            onClick={() => onChange(Math.min(max, value + 1))}
-            disabled={value >= max}
-            className="flex h-6 w-6 items-center justify-center rounded-full bg-navy text-white disabled:opacity-30 hover:bg-navy/90 transition-colors cursor-pointer"
-          >
-            <IconPlus className="h-3 w-3" />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => onChange(Math.min(max, value + 1))}
+          disabled={value >= max}
+          className="flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 text-gray-600 disabled:opacity-30 hover:border-gray-400 transition-colors cursor-pointer shrink-0"
+        >
+          <IconPlus className="h-3 w-3" />
+        </button>
       </div>
     </SearchField>
   );

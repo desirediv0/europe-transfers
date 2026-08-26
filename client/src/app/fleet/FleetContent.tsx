@@ -296,7 +296,7 @@ function FleetGallery({ carTypes, loading }: { carTypes: CarType[]; loading: boo
             Select your pickup & drop-off locations across 120+ European cities for instant all-inclusive fixed pricing.
           </p>
 
-          <div className="flex justify-center max-w-xl mx-auto text-left">
+          <div className="max-w-4xl mx-auto text-left">
             <TransferSearchWidget />
           </div>
         </div>

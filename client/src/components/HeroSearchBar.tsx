@@ -60,15 +60,15 @@ export function HeroSearchBar({
         </Tabs>
       )}
 
-      <div className="bg-white rounded-2xl sm:rounded-full shadow-2xl border border-gray-100 p-2 flex flex-col sm:flex-row sm:items-stretch gap-1.5 sm:gap-0">
-        <div className={cn("grid grid-cols-1 flex-1 gap-1.5 sm:gap-0 sm:items-stretch", gridColsClass)}>
+      <div className="bg-white rounded-2xl sm:rounded-full shadow-xl border border-gray-100 p-2 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-0">
+        <div className={cn("grid grid-cols-1 flex-1 gap-1.5 sm:gap-0 sm:items-center", gridColsClass)}>
           {fields}
         </div>
 
         <Button
           onClick={onSubmit}
           disabled={disabled || submitting}
-          className="w-full sm:w-auto h-12 sm:h-auto px-6 rounded-xl sm:rounded-full bg-navy hover:bg-navy-light text-white font-bold text-sm shrink-0 cursor-pointer"
+          className="w-full sm:w-auto h-12 px-7 rounded-xl sm:rounded-full bg-black hover:bg-neutral-800 text-white font-bold text-sm shrink-0 cursor-pointer"
         >
           {submitting ? (
             <IconLoader2 className="h-4 w-4 animate-spin" />
@@ -98,15 +98,15 @@ export function SearchField({
   return (
     <div
       className={cn(
-        "flex flex-col justify-center px-4 py-2 sm:py-1.5 rounded-xl sm:rounded-none hover:bg-slate-50 transition-colors relative",
-        divider && "sm:border-r sm:border-gray-150 last:border-r-0"
+        "flex items-start gap-2.5 px-4 py-2.5 sm:py-2 rounded-xl sm:rounded-none hover:bg-slate-50 transition-colors relative",
+        divider && "sm:border-r sm:border-gray-200 last:border-r-0"
       )}
     >
-      <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400">
-        {Icon && <Icon className="h-3 w-3 text-gold" />}
-        {label}
-      </span>
-      {children}
+      {Icon && <Icon className="h-4 w-4 text-gray-400 shrink-0 mt-0.5" />}
+      <div className="flex-1 min-w-0">
+        <span className="block text-xs text-gray-500 font-medium">{label}</span>
+        {children}
+      </div>
     </div>
   );
 }
