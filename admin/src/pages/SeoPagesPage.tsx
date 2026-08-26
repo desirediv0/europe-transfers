@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import env from "@/config/env.config";
 import type { SeoPage, Pagination } from "@/lib/types";
 import { Plus, Eye, Pencil, Trash2, Search } from "lucide-react";
 
@@ -117,7 +118,7 @@ export default function SeoPagesPage() {
                     <TableCell className="py-4 pl-6">
                       <div className="font-semibold text-gray-900">{item.title}</div>
                       <a
-                        href={`http://localhost:3000/${item.slug}`}
+                        href={`${env.CLIENT_URL}/${item.slug}`}
                         target="_blank"
                         rel="noreferrer"
                         className="text-xs text-[#1B2A4A] hover:underline font-medium mt-0.5 block"
@@ -146,7 +147,7 @@ export default function SeoPagesPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => window.open(`http://localhost:3000/${item.slug}`, "_blank")}
+                          onClick={() => window.open(`${env.CLIENT_URL}/${item.slug}`, "_blank")}
                           className="text-gray-400 hover:text-[#1B2A4A] hover:bg-slate-100 h-8 w-8 rounded-lg"
                           title="Preview Page"
                         >
