@@ -101,8 +101,8 @@ export default function HomePage() {
 
   useEffect(() => {
     Promise.all([
-      api.get<{ items: Package[] }>("/packages?featured=true&limit=6"),
-      api.get<LocationSummary[]>("/locations/all"),
+      api.get<{ items: Package[] }>("/packages?featured=true&limit=6").catch(() => ({ items: [] })),
+      api.get<LocationSummary[]>("/locations/all").catch(() => []),
       api.get<FeaturedRoute[]>("/routes/featured?limit=6").catch(() => []),
       api.get<FeaturedVehicle[]>("/van-coach/all?featured=true").catch(() => []),
       api.get<{ items: FeaturedTour[] }>("/sightseeing?featured=true&limit=6").catch(() => ({ items: [] })),
