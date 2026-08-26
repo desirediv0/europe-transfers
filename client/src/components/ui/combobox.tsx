@@ -42,7 +42,13 @@ export function Combobox({
   const [search, setSearch] = useState("");
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) setSearch("");
+      }}
+    >
       <PopoverTrigger asChild>
         <Button
           type="button"
@@ -73,8 +79,10 @@ export function Combobox({
               {allowCustomValue && search.trim() ? (
                 <button
                   type="button"
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
                     onChange(search.trim());
+                    setSearch("");
                     setOpen(false);
                   }}
                   className="w-full text-left px-2 py-1.5 text-sm hover:bg-accent rounded-sm cursor-pointer"
@@ -93,8 +101,10 @@ export function Combobox({
                 <CommandItem
                   key={option}
                   value={option}
-                  onSelect={(currentValue) => {
-                    onChange(currentValue === value ? "" : currentValue);
+                  onMouseDown={(e) => e.preventDefault()}
+                  onSelect={() => {
+                    onChange(option === value ? "" : option);
+                    setSearch("");
                     setOpen(false);
                   }}
                   className="cursor-pointer"
