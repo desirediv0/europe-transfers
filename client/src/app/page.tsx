@@ -12,7 +12,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { api } from "@/lib/api";
-import type { Package, Route } from "@/lib/types";
+import type { Package, Route, BlogPost } from "@/lib/types";
 import CTASection from "@/components/CTASection";
 import { FullScreenScrollFX } from "@/components/ui/full-screen-scroll-fx";
 import PackageCard, { PackageCardSkeleton } from "@/components/PackageCard";
@@ -33,6 +33,8 @@ import {
   IconCompass,
   IconUsersGroup,
   IconRoute,
+  IconArticle,
+  IconCalendar,
 } from "@tabler/icons-react";
 
 const HERO_IMAGES = [
@@ -91,6 +93,7 @@ export default function HomePage() {
   const [featuredRoutes, setFeaturedRoutes] = useState<FeaturedRoute[]>([]);
   const [featuredVehicles, setFeaturedVehicles] = useState<FeaturedVehicle[]>([]);
   const [featuredTours, setFeaturedTours] = useState<FeaturedTour[]>([]);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [_, setCurrentImageIndex] = useState(0);
 
@@ -103,8 +106,9 @@ export default function HomePage() {
       api.get<FeaturedRoute[]>("/routes/featured?limit=6").catch(() => []),
       api.get<FeaturedVehicle[]>("/van-coach/all?featured=true").catch(() => []),
       api.get<{ items: FeaturedTour[] }>("/sightseeing?featured=true&limit=6").catch(() => ({ items: [] })),
+      api.get<{ items: BlogPost[] }>("/blog/posts?page=1&limit=8&status=PUBLISHED").catch(() => ({ items: [] })),
     ])
-      .then(([p, locations, routes, vehicles, tours]) => {
+      .then(([p, locations, routes, vehicles, tours, blog]) => {
         setPackages(p.items);
 
         const byCity = new Map<string, number>();
@@ -123,6 +127,7 @@ export default function HomePage() {
         setFeaturedRoutes(routes);
         setFeaturedVehicles(vehicles);
         setFeaturedTours(tours.items);
+        setBlogPosts(blog.items);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -817,6 +822,62 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Latest From The Blog Section */}
+      {blogPosts.length > 0 && (
+        <section className="bg-slate-50/70 py-12 lg:py-16 relative overflow-hidden border-b border-gray-100">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+              <div className="max-w-2xl">
+                <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-xs font-bold text-gold uppercase tracking-widest mb-4">
+                  <IconArticle className="h-4 w-4 text-gold" />
+                  Travel Guides & Insights
+                </div>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-navy tracking-tight leading-[1.15]">
+                  Latest From The <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-500 to-yellow-600">Blog</span>
+                </h2>
+              </div>
+              <Link
+                href="/blog"
+                className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-gold hover:bg-gold-light text-navy px-6 py-3.5 text-sm font-bold shadow-lg shadow-gold/25 hover:shadow-gold/40 hover:-translate-y-0.5 transition-all duration-300 self-start md:self-auto flex-shrink-0"
+              >
+                View All Articles <IconArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {blogPosts.map((post) => (
+                <Link
+                  key={post.id}
+                  href={`/blog/${post.slug}`}
+                  className="group bg-white border border-gray-200/80 rounded-xl overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="relative h-24 sm:h-28 bg-navy/5">
+                    {post.coverImage ? (
+                      <img src={post.coverImage} alt={post.title} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center bg-gradient-to-br from-navy to-navy/70">
+                        <IconArticle className="h-6 w-6 text-gold/60" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <p className="text-xs font-bold text-navy leading-snug line-clamp-2 group-hover:text-gold transition-colors">
+                      {post.title}
+                    </p>
+                    {post.publishedAt && (
+                      <p className="text-[10px] text-gray-400 mt-2 flex items-center gap-1">
+                        <IconCalendar className="h-3 w-3" />
+                        {new Date(post.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Reusable Dribbble-Style CTA Section */}
       <CTASection />
