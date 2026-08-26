@@ -32,7 +32,6 @@ import blogPostRoutes from "./routes/blogPost.routes.js";
 import vanCoachRoutes from "./routes/vanCoach.routes.js";
 import currencyRoutes from "./routes/currency.routes.js";
 import sightseeingRoutes from "./routes/sightseeing.routes.js";
-import siteSettingsRoutes from "./routes/siteSettings.routes.js";
 import jobRoutes from "./routes/job.routes.js";
 import fleetPartnerRoutes from "./routes/fleetPartner.routes.js";
 
@@ -68,7 +67,6 @@ app.use("/api/v1/car-types", carTypeRoutes);
 app.use("/api/v1/van-coach", vanCoachRoutes);
 app.use("/api/v1/currency", currencyRoutes);
 app.use("/api/v1/sightseeing", sightseeingRoutes);
-app.use("/api/v1/site-settings", siteSettingsRoutes);
 app.use("/api/v1/routes", routeRoutes);
 app.use("/api/v1/route-prices", routePriceRoutes);
 app.use("/api/v1/packages", packageRoutes);

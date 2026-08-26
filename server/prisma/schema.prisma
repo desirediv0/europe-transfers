@@ -383,17 +383,6 @@ model Order {
   @@index([razorpayPaymentId])
 }
 
-// ─── Site Settings (singleton) ──────────────────────────
-
-model SiteSettings {
-  id                       String   @id @default("singleton")
-  showPrivateTransfers     Boolean  @default(true)
-  showVanCoach             Boolean  @default(true)
-  showPackages             Boolean  @default(true)
-  showSightseeing          Boolean  @default(true)
-  updatedAt                DateTime @updatedAt
-}
-
 // ─── Testimonials ───────────────────────────────────────
 
 model Testimonial {

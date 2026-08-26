@@ -27,14 +27,12 @@ import {
   Compass,
   CreditCard,
   Ship,
-  Settings,
   Briefcase,
   Handshake,
 } from "lucide-react";
 
 const topNavItems = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/" },
-  { label: "Homepage Settings", icon: Settings, href: "/homepage-settings" },
 ];
 
 // Everything below powers /private-transfers on the website (uses Location/CarType/Route/Booking models)

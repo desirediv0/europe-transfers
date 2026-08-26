@@ -35,44 +35,6 @@ import {
   IconRoute,
 } from "@tabler/icons-react";
 
-interface SiteSettings {
-  showPrivateTransfers: boolean;
-  showVanCoach: boolean;
-  showPackages: boolean;
-  showSightseeing: boolean;
-}
-
-const SERVICE_CARDS = [
-  {
-    key: "showPrivateTransfers" as const,
-    title: "Private Transfers",
-    description: "Fixed-price airport, hotel & intercity chauffeured transfers in luxury Mercedes-Benz sedans and minivans.",
-    href: "/private-transfers",
-    icon: IconCar,
-  },
-  {
-    key: "showVanCoach" as const,
-    title: "Van & Coach",
-    description: "Hourly vehicle disposal with a dedicated chauffeur for business roadshows, shopping, or custom itineraries.",
-    href: "/van-coach",
-    icon: IconBus,
-  },
-  {
-    key: "showPackages" as const,
-    title: "Packages",
-    description: "Hand-picked multi-day luxury tour itineraries across Europe's most iconic destinations.",
-    href: "/packages",
-    icon: IconPackage,
-  },
-  {
-    key: "showSightseeing" as const,
-    title: "Sightseeing",
-    description: "Skip-the-line tickets and guided activities at top European attractions and landmarks.",
-    href: "/sightseeing",
-    icon: IconCompass,
-  },
-];
-
 const HERO_IMAGES = [
   "/images/hero_swiss_alps.png",
   "/images/hero_paris_twilight.png",
@@ -126,7 +88,6 @@ interface FeaturedTour {
 export default function HomePage() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [cities, setCities] = useState<FeaturedCity[]>([]);
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [featuredRoutes, setFeaturedRoutes] = useState<FeaturedRoute[]>([]);
   const [featuredVehicles, setFeaturedVehicles] = useState<FeaturedVehicle[]>([]);
   const [featuredTours, setFeaturedTours] = useState<FeaturedTour[]>([]);
@@ -139,12 +100,11 @@ export default function HomePage() {
     Promise.all([
       api.get<{ items: Package[] }>("/packages?featured=true&limit=6"),
       api.get<LocationSummary[]>("/locations/all"),
-      api.get<SiteSettings>("/site-settings").catch(() => null),
       api.get<FeaturedRoute[]>("/routes/featured?limit=6").catch(() => []),
       api.get<FeaturedVehicle[]>("/van-coach/all?featured=true").catch(() => []),
       api.get<{ items: FeaturedTour[] }>("/sightseeing?featured=true&limit=6").catch(() => ({ items: [] })),
     ])
-      .then(([p, locations, s, routes, vehicles, tours]) => {
+      .then(([p, locations, routes, vehicles, tours]) => {
         setPackages(p.items);
 
         const byCity = new Map<string, number>();
@@ -160,7 +120,6 @@ export default function HomePage() {
           .slice(0, 6);
 
         setCities(featuredCities);
-        setSettings(s);
         setFeaturedRoutes(routes);
         setFeaturedVehicles(vehicles);
         setFeaturedTours(tours.items);
@@ -245,45 +204,6 @@ export default function HomePage() {
           }}
         />
       </section>
-
-      {/* Our Services Section (admin-controlled visibility) */}
-      {(!settings || SERVICE_CARDS.some((s) => settings[s.key])) && (
-        <section className="bg-white py-12 lg:py-16 relative overflow-hidden border-b border-gray-100">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-2xl mx-auto mb-12">
-              <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-xs font-bold text-gold uppercase tracking-widest mb-4">
-                <IconShieldCheck className="h-4 w-4 text-gold" />
-                Our Services
-              </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-navy tracking-tight leading-[1.15]">
-                Everything You Need To <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-500 to-yellow-600">Travel Europe</span>
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {SERVICE_CARDS.filter((s) => !settings || settings[s.key]).map((service) => (
-                <Link
-                  key={service.key}
-                  href={service.href}
-                  className="group relative bg-white border border-gray-200/80 rounded-[1.5rem] p-7 transition-all duration-300 hover:shadow-xl hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden"
-                >
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-gold/10 to-transparent rounded-bl-[3rem] pointer-events-none" />
-                  <div>
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-navy text-gold mb-6 transition-transform duration-300 group-hover:scale-110">
-                      <service.icon className="h-6 w-6" strokeWidth={1.8} />
-                    </div>
-                    <h3 className="text-lg font-black text-navy group-hover:text-gold transition-colors">{service.title}</h3>
-                    <p className="text-xs text-gray-500 mt-2 leading-relaxed">{service.description}</p>
-                  </div>
-                  <div className="mt-6 pt-4 border-t border-gray-100 flex items-center gap-1.5 text-xs font-bold text-gold">
-                    Explore <IconArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Features & Why Choose Us Section */}
       <section className="bg-slate-50/70 py-12 lg:py-16 relative overflow-hidden">

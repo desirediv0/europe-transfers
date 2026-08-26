@@ -6,7 +6,6 @@ import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { Sidebar, AdminHeader } from "@/components/layout/Sidebar";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
-import SiteSettingsPage from "@/pages/SiteSettingsPage";
 import LocationsPage from "@/pages/LocationsPage";
 import CarTypesPage from "@/pages/CarTypesPage";
 import VanCoachPage from "@/pages/VanCoachPage";
@@ -60,7 +59,6 @@ export default function App() {
                   <AdminLayout>
                     <Routes>
                       <Route path="/" element={<DashboardPage />} />
-                      <Route path="/homepage-settings" element={<SiteSettingsPage />} />
                       
                       {/* SEO Dynamic Pages */}
                       <Route path="/seo-pages" element={<SeoPagesPage />} />
