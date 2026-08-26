@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import TeamShowcase from "@/components/ui/team-showcase";
 import CTASection from "@/components/CTASection";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -188,13 +187,6 @@ export default function AboutPage() {
               </CardContent>
             </Card>
           ))}
-        </div>
-      </section>
-
-      {/* Leadership & Chauffeur Team Showcase Section */}
-      <section className="bg-white border-t border-b border-gray-200/80 py-16 sm:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <TeamShowcase />
         </div>
       </section>
 

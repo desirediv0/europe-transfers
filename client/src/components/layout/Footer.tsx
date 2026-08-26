@@ -45,7 +45,6 @@ const navigation = {
       name: "Company",
       items: [
         { name: "About Us", href: "/about" },
-        { name: "Leadership Team", href: "/about" },
         { name: "Fleet Standards", href: "/private-transfers" },
         { name: "Tour Packages", href: "/packages" },
         { name: "Europe Transfers Blog", href: "/blog" },
