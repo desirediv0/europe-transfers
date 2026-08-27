@@ -14,7 +14,6 @@ import {
 import { api } from "@/lib/api";
 import type { Package, Route, BlogPost } from "@/lib/types";
 import CTASection from "@/components/CTASection";
-import { FullScreenScrollFX } from "@/components/ui/full-screen-scroll-fx";
 import PackageCard, { PackageCardSkeleton } from "@/components/PackageCard";
 import DestinationCard, { DestinationCardSkeleton, type FeaturedCity } from "@/components/DestinationCard";
 import {
@@ -142,72 +141,61 @@ export default function HomePage() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative overflow-hidden">
-        <FullScreenScrollFX
-          sections={[
-            {
-              id: "swiss-alps",
-              leftLabel: "Alps & Mountains",
-              title: <>SWISS ALPS</>,
-              rightLabel: "Luxury Transfers",
-              background: "/images/hero_swiss_alps.png",
-            },
-            {
-              id: "paris-twilight",
-              leftLabel: "City Escapes",
-              title: <>PARIS TWILIGHT</>,
-              rightLabel: "Chauffeur Service",
-              background: "/images/hero_paris_twilight.png",
-            },
-            {
-              id: "amalfi-coast",
-              leftLabel: "Coastal Journeys",
-              title: <>AMALFI COAST</>,
-              rightLabel: "Private Tours",
-              background: "/images/hero_amalfi_coast.png",
-            },
-          ]}
-          header={
-            <div className="flex flex-col items-center justify-center">
-              <div className="inline-flex items-center gap-2 rounded-full bg-black/40 backdrop-blur-md px-3.5 py-1 text-[11px] font-bold text-gold border border-gold/40 tracking-widest uppercase mb-2 shadow-lg">
-                <IconShieldCheck className="h-3.5 w-3.5 text-gold" />
-                The Europe Transfers
-              </div>
-              <div className="text-[clamp(1.5rem,3.5vw,3.2rem)] font-extrabold text-white tracking-tight leading-tight drop-shadow-lg mb-1">
-                TRAVEL EUROPE IN STYLE
-              </div>
-            </div>
-          }
-          footer={
-            <div className="flex flex-col items-center gap-3 w-full px-4">
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-3.5 w-full max-w-md sm:max-w-none">
-                <Link href="/private-transfers" className="w-full sm:w-auto">
-                  <Button
-                    size="lg"
-                    className="w-full sm:w-auto h-12 px-8 rounded-full text-sm font-extrabold bg-gold hover:bg-gold-light text-navy shadow-xl shadow-gold/30 hover:shadow-gold/50 transition-all duration-300 pointer-events-auto uppercase tracking-wide border-2 border-gold"
-                  >
-                    <IconCar className="mr-2 h-5 w-5" /> PRIVATE TRANSFERS
-                  </Button>
-                </Link>
-                <Link href="/van-coach" className="w-full sm:w-auto">
-                  <Button
-                    size="lg"
-                    className="w-full sm:w-auto h-12 px-8 rounded-full text-sm font-extrabold bg-black/60 border-2 border-white/80 text-white backdrop-blur-md hover:bg-white hover:text-navy transition-all duration-300 pointer-events-auto uppercase tracking-wide shadow-xl"
-                  >
-                    <IconClock className="mr-2 h-5 w-5 text-gold" /> VAN & COACH
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          }
-          durations={{ change: 0.7, snap: 800 }}
-          colors={{
-            text: "#FFFFFF",
-            overlay: "linear-gradient(to bottom, rgba(5,10,20,0.5) 0%, rgba(5,10,20,0.1) 40%, rgba(5,10,20,0.1) 60%, rgba(5,10,20,0.6) 100%)",
-            pageBg: "#0B1426",
-            stageBg: "#050B14",
+      <section className="relative h-[100svh] min-h-[560px] w-full overflow-hidden bg-[#0B1426]">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          className="absolute inset-0 h-full w-full object-cover"
+          poster="/images/hero_paris_twilight.png"
+        >
+          <source
+            src="https://desirediv-storage.blr1.cdn.digitaloceanspaces.com/euro/magnific_cinematic-luxury-travel-c_EbrjM7EuuO.mp4"
+            type="video/mp4"
+          />
+        </video>
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(5,10,20,0.55) 0%, rgba(5,10,20,0.15) 40%, rgba(5,10,20,0.15) 60%, rgba(5,10,20,0.65) 100%)",
           }}
         />
+
+        <div className="relative z-10 flex h-full flex-col items-center justify-between px-4 py-10 sm:py-14 text-center">
+          <div className="flex flex-col items-center justify-center">
+            <div className="inline-flex items-center gap-2 rounded-full bg-black/40 backdrop-blur-md px-3.5 py-1 text-[11px] font-bold text-gold border border-gold/40 tracking-widest uppercase mb-2 shadow-lg">
+              <IconShieldCheck className="h-3.5 w-3.5 text-gold" />
+              The Europe Transfers
+            </div>
+            <div className="text-[clamp(1.5rem,3.5vw,3.2rem)] font-extrabold text-white tracking-tight leading-tight drop-shadow-lg mb-1">
+              TRAVEL EUROPE IN STYLE
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center gap-3 w-full">
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-3.5 w-full max-w-md sm:max-w-none">
+              <Link href="/private-transfers" className="w-full sm:w-auto">
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto h-12 px-8 rounded-full text-sm font-extrabold bg-gold hover:bg-gold-light text-navy shadow-xl shadow-gold/30 hover:shadow-gold/50 transition-all duration-300 uppercase tracking-wide border-2 border-gold"
+                >
+                  <IconCar className="mr-2 h-5 w-5" /> PRIVATE TRANSFERS
+                </Button>
+              </Link>
+              <Link href="/van-coach" className="w-full sm:w-auto">
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto h-12 px-8 rounded-full text-sm font-extrabold bg-black/60 border-2 border-white/80 text-white backdrop-blur-md hover:bg-white hover:text-navy transition-all duration-300 uppercase tracking-wide shadow-xl"
+                >
+                  <IconClock className="mr-2 h-5 w-5 text-gold" /> VAN & COACH
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Features & Why Choose Us Section */}
