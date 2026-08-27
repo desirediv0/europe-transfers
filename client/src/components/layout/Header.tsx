@@ -104,11 +104,11 @@ function MobileNav() {
           </div>
 
           <a
-            href="tel:+41441234567"
+            href="tel:+918882382864"
             className="flex items-center gap-3 rounded-xl px-4 py-3 text-xs font-bold text-navy bg-slate-50 border border-gray-100"
           >
             <IconHeadset className="h-4.5 w-4.5 text-gold" />
-            <span>Call Now: +41 44 123 4567</span>
+            <span>Call Now: +91 8882382864</span>
           </a>
 
           {user ? (
@@ -214,12 +214,12 @@ export function Header() {
 
           {/* Call Now Button Pill */}
           <a
-            href="tel:+41441234567"
+            href="tel:+918882382864"
             className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-gray-200/80 bg-white px-3.5 py-2 text-xs font-bold text-navy hover:border-gold transition-all"
             title="Call Support"
           >
             <IconHeadset className="h-4 w-4 text-gold" />
-            <span className="hidden lg:inline">+41 44 123 4567</span>
+            <span className="hidden lg:inline">+91 8882382864</span>
             <span className="lg:hidden">Call</span>
           </a>
 

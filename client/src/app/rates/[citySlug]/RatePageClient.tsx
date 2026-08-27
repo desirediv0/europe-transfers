@@ -327,7 +327,7 @@ export function RatePageClient({ locations, routes, citySlug }: Props) {
                 <IconInfoCircle className="mr-2 h-4 w-4" /> Request Custom Quote
               </Button>
             </Link>
-            <Link href="tel:+41441234567">
+            <Link href="tel:+918882382864">
               <Button variant="outline" size="lg" className="rounded-xl border-white/20 text-white hover:bg-white/10 hover:text-white px-7 py-3.5 text-xs sm:text-sm font-bold cursor-pointer">
                 <IconPhone className="mr-2 h-4 w-4" /> Speak with Concierge
               </Button>

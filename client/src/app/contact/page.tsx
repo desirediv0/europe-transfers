@@ -336,8 +336,8 @@ function ContactFormContent() {
           </div>
           <h4 className="font-semibold text-base text-navy">Call & WhatsApp</h4>
           <div className="text-xs text-gray-500 font-medium space-y-0.5">
-            <p>+41 44 123 4567</p>
-            <p>+49 123 456 789</p>
+            <p>+91 8882382864</p>
+            <p>+91 87967 57775</p>
           </div>
         </div>
 

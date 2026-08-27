@@ -209,7 +209,7 @@ export function Footer() {
           </Link>
           <Link
             aria-label="WhatsApp Concierge"
-            href="https://wa.me/"
+            href="https://wa.me/918796757775"
             target="_blank"
             rel="noreferrer"
             className={Underline}

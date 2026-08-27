@@ -331,7 +331,7 @@ export function PackageDetailClient({ pkg }: Props) {
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center gap-3 text-xs font-semibold text-gray-200">
                     <IconPhone className="h-4 w-4 text-gold flex-shrink-0" />
-                    <span>+41 44 123 4567</span>
+                    <span>+91 8882382864</span>
                   </div>
                   <div className="flex items-center gap-3 text-xs font-semibold text-gray-200">
                     <IconMail className="h-4 w-4 text-gold flex-shrink-0" />
@@ -494,13 +494,13 @@ export function PackageDetailClient({ pkg }: Props) {
             <p className="text-[10px] font-bold text-gold uppercase tracking-widest">Need Immediate Assistance?</p>
             <div className="flex items-center justify-center gap-3">
               <a
-                href="tel:+41441234567"
+                href="tel:+918882382864"
                 className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 p-2.5 text-xs font-extrabold text-navy hover:bg-slate-50 transition-colors"
               >
                 <IconPhoneCall className="h-4 w-4 text-gold" /> Call Team
               </a>
               <a
-                href="https://wa.me/41441234567"
+                href="https://wa.me/918796757775"
                 target="_blank"
                 rel="noreferrer"
                 className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 text-white p-2.5 text-xs font-extrabold hover:bg-emerald-600 transition-colors"

@@ -568,8 +568,8 @@ export function SightseeingDetailClient({ tour }: Props) {
                   Our concierge team can arrange private group tours, custom timings & VIP entry.
                 </p>
                 <div className="space-y-2 text-xs">
-                  <a href="tel:+41441234567" className="flex items-center gap-2 text-gray-300 hover:text-gold transition-colors font-semibold">
-                    <IconPhone className="h-4 w-4 text-gold" /> +41 44 123 4567
+                  <a href="tel:+918882382864" className="flex items-center gap-2 text-gray-300 hover:text-gold transition-colors font-semibold">
+                    <IconPhone className="h-4 w-4 text-gold" /> +91 8882382864
                   </a>
                   <a href="mailto:info@europetransfers.com" className="flex items-center gap-2 text-gray-300 hover:text-gold transition-colors font-semibold">
                     <IconMail className="h-4 w-4 text-gold" /> info@europetransfers.com
@@ -761,13 +761,13 @@ export function SightseeingDetailClient({ tour }: Props) {
             <p className="text-[10px] font-black text-gold uppercase tracking-widest">Need Immediate Assistance?</p>
             <div className="flex items-center justify-center gap-3">
               <a
-                href="tel:+41441234567"
+                href="tel:+918882382864"
                 className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 p-2.5 text-xs font-extrabold text-navy hover:bg-slate-50 transition-colors"
               >
                 <IconPhoneCall className="h-4 w-4 text-gold" /> Call Concierge
               </a>
               <a
-                href="https://wa.me/41441234567"
+                href="https://wa.me/918796757775"
                 target="_blank"
                 rel="noreferrer"
                 className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 text-white p-2.5 text-xs font-extrabold hover:bg-emerald-600 transition-colors"

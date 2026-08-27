@@ -248,7 +248,7 @@ export default function BlogPostDetailClient({ post }: Props) {
 
                 <div className="space-y-3">
                   <a
-                    href="https://wa.me/918882382864"
+                    href="https://wa.me/918796757775"
                     target="_blank"
                     rel="noreferrer"
                     className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-extrabold text-xs flex items-center justify-center shadow transition-transform hover:scale-105"
