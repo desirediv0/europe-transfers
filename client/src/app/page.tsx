@@ -36,10 +36,10 @@ import {
   IconCalendar,
 } from "@tabler/icons-react";
 
-const HERO_IMAGES = [
-  "/images/hero_swiss_alps.png",
-  "/images/hero_paris_twilight.png",
-  "/images/hero_amalfi_coast.png",
+const HERO_TAGLINES = [
+  "TRAVEL EUROPE IN STYLE",
+  "LUXURY TRANSFERS, EVERY TIME",
+  "YOUR JOURNEY, OUR CHAUFFEURS",
 ];
 
 
@@ -94,7 +94,7 @@ export default function HomePage() {
   const [featuredTours, setFeaturedTours] = useState<FeaturedTour[]>([]);
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [_, setCurrentImageIndex] = useState(0);
+  const [heroTextIndex, setHeroTextIndex] = useState(0);
 
 
 
@@ -133,8 +133,8 @@ export default function HomePage() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % HERO_IMAGES.length);
-    }, 6000);
+      setHeroTextIndex((prev) => (prev + 1) % HERO_TAGLINES.length);
+    }, 4000);
     return () => clearInterval(timer);
   }, []);
 
@@ -164,15 +164,25 @@ export default function HomePage() {
           }}
         />
 
-        <div className="relative z-10 flex h-full flex-col items-center justify-between px-4 py-10 sm:py-14 text-center">
+        <div className="relative z-10 flex h-full flex-col items-center justify-center gap-8 px-4 py-10 sm:py-14 text-center">
           <div className="flex flex-col items-center justify-center">
             <div className="inline-flex items-center gap-2 rounded-full bg-black/40 backdrop-blur-md px-3.5 py-1 text-[11px] font-bold text-gold border border-gold/40 tracking-widest uppercase mb-2 shadow-lg">
               <IconShieldCheck className="h-3.5 w-3.5 text-gold" />
               The Europe Transfers
             </div>
-            <div className="text-[clamp(1.5rem,3.5vw,3.2rem)] font-extrabold text-white tracking-tight leading-tight drop-shadow-lg mb-1">
-              TRAVEL EUROPE IN STYLE
+            <div
+              key={heroTextIndex}
+              className="text-[clamp(1.5rem,3.5vw,3.2rem)] font-extrabold text-white tracking-tight leading-tight drop-shadow-lg mb-1"
+              style={{ animation: "heroFadeIn 0.7s ease" }}
+            >
+              {HERO_TAGLINES[heroTextIndex]}
             </div>
+            <style jsx>{`
+              @keyframes heroFadeIn {
+                from { opacity: 0; transform: translateY(6px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+            `}</style>
           </div>
 
           <div className="flex flex-col items-center gap-3 w-full">
