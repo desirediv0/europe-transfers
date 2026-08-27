@@ -13,7 +13,6 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { usePayment } from "@/hooks/usePayment";
-import { useAuth } from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import {
   IconCar,
@@ -109,7 +108,6 @@ function ResultsContent() {
   const [paymentForm, setPaymentForm] = useState({ name: "", email: "", phone: "", pickupAddress: "" });
   const [paymentOpen, setPaymentOpen] = useState(false);
   const { initiatePayment, loading: paymentLoading } = usePayment();
-  const { user } = useAuth();
 
   useEffect(() => {
     api.get<VanCoachVehicle[]>("/van-coach/all")
@@ -133,12 +131,6 @@ function ResultsContent() {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      toast.error("Please login to send an enquiry");
-      setDetailModalOpen(false);
-      router.push("/auth/login");
-      return;
-    }
     if (!selectedVehicle) { toast.error("Please select a vehicle"); return; }
     if (!form.name || !form.email || !form.phone) { toast.error("Please enter name, email, and phone"); return; }
     setSubmitting(true);

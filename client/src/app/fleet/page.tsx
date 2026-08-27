@@ -95,16 +95,16 @@ export default async function FleetPage({
   let realData: SearchData | null = null;
   let error: string | null = null;
 
-  if (isLoggedIn) {
-    try {
-      realData = await fetchSearchResults({
-        fromLocationId: fromId,
-        toLocationId: toId,
-        passengers: pax,
-      });
-    } catch (e) {
-      error = e instanceof Error ? e.message : "Failed to load results";
-    }
+  // Real prices are shown to everyone, logged in or not — login is only
+  // required at checkout when actually completing a booking.
+  try {
+    realData = await fetchSearchResults({
+      fromLocationId: fromId,
+      toLocationId: toId,
+      passengers: pax,
+    });
+  } catch (e) {
+    error = e instanceof Error ? e.message : "Failed to load results";
   }
 
   return (

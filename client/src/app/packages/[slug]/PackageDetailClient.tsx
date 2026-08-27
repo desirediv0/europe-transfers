@@ -10,9 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import { useAuth } from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import type { Package } from "@/lib/types";
 import {
@@ -55,8 +53,6 @@ export function PackageDetailClient({ pkg }: Props) {
   const priceNumber = pkg.priceFrom ? Number(pkg.priceFrom) : 1195;
   const { format } = useCurrency();
   const formattedPrice = format(priceNumber);
-  const { user } = useAuth();
-  const router = useRouter();
 
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
@@ -72,12 +68,6 @@ export function PackageDetailClient({ pkg }: Props) {
 
   const handleEnquireSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      toast.error("Please login to book this package");
-      setEnquiryOpen(false);
-      router.push("/auth/login");
-      return;
-    }
     if (!form.name || !form.email || !form.phone) {
       toast.error("Please enter your name, email, and phone number.");
       return;

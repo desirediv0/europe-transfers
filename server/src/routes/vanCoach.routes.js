@@ -10,7 +10,6 @@ import {
   getVanCoachEnquiries,
 } from "../controllers/vanCoach.controller.js";
 import protectAdmin from "../middlewares/adminAuth.middleware.js";
-import protectUser from "../middlewares/auth.middleware.js";
 import validate from "../middlewares/validate.middleware.js";
 import { z } from "zod";
 
@@ -53,7 +52,7 @@ const enquirySchema = z.object({
 });
 
 // Enquiry routes (must be registered before "/:id" so they aren't shadowed)
-router.post("/enquire", protectUser, validate(enquirySchema), submitVanCoachEnquiry);
+router.post("/enquire", validate(enquirySchema), submitVanCoachEnquiry);
 router.get("/enquiries", protectAdmin, getVanCoachEnquiries);
 
 router.get("/", getVanCoachVehicles);

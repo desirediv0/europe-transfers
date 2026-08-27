@@ -5,7 +5,6 @@ import {
   submitPackageEnquiry, getPackageEnquiries,
 } from "../controllers/package.controller.js";
 import protectAdmin from "../middlewares/adminAuth.middleware.js";
-import protectUser from "../middlewares/auth.middleware.js";
 import validate from "../middlewares/validate.middleware.js";
 import { z } from "zod";
 
@@ -43,8 +42,8 @@ const enquirySchema = z.object({
   notes: z.string().optional(),
 });
 
-// Enquiry routes (requires login to submit; admin can list)
-router.post("/enquire", protectUser, validate(enquirySchema), submitPackageEnquiry);
+// Enquiry routes (public submit & admin list)
+router.post("/enquire", validate(enquirySchema), submitPackageEnquiry);
 router.get("/enquiries", protectAdmin, getPackageEnquiries);
 
 router.get("/", getPackages);

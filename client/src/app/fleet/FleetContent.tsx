@@ -216,66 +216,6 @@ function ResultsSkeleton() {
   );
 }
 
-function AuthOverlay({ type, onLogin, onVerify }: { type: "login" | "verify"; onLogin: () => void; onVerify: () => void }) {
-  if (type === "login") {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 animate-in fade-in duration-300">
-        <Card className="w-full max-w-md border-0 overflow-hidden shadow-2xl rounded-md bg-white font-sans">
-          <div className="h-2 bg-gradient-to-r from-gold via-amber-300 to-gold" />
-          <CardContent className="py-10 px-6 sm:px-8 text-center space-y-5">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-md bg-gold/15 text-navy border border-gold/30 shadow-sm">
-              <IconLock className="h-8 w-8 text-gold" />
-            </div>
-            <div>
-              <span className="text-[10px] font-black text-gold uppercase tracking-widest">Authentication Required</span>
-              <h2 className="mt-1 text-2xl font-black text-navy">Sign In to Continue</h2>
-              <p className="mt-2 text-xs text-gray-500 max-w-xs mx-auto leading-relaxed">
-                Please sign in to your account to view live fixed route prices and complete your transfer booking.
-              </p>
-            </div>
-            <div className="pt-2 flex flex-col gap-2.5">
-              <Button onClick={onLogin} className="w-full h-12 rounded-xl bg-gold hover:bg-gold-light font-black text-navy text-xs shadow-lg shadow-gold/20 cursor-pointer">
-                Sign In to View Prices <IconArrowRight className="ml-1.5 h-4 w-4" />
-              </Button>
-              <Button onClick={onVerify} variant="ghost" className="w-full h-11 rounded-xl text-xs font-bold text-gray-500 hover:text-navy hover:bg-slate-100">
-                Browse Fleet Only
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 animate-in fade-in duration-300">
-      <Card className="w-full max-w-md border-0 overflow-hidden shadow-2xl rounded-md bg-white font-sans">
-        <div className="h-2 bg-gradient-to-r from-gold via-amber-300 to-gold" />
-        <CardContent className="py-10 px-6 sm:px-8 text-center space-y-5">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gold/15 text-navy border border-gold/30 shadow-sm">
-            <IconFile className="h-8 w-8 text-gold" />
-          </div>
-          <div>
-            <span className="text-[10px] font-black text-gold uppercase tracking-widest">Document Verification</span>
-            <h2 className="mt-1 text-2xl font-black text-navy">Verify Government ID</h2>
-            <p className="mt-2 text-xs text-gray-500 max-w-xs mx-auto leading-relaxed">
-              Upload your passport or driving license to complete client verification and unlock direct instant bookings.
-            </p>
-          </div>
-          <div className="pt-2 flex flex-col gap-2.5">
-            <Button onClick={onVerify} className="w-full h-12 rounded-xl bg-gold hover:bg-gold-light font-black text-navy text-xs shadow-lg shadow-gold/20 cursor-pointer">
-              Upload Government ID Now <IconArrowRight className="ml-1.5 h-4 w-4" />
-            </Button>
-            <Button onClick={onLogin} variant="ghost" className="w-full h-11 rounded-xl text-xs font-bold text-gray-500 hover:text-navy hover:bg-slate-100">
-              Go Back
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
 function FleetGallery({ carTypes, loading, basePath }: { carTypes: CarType[]; loading: boolean; basePath: string }) {
   const isPrivateTransfers = basePath === "/private-transfers";
 
@@ -504,9 +444,9 @@ export default function FleetContent({
   }, []);
 
   const isVerified = verificationStep === "VERIFIED";
-  const showRealData = isLoggedIn && isVerified && realData;
+  const showRealData = !!realData;
   const searchData = showRealData ? realData! : demoData || null;
-  const isLocked = isSearchMode && !showRealData;
+  const isLocked = false;
 
   const fetchData = useCallback(async () => {
     if (!sp) return;
@@ -636,13 +576,6 @@ export default function FleetContent({
 
   return (
     <div className="min-h-screen bg-slate-50/50 font-sans">
-      {!authLoading && isLocked && !isLoggedIn && (
-        <AuthOverlay type="login" onLogin={() => router.push("/auth/login")} onVerify={() => router.back()} />
-      )}
-      {!authLoading && isLocked && isLoggedIn && !isVerified && (
-        <AuthOverlay type="verify" onLogin={() => router.back()} onVerify={() => router.push("/account")} />
-      )}
-
       <div className="bg-gradient-to-r from-navy via-[#0B1528] to-navy text-white border-b border-white/10 shadow-xl">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
           <div className="flex items-center justify-between gap-4 mb-4">
