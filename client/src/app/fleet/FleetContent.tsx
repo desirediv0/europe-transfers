@@ -86,14 +86,6 @@ const fleetBenefits = [
   "Free cancellation up to 24h",
 ];
 
-const CAR_IMAGE_FALLBACKS: Record<string, string> = {
-  sedan: "/images/about_luxury_chauffeur.png",
-  suv: "/images/hero_swiss_alps.png",
-  minivan: "/images/why_choose_us_chauffeur.png",
-  van: "/images/why_choose_us_chauffeur.png",
-  coach: "/images/hero_amalfi_coast.png",
-};
-
 function VehicleCard({
   item,
   selected,
@@ -108,8 +100,7 @@ function VehicleCard({
   isLocked?: boolean;
 }) {
   const { format } = useCurrency();
-  const fallbackImg = CAR_IMAGE_FALLBACKS[item.carType.id.toLowerCase()] || CAR_IMAGE_FALLBACKS.sedan;
-  const imgSrc = item.carType.image || fallbackImg;
+  const imgSrc = item.carType.image || null;
 
   return (
     <Card
@@ -124,11 +115,18 @@ function VehicleCard({
       <CardContent className="p-0">
         <div className="flex flex-col sm:flex-row">
           <div className="relative h-48 sm:h-auto sm:w-64 bg-slate-900 shrink-0 overflow-hidden">
-            <img
-              src={imgSrc}
-              alt={item.carType.name}
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-            />
+            {imgSrc ? (
+              <img
+                src={imgSrc}
+                alt={item.carType.name}
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-slate-800 text-slate-500">
+                <IconCar className="h-8 w-8" />
+                <span className="text-[10px] font-bold uppercase tracking-wider">No Image</span>
+              </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent sm:hidden" />
             <div className="absolute top-3 left-3">
               <Badge className={`rounded-full font-black text-xs px-3 py-1 border-0 shadow-md ${isLocked ? "bg-blue-600 text-white" : "bg-navy text-gold"}`}>
@@ -353,14 +351,20 @@ function FleetGallery({ carTypes, loading, basePath }: { carTypes: CarType[]; lo
                   </Card>
                 ))
                 : carTypes.map((ct) => {
-                  const fallbackImg = CAR_IMAGE_FALLBACKS[ct.id.toLowerCase()] || CAR_IMAGE_FALLBACKS.sedan;
-                  const imgSrc = ct.image || fallbackImg;
+                  const imgSrc = ct.image || null;
 
                   return (
                     <Card key={ct.id} className="group overflow-hidden rounded-3xl border-gray-200/80 bg-white transition-all duration-300 hover:shadow-xl hover:border-gold/40 hover:-translate-y-1 flex flex-col justify-between">
                       <CardContent className="p-0">
                         <div className="relative h-36 sm:h-56 bg-slate-100 overflow-hidden">
-                          <img src={imgSrc} alt={ct.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                          {imgSrc ? (
+                            <img src={imgSrc} alt={ct.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                          ) : (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-slate-200 text-slate-400">
+                              <IconCar className="h-8 w-8" />
+                              <span className="text-[10px] font-bold uppercase tracking-wider">No Image</span>
+                            </div>
+                          )}
                           <div className="absolute top-3 right-3 z-10">
                             <Badge className="rounded-full bg-navy text-gold border-0 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-bold">{ct.name}</Badge>
                           </div>
