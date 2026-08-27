@@ -94,6 +94,7 @@ export default function CarTypesPage() {
 
       <Card>
         <CardContent className="p-0">
+          <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -147,6 +148,7 @@ export default function CarTypesPage() {
               )}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 
@@ -164,22 +166,29 @@ export default function CarTypesPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editing ? "Edit Car Type" : "Add Car Type"}</DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              A car type is a vehicle category customers can choose when booking a Private Transfer — e.g. Sedan, Minivan, Luxury Coach. You'll set its seating capacity, a photo, and which comfort features it has.
+            </p>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Name</Label>
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Sedan" />
+              <p className="text-xs text-muted-foreground">The vehicle category name shown to customers, e.g. "Sedan", "Luxury Minivan", "Executive Coach".</p>
             </div>
             <div className="space-y-2">
               <Label>Seats</Label>
               <Input type="number" min="1" value={form.seats} onChange={(e) => setForm({ ...form, seats: e.target.value })} placeholder="e.g. 3" />
+              <p className="text-xs text-muted-foreground">Maximum number of passengers this vehicle type can carry, e.g. 3 for a Sedan, 7 for a Minivan.</p>
             </div>
             <div className="space-y-2">
               <Label>Image</Label>
               <ImageUpload value={form.image} onChange={(url) => setForm({ ...form, image: url })} />
+              <p className="text-xs text-muted-foreground">A clear photo of this vehicle type, shown on the booking page so customers know what they're getting.</p>
             </div>
             <div className="space-y-3">
               <Label>Features</Label>
+              <p className="text-xs text-muted-foreground -mt-1">Tick whichever amenities this vehicle actually has — they show up as badges on the booking page.</p>
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { key: "isAC", label: "Air Conditioned", icon: Snowflake, defaultOn: true },

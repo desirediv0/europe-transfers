@@ -351,16 +351,21 @@ export default function VanCoachPage() {
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? "Edit Vehicle" : "Add Vehicle"}</DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              A Van & Coach vehicle is one you offer for hourly disposal (a chauffeur + vehicle booked by the hour, not a fixed point-to-point route).
+            </p>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Name</Label>
                 <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Alphard" />
+                <p className="text-xs text-muted-foreground">The vehicle's model name, e.g. "Toyota Alphard", "Mercedes Sprinter".</p>
               </div>
               <div className="space-y-2">
                 <Label>Seats</Label>
                 <Input type="number" min="1" value={form.seats} onChange={(e) => setForm({ ...form, seats: e.target.value })} placeholder="e.g. 6" />
+                <p className="text-xs text-muted-foreground">Passenger capacity, e.g. 6 for a minivan, 16 for a coach.</p>
               </div>
             </div>
 
@@ -368,21 +373,25 @@ export default function VanCoachPage() {
               <div className="space-y-2">
                 <Label>Category</Label>
                 <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="e.g. Luxury Minivan" />
+                <p className="text-xs text-muted-foreground">A short label shown as a badge, e.g. "Luxury Minivan", "Executive Coach".</p>
               </div>
               <div className="space-y-2">
                 <Label>Currency</Label>
                 <Input value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} placeholder="USD" />
+                <p className="text-xs text-muted-foreground">3-letter currency code for the hourly rates below, e.g. USD, EUR.</p>
               </div>
             </div>
 
             <div className="space-y-2">
               <Label>Image</Label>
               <ImageUpload value={form.image} onChange={(url) => setForm({ ...form, image: url })} />
+              <p className="text-xs text-muted-foreground">A photo of this exact vehicle, shown to customers on the Van & Coach page.</p>
             </div>
 
             <div className="space-y-2">
               <Label>Description</Label>
               <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Short description" />
+              <p className="text-xs text-muted-foreground">One line customers see under the vehicle name, e.g. "Spacious minivan ideal for families or small groups".</p>
             </div>
 
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-muted/30 px-4 py-3">
@@ -397,19 +406,23 @@ export default function VanCoachPage() {
               <div className="space-y-2">
                 <Label>8 Hours Rate</Label>
                 <Input type="number" min="0" value={form.rate8h} onChange={(e) => setForm({ ...form, rate8h: e.target.value })} />
+                <p className="text-xs text-muted-foreground">Total price for an 8-hour booking, e.g. 500.</p>
               </div>
               <div className="space-y-2">
                 <Label>10 Hours Rate</Label>
                 <Input type="number" min="0" value={form.rate10h} onChange={(e) => setForm({ ...form, rate10h: e.target.value })} />
+                <p className="text-xs text-muted-foreground">Total price for a 10-hour booking, e.g. 600.</p>
               </div>
               <div className="space-y-2">
                 <Label>Overtime Fee (per hour)</Label>
                 <Input type="number" min="0" value={form.overtimeRate} onChange={(e) => setForm({ ...form, overtimeRate: e.target.value })} />
+                <p className="text-xs text-muted-foreground">Extra charge per hour if the customer runs over their booked time.</p>
               </div>
             </div>
 
             <div className="space-y-3 border-t pt-4">
               <Label>Route & Package Prices</Label>
+              <p className="text-xs text-muted-foreground -mt-1">Optional — add fixed prices for common airport transfers, point-to-point rides, or tour packages this vehicle can also do. Skip this if the vehicle is hourly-only.</p>
               {(Object.keys(GROUP_LABELS) as VanCoachPriceGroup[]).map((group) => (
                 <div key={group} className="space-y-2 rounded-lg border p-3">
                   <div className="flex items-center justify-between">

@@ -830,6 +830,7 @@ export default function SightseeingPage() {
             </DialogTitle>
             <DialogDescription>
               Add tour title, options, highlights, timeline schedule & gallery images without JSON code.
+              {" "}A Sightseeing activity is a bookable tour, ticket, or experience — like a skip-the-line entry or a guided walking tour — shown on the Sightseeing page.
             </DialogDescription>
           </DialogHeader>
 
@@ -850,6 +851,7 @@ export default function SightseeingPage() {
                     placeholder="e.g. Summit Eiffel Tower Ticket with Audio Guide"
                     className="mt-1 bg-white font-semibold"
                   />
+                  <p className="text-[11px] text-muted-foreground mt-1">The tour/ticket name customers see, e.g. "Summit Eiffel Tower Ticket with Audio Guide".</p>
                 </div>
                 <div>
                   <Label className="font-bold">URL Slug *</Label>
@@ -859,6 +861,7 @@ export default function SightseeingPage() {
                     placeholder="e.g. eiffel-tower-summit-reserved-access"
                     className="mt-1 bg-white font-semibold"
                   />
+                  <p className="text-[11px] text-muted-foreground mt-1">Fills in automatically from the title — only edit it if you want a different web address.</p>
                 </div>
               </div>
 
@@ -871,6 +874,7 @@ export default function SightseeingPage() {
                     placeholder="Paris"
                     className="mt-1 bg-white font-semibold"
                   />
+                  <p className="text-[11px] text-muted-foreground mt-1">Where this activity takes place, e.g. "Paris".</p>
                 </div>
                 <div>
                   <Label className="font-bold">Country Name</Label>
@@ -880,6 +884,7 @@ export default function SightseeingPage() {
                     placeholder="France"
                     className="mt-1 bg-white font-semibold"
                   />
+                  <p className="text-[11px] text-muted-foreground mt-1">The country the city above is in, e.g. "France".</p>
                 </div>
                 <div>
                   <Label className="font-bold">Duration *</Label>
@@ -889,6 +894,7 @@ export default function SightseeingPage() {
                     placeholder="e.g. 2 - 3 Hours"
                     className="mt-1 bg-white font-semibold"
                   />
+                  <p className="text-[11px] text-muted-foreground mt-1">How long the experience typically lasts, e.g. "2 - 3 Hours".</p>
                 </div>
               </div>
 

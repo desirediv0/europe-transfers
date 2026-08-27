@@ -374,6 +374,7 @@ export default function RoutesPage() {
               {editing
                 ? "Update route details and vehicle prices together."
                 : "Create a new route and set prices for available vehicles."}
+              {" "}A route connects two Locations (e.g. "Rome Fiumicino Airport" → "Rome City Center") with a fixed price per car type.
             </DialogDescription>
           </DialogHeader>
 
@@ -381,6 +382,7 @@ export default function RoutesPage() {
             {/* Route Details */}
             <div className="space-y-4">
               <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Route Details</h3>
+              <p className="text-xs text-muted-foreground -mt-2">Both locations must already exist under Locations — add them there first if they're missing from the dropdowns below.</p>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1.5 text-sm">
@@ -447,6 +449,7 @@ export default function RoutesPage() {
                 </h3>
                 <span className="text-xs text-muted-foreground">Leave blank to skip a vehicle</span>
               </div>
+              <p className="text-xs text-muted-foreground -mt-2">Set a fixed one-way price per car type for this exact route, e.g. €65 for a Sedan, €95 for a Minivan. Prices are in EUR.</p>
 
               {carTypes.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">

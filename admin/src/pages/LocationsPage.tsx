@@ -148,24 +148,31 @@ export default function LocationsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editing ? "Edit Location" : "Add Location"}</DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              A Location is a specific pickup/drop-off point — an airport, a hotel, a train station, a city center. Routes are built by connecting two Locations together.
+            </p>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Name</Label>
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Rome Fiumicino Airport (FCO)" />
+              <p className="text-xs text-muted-foreground">The exact pickup/drop-off point name, e.g. "Rome Fiumicino Airport (FCO)" or "Paris Marriott Champs-Élysées Hotel".</p>
             </div>
             <div className="space-y-2">
               <Label>City</Label>
               <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="e.g. Rome" />
+              <p className="text-xs text-muted-foreground">The city this location is in, e.g. "Rome" — used to group and search locations.</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Latitude</Label>
                 <Input type="number" step="any" value={form.latitude} onChange={(e) => setForm({ ...form, latitude: e.target.value })} placeholder="41.8003" />
+                <p className="text-xs text-muted-foreground">Optional — copy from Google Maps (right-click the pin → the first number shown).</p>
               </div>
               <div className="space-y-2">
                 <Label>Longitude</Label>
                 <Input type="number" step="any" value={form.longitude} onChange={(e) => setForm({ ...form, longitude: e.target.value })} placeholder="12.2389" />
+                <p className="text-xs text-muted-foreground">Optional — the second number from the same Google Maps coordinates.</p>
               </div>
             </div>
           </div>

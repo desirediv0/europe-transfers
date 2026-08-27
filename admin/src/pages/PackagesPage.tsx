@@ -518,6 +518,7 @@ export default function PackagesPage() {
             </DialogTitle>
             <DialogDescription>
               {editing ? "Update package details and cover image." : "Create a new tour package."}
+              {" "}A package is a multi-day itinerary customers enquire about (not an instant online booking) — shown on the Packages page with a "from" price.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-5 py-2">
@@ -527,19 +528,41 @@ export default function PackagesPage() {
                 <SelectTrigger><SelectValue placeholder="Select country" /></SelectTrigger>
                 <SelectContent>{countries.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">The main destination country this package covers.</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2"><Label>Title</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Romantic Paris Getaway" /></div>
-              <div className="space-y-2"><Label>Slug</Label><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="e.g. romantic-paris-getaway" /></div>
+              <div className="space-y-2">
+                <Label>Title</Label>
+                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Romantic Paris Getaway" />
+                <p className="text-xs text-muted-foreground">The package name customers see, e.g. "Romantic Paris Getaway".</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Slug</Label>
+                <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="e.g. romantic-paris-getaway" />
+                <p className="text-xs text-muted-foreground">The web address for this package — lowercase, hyphens instead of spaces, no special characters.</p>
+              </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2"><Label className="flex items-center gap-1.5"><IconClock className="h-3.5 w-3.5" /> Duration (days)</Label><Input type="number" min={1} value={form.durationDays} onChange={(e) => setForm({ ...form, durationDays: Number(e.target.value) })} /></div>
-              <div className="space-y-2"><Label className="flex items-center gap-1.5"><IconCoinEuro className="h-3.5 w-3.5" /> Price From (€)</Label><Input type="number" step="0.01" min={0} value={form.priceFrom} onChange={(e) => setForm({ ...form, priceFrom: Number(e.target.value) })} /></div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5"><IconClock className="h-3.5 w-3.5" /> Duration (days)</Label>
+                <Input type="number" min={1} value={form.durationDays} onChange={(e) => setForm({ ...form, durationDays: Number(e.target.value) })} />
+                <p className="text-xs text-muted-foreground">Total trip length in days, e.g. 5.</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5"><IconCoinEuro className="h-3.5 w-3.5" /> Price From (€)</Label>
+                <Input type="number" step="0.01" min={0} value={form.priceFrom} onChange={(e) => setForm({ ...form, priceFrom: Number(e.target.value) })} />
+                <p className="text-xs text-muted-foreground">Starting price per person shown as "From €___" — the actual quote may vary by group size and season.</p>
+              </div>
             </div>
-            <div className="space-y-2"><Label>Summary</Label><Input value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} placeholder="Short description of the package" /></div>
+            <div className="space-y-2">
+              <Label>Summary</Label>
+              <Input value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} placeholder="Short description of the package" />
+              <p className="text-xs text-muted-foreground">One or two sentences shown on the package card, e.g. "5 days exploring Paris's most iconic landmarks with a private chauffeur."</p>
+            </div>
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5"><IconPhoto className="h-3.5 w-3.5" /> Cover Image</Label>
               <ImageUpload value={form.coverImage} onChange={(url) => setForm({ ...form, coverImage: url })} />
+              <p className="text-xs text-muted-foreground">The main photo shown on the package listing and detail page.</p>
             </div>
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-muted/30 px-4 py-3">
               <div className="space-y-0.5">
