@@ -152,7 +152,7 @@ export default function HomePage() {
           poster="/images/hero_paris_twilight.png"
         >
           <source
-            src="https://desirediv-storage.blr1.cdn.digitaloceanspaces.com/euro/magnific_cinematic-luxury-travel-c_EbrjM7EuuO.mp4"
+            src="https://desirediv-storage.blr1.cdn.digitaloceanspaces.com/euro/magnific_cinematic-luxury-travel-c_Sy6ZK6lUb8.mp4"
             type="video/mp4"
           />
         </video>
