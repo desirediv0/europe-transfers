@@ -94,8 +94,13 @@ function VanCoachSearchContent() {
                     placeholder="Select duration"
                     options={[
                       { id: "4", label: "4 Hours Half-Day" },
+                      { id: "5", label: "5 Hours" },
+                      { id: "6", label: "6 Hours" },
+                      { id: "7", label: "7 Hours" },
                       { id: "8", label: "8 Hours Full-Day" },
+                      { id: "9", label: "9 Hours" },
                       { id: "10", label: "10 Hours Extended Day" },
+                      { id: "11", label: "11 Hours" },
                       { id: "12", label: "12 Hours Grand Day" },
                       { id: "24", label: "24 Hours Multi-Day" },
                     ]}
