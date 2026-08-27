@@ -163,7 +163,7 @@ export default function CarTypesPage() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? "Edit Car Type" : "Add Car Type"}</DialogTitle>
             <p className="text-sm text-muted-foreground">
