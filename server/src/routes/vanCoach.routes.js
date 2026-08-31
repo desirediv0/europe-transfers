@@ -8,6 +8,7 @@ import {
   deleteVanCoachVehicle,
   submitVanCoachEnquiry,
   getVanCoachEnquiries,
+  deleteVanCoachEnquiry,
 } from "../controllers/vanCoach.controller.js";
 import protectAdmin from "../middlewares/adminAuth.middleware.js";
 import validate from "../middlewares/validate.middleware.js";
@@ -54,6 +55,7 @@ const enquirySchema = z.object({
 // Enquiry routes (must be registered before "/:id" so they aren't shadowed)
 router.post("/enquire", validate(enquirySchema), submitVanCoachEnquiry);
 router.get("/enquiries", protectAdmin, getVanCoachEnquiries);
+router.delete("/enquiries/:id", protectAdmin, deleteVanCoachEnquiry);
 
 router.get("/", getVanCoachVehicles);
 router.get("/all", getAllVanCoachVehicles);

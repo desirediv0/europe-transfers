@@ -307,3 +307,8 @@ export const getVanCoachEnquiries = asyncHandler(async (req, res) => {
     return apiResponse(res, 200, "Van & Coach enquiries retrieved", []);
   }
 });
+
+export const deleteVanCoachEnquiry = asyncHandler(async (req, res) => {
+  await prisma.$executeRawUnsafe(`DELETE FROM "VanCoachEnquiry" WHERE "id" = $1`, req.params.id);
+  return apiResponse(res, 200, "Van & Coach enquiry deleted", null);
+});
