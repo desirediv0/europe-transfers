@@ -2,6 +2,11 @@ import { api } from "@/lib/api";
 import { notFound } from "next/navigation";
 import { SightseeingDetailClient, SightseeingTourDetail } from "./SightseeingDetailClient";
 
+// Always fetch fresh tour data — this page must reflect admin edits
+// immediately, not a cached build-time snapshot.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface Props {
   params: Promise<{ slug: string }>;
 }

@@ -3,6 +3,11 @@ import type { Package } from "@/lib/types";
 import { PackageDetailClient } from "./PackageDetailClient";
 import { notFound } from "next/navigation";
 
+// Always fetch fresh package data — this page must reflect admin
+// edits immediately, not a cached build-time snapshot.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
