@@ -33,6 +33,7 @@ const emptyForm = {
   overtimeRate: "",
   currency: "USD",
   showOnHomepage: false,
+  order: "0",
 };
 
 export default function VanCoachPage() {
@@ -97,6 +98,7 @@ export default function VanCoachPage() {
       overtimeRate: item.overtimeRate.toString(),
       currency: item.currency,
       showOnHomepage: item.showOnHomepage,
+      order: (item.order ?? 0).toString(),
     });
     setPriceRows(
       (item.routePrices || []).map((rp) => ({ group: rp.group, label: rp.label, price: rp.price.toString() }))
@@ -134,6 +136,7 @@ export default function VanCoachPage() {
         overtimeRate: parseFloat(form.overtimeRate),
         currency: form.currency || "USD",
         showOnHomepage: form.showOnHomepage,
+        order: form.order ? parseInt(form.order) : 0,
         routePrices: priceRows
           .filter((r) => r.label && r.price !== "")
           .map((r, i) => ({ group: r.group, label: r.label, price: parseFloat(r.price), order: i })),
@@ -211,6 +214,7 @@ export default function VanCoachPage() {
                 <TableHead>10h Rate</TableHead>
                 <TableHead>Overtime/hr</TableHead>
                 <TableHead>Prices</TableHead>
+                <TableHead>Order</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-24">Actions</TableHead>
               </TableRow>
@@ -218,10 +222,10 @@ export default function VanCoachPage() {
             <TableBody>
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i}><TableCell colSpan={9}><Skeleton className="h-4 w-full" /></TableCell></TableRow>
+                  <TableRow key={i}><TableCell colSpan={10}><Skeleton className="h-4 w-full" /></TableCell></TableRow>
                 ))
               ) : items.length === 0 ? (
-                <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No Van & Coach vehicles found</TableCell></TableRow>
+                <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">No Van & Coach vehicles found</TableCell></TableRow>
               ) : (
                 items.map((item) => (
                   <TableRow key={item.id}>
@@ -238,6 +242,7 @@ export default function VanCoachPage() {
                     <TableCell>{item.currency} {item.rate10h}</TableCell>
                     <TableCell>{item.currency} {item.overtimeRate}</TableCell>
                     <TableCell><Badge variant="outline">{item.routePrices?.length || 0} prices</Badge></TableCell>
+                    <TableCell>{item.order}</TableCell>
                     <TableCell><Badge variant={item.isActive ? "default" : "secondary"}>{item.isActive ? "Active" : "Inactive"}</Badge></TableCell>
                     <TableCell>
                       <div className="flex gap-1">
@@ -400,6 +405,12 @@ export default function VanCoachPage() {
                 <p className="text-xs text-muted-foreground">Feature this vehicle in the homepage&apos;s Featured Van & Coach section</p>
               </div>
               <Switch checked={form.showOnHomepage} onCheckedChange={(v) => setForm({ ...form, showOnHomepage: v })} />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Display Order</Label>
+              <Input type="number" value={form.order} onChange={(e) => setForm({ ...form, order: e.target.value })} placeholder="0" />
+              <p className="text-xs text-muted-foreground">Lower numbers show first in the Van & Coach fleet list. Leave as 0 if order doesn&apos;t matter.</p>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
