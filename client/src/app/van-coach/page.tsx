@@ -6,6 +6,10 @@ import { api } from "@/lib/api";
 import { HeroSearchBar } from "@/components/HeroSearchBar";
 import { DropdownPickerField, DatePickerField } from "@/components/SearchFields";
 import type { Location } from "@/lib/types";
+
+interface VanCoachVehicleLite {
+  name: string;
+}
 import {
   IconClock,
   IconMapPin,
@@ -31,7 +35,24 @@ function VanCoachSearchContent() {
   const [pickupTime, setPickupTime] = useState("09:00 AM");
 
   useEffect(() => {
-    api.get<Location[]>("/search/locations").then(setLocations).catch(() => {});
+    // Van & Coach has its own fleet (city name embedded in each vehicle's
+    // name, e.g. "Paris - Mercedes S Class"), so its location search is
+    // derived from that fleet directly — it does not depend on the
+    // separate Private Transfers Location table.
+    api
+      .get<VanCoachVehicleLite[]>("/van-coach/all")
+      .then((vehicles) => {
+        const cityNames = new Set<string>();
+        for (const v of vehicles) {
+          const city = v.name.split(" - ")[0]?.trim();
+          if (city) cityNames.add(city);
+        }
+        const derived: Location[] = Array.from(cityNames)
+          .sort()
+          .map((name) => ({ id: name, name, city: name, isActive: true }));
+        setLocations(derived);
+      })
+      .catch(() => {});
   }, []);
 
   const times: string[] = [];
