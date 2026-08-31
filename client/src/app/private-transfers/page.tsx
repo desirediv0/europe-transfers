@@ -69,21 +69,23 @@ export default async function PrivateTransfersPage({
   const accessToken = cookieStore.get("accessToken")?.value;
   const isLoggedIn = !!accessToken;
 
-  const demoData = getDemoData(from, to);
   let realData: SearchData | null = null;
   let error: string | null = null;
 
-  if (isLoggedIn) {
-    try {
-      realData = await fetchSearchResults({
-        fromLocationId: fromId,
-        toLocationId: toId,
-        passengers: pax,
-      });
-    } catch (e) {
-      error = e instanceof Error ? e.message : "Failed to load results";
-    }
+  try {
+    realData = await fetchSearchResults({
+      fromLocationId: fromId,
+      toLocationId: toId,
+      passengers: pax,
+    });
+  } catch (e) {
+    error = e instanceof Error ? e.message : "Failed to load results";
   }
+
+  // demoData is only a last-resort placeholder if the real route has no
+  // data at all (e.g. no route between these two locations yet) - it is
+  // never shown when realData is available, logged in or not.
+  const demoData = realData ? undefined : getDemoData(from, to);
 
   return (
     <FleetContent
