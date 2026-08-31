@@ -65,7 +65,7 @@ interface DisposalVehicle {
   minHours: number;
   includedKmPerHour: number;
   extraKmRate: number;
-  image: string;
+  image: string | null;
   features: string[];
   description: string;
 }
@@ -80,7 +80,7 @@ function mapToDisposalVehicle(v: VanCoachVehicle): DisposalVehicle {
     minHours: 4,
     includedKmPerHour: 25,
     extraKmRate: Number(v.overtimeRate) || 0,
-    image: v.image || "/images/about_luxury_chauffeur.png",
+    image: v.image || null,
     features: ["Air Conditioning", "Professional Chauffeur", "Free Waiting Time", "Meet & Greet"],
     description: v.description || `${v.name} available for hourly disposal with dedicated English-speaking chauffeur.`,
   };
@@ -277,7 +277,14 @@ function ResultsContent() {
               <Card key={v.id} className="group overflow-hidden rounded-2xl sm:rounded-3xl border-gray-200/80 bg-white transition-all duration-300 hover:shadow-xl hover:border-gold/40 flex flex-col justify-between">
                 <CardContent className="p-0">
                   <div className="relative h-28 sm:h-48 bg-slate-100 overflow-hidden">
-                    <img src={v.image} alt={v.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    {v.image ? (
+                      <img src={v.image} alt={v.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    ) : (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-slate-200 text-slate-400">
+                        <IconCar className="h-6 w-6 sm:h-8 sm:w-8" />
+                        <span className="text-[8px] sm:text-[10px] font-bold uppercase tracking-wider">No Image</span>
+                      </div>
+                    )}
                     <div className="absolute top-2 right-2 z-10">
                       <Badge className="rounded-full bg-navy/90 text-gold border-0 px-2 py-0.5 text-[9px] sm:text-xs font-black shadow-sm">{formatCurrency(v.hourlyRate)}/hr</Badge>
                     </div>
@@ -299,13 +306,8 @@ function ResultsContent() {
                         <p className="text-xs sm:text-lg font-black text-navy">{formatCurrency(totalPrice)}</p>
                       </div>
                       <Button onClick={() => handleOpenDetail(v)}
-                        className="rounded-xl bg-gold hover:bg-gold-light text-navy font-black text-[10px] sm:text-xs px-2 sm:px-4 py-1 sm:py-2 cursor-pointer shadow-xs">
+                        className="rounded-xl bg-gold hover:bg-gold-light text-navy font-black text-[10px] sm:text-xs px-3 sm:px-5 py-1 sm:py-2 cursor-pointer shadow-xs">
                         Enquire
-                      </Button>
-                      <Button onClick={() => { setSelectedVehicle(v); setPaymentForm({ name: "", email: "", phone: "", pickupAddress: "" }); setPaymentOpen(true); }}
-                        variant="outline"
-                        className="rounded-xl border-2 border-navy text-navy hover:bg-navy hover:text-white font-black text-[10px] sm:text-xs px-2 sm:px-4 py-1 sm:py-2 cursor-pointer shadow-xs">
-                        <IconCreditCard className="h-3 w-3 mr-0.5" /> Pay
                       </Button>
                     </div>
                   </div>
@@ -331,7 +333,14 @@ function ResultsContent() {
         <Dialog open={detailModalOpen} onOpenChange={setDetailModalOpen}>
           <DialogContent className="sm:max-w-2xl rounded-3xl p-0 overflow-hidden bg-white border border-gray-200">
             <div className="relative h-48 bg-slate-900 text-white overflow-hidden">
-              <img src={selectedVehicle.image} alt={selectedVehicle.name} className="absolute inset-0 h-full w-full object-cover opacity-60" />
+              {selectedVehicle.image ? (
+                <img src={selectedVehicle.image} alt={selectedVehicle.name} className="absolute inset-0 h-full w-full object-cover opacity-60" />
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-slate-800 text-slate-500">
+                  <IconCar className="h-8 w-8" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">No Image</span>
+                </div>
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/50 to-transparent" />
               <div className="absolute bottom-4 left-6 right-6">
                 <Badge className="rounded-full bg-gold text-navy font-bold text-xs mb-1">{selectedVehicle.category}</Badge>
