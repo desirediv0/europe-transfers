@@ -14,6 +14,7 @@ import {
 import { api } from "@/lib/api";
 import type { Package, Route, BlogPost } from "@/lib/types";
 import CTASection from "@/components/CTASection";
+import RebrandAnnouncementModal from "@/components/RebrandAnnouncementModal";
 import PackageCard, { PackageCardSkeleton } from "@/components/PackageCard";
 import DestinationCard, { DestinationCardSkeleton, type FeaturedCity } from "@/components/DestinationCard";
 import {
@@ -140,6 +141,9 @@ export default function HomePage() {
 
   return (
     <div>
+      {/* Pop-up Rebrand Announcement Banner */}
+      <RebrandAnnouncementModal />
+
       {/* Hero */}
       <section className="relative h-[100svh] min-h-[560px] w-full overflow-hidden bg-[#0B1426]">
         <video
