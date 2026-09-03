@@ -71,6 +71,12 @@ export function SightseeingDetailClient({ tour }: Props) {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [lastBooking, setLastBooking] = useState<{ option: string; date: string; pax: string } | null>(null);
 
+  interface PassengerDetail {
+    name: string;
+    phone: string;
+    email: string;
+  }
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -79,6 +85,28 @@ export function SightseeingDetailClient({ tour }: Props) {
     pax: "2",
     message: "",
   });
+  const [additionalPassengers, setAdditionalPassengers] = useState<PassengerDetail[]>([]);
+
+  // Keeps the additional-passenger fields in sync with the selected pax
+  // count: passenger 1 is the lead contact above (name/phone/email);
+  // passengers 2..N each get their own Name/Phone/Email row.
+  const syncAdditionalPassengers = (paxValue: string) => {
+    const paxNum = parseInt(paxValue, 10) || 1;
+    const extraCount = Math.max(0, paxNum - 1);
+    setAdditionalPassengers((prev) => {
+      const next = prev.slice(0, extraCount);
+      while (next.length < extraCount) next.push({ name: "", phone: "", email: "" });
+      return next;
+    });
+  };
+
+  const updateAdditionalPassenger = (index: number, field: keyof PassengerDetail, value: string) => {
+    setAdditionalPassengers((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: value };
+      return next;
+    });
+  };
 
   const [paymentForm, setPaymentForm] = useState({
     name: "",
@@ -136,6 +164,7 @@ export function SightseeingDetailClient({ tour }: Props) {
   const handleOpenOption = (opt: { name: string; price: number }) => {
     setSelectedOption(opt);
     setForm({ name: "", email: "", phone: "", travelDate: "", pax: "2", message: "" });
+    setAdditionalPassengers([{ name: "", phone: "", email: "" }]);
     setEnquiryOpen(true);
   };
 
@@ -145,6 +174,13 @@ export function SightseeingDetailClient({ tour }: Props) {
       toast.error("Please enter your name, email, and phone number.");
       return;
     }
+    for (let i = 0; i < additionalPassengers.length; i++) {
+      const p = additionalPassengers[i];
+      if (!p.name || !p.phone || !p.email) {
+        toast.error(`Please enter details for Passenger ${i + 2}.`);
+        return;
+      }
+    }
 
       setSubmitting(true);
       try {
@@ -152,6 +188,16 @@ export function SightseeingDetailClient({ tour }: Props) {
         const activeOptPrice = selectedOption ? Number(selectedOption.price).toFixed(2) : priceDisplay;
 
         setLastBooking({ option: activeOptName, date: form.travelDate, pax: form.pax });
+
+        // The backend stores one lead-contact name/phone/email; additional
+        // passengers' details are appended into the notes so nothing is
+        // lost even though there isn't a dedicated per-passenger column.
+        const passengerNotes = additionalPassengers.length > 0
+          ? "\n\nAdditional Passengers:\n" +
+            additionalPassengers
+              .map((p, i) => `${i + 2}. ${p.name} — ${p.phone} — ${p.email}`)
+              .join("\n")
+          : "";
 
       await api.post("/sightseeing/enquire", {
         sightseeingId: tour.id,
@@ -164,7 +210,7 @@ export function SightseeingDetailClient({ tour }: Props) {
         email: form.email,
         travelDate: form.travelDate || undefined,
         pax: parseInt(form.pax, 10) || 2,
-        message: form.message || undefined,
+        message: (form.message || "") + passengerNotes || undefined,
       });
 
       setSubmitting(false);
@@ -672,7 +718,10 @@ export function SightseeingDetailClient({ tour }: Props) {
                 </Label>
                 <select
                   value={form.pax}
-                  onChange={(e) => setForm({ ...form, pax: e.target.value })}
+                  onChange={(e) => {
+                    setForm({ ...form, pax: e.target.value });
+                    syncAdditionalPassengers(e.target.value);
+                  }}
                   className="w-full h-11 rounded-xl border border-gray-200 bg-slate-50 px-3 text-xs font-bold text-navy focus:outline-none focus:border-gold mt-1"
                 >
                   <option value="1">1 Person</option>
@@ -684,6 +733,44 @@ export function SightseeingDetailClient({ tour }: Props) {
                 </select>
               </div>
             </div>
+
+            {additionalPassengers.length > 0 && (
+              <div className="space-y-3 rounded-xl border border-gold/30 bg-gold/5 p-3">
+                <p className="text-[11px] font-black text-navy uppercase tracking-wide">
+                  Additional Passenger Details
+                </p>
+                {additionalPassengers.map((passenger, idx) => (
+                  <div key={idx} className="space-y-2 rounded-lg bg-white border border-gray-200 p-3">
+                    <p className="text-[11px] font-bold text-gold">Passenger {idx + 2}</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        required
+                        placeholder="Full Name"
+                        value={passenger.name}
+                        onChange={(e) => updateAdditionalPassenger(idx, "name", e.target.value)}
+                        className="h-10 rounded-lg border-gray-200 text-xs font-semibold"
+                      />
+                      <Input
+                        type="tel"
+                        required
+                        placeholder="Phone / WhatsApp"
+                        value={passenger.phone}
+                        onChange={(e) => updateAdditionalPassenger(idx, "phone", e.target.value)}
+                        className="h-10 rounded-lg border-gray-200 text-xs font-semibold"
+                      />
+                    </div>
+                    <Input
+                      type="email"
+                      required
+                      placeholder="Email Address"
+                      value={passenger.email}
+                      onChange={(e) => updateAdditionalPassenger(idx, "email", e.target.value)}
+                      className="h-10 rounded-lg border-gray-200 text-xs font-semibold"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div>
               <Label className="text-xs font-black text-navy">Special Requests / Notes</Label>
