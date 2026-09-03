@@ -8,12 +8,24 @@ interface RebrandAnnouncementModalProps {
   onExplore?: () => void;
 }
 
+const DISMISSED_KEY = "rebrand-announcement-dismissed";
+
 export default function RebrandAnnouncementModal({ onExplore }: RebrandAnnouncementModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
 
   useEffect(() => {
-    // Show every time the homepage is loaded/opened
+    // Show once ever per browser - stays hidden after the visitor
+    // closes it, even across tabs/visits, until they clear site data.
+    let alreadyDismissed = false;
+    try {
+      alreadyDismissed = localStorage.getItem(DISMISSED_KEY) === "true";
+    } catch {
+      // localStorage unavailable (private mode, blocked cookies, etc.) -
+      // fall back to showing it, same as before.
+    }
+    if (alreadyDismissed) return;
+
     const timer = setTimeout(() => {
       setIsOpen(true);
     }, 400);
@@ -40,6 +52,11 @@ export default function RebrandAnnouncementModal({ onExplore }: RebrandAnnouncem
   }, [isOpen]);
 
   const handleClose = () => {
+    try {
+      localStorage.setItem(DISMISSED_KEY, "true");
+    } catch {
+      // ignore - worst case it shows again next visit
+    }
     setIsAnimatingOut(true);
     setTimeout(() => {
       setIsOpen(false);
@@ -73,7 +90,7 @@ export default function RebrandAnnouncementModal({ onExplore }: RebrandAnnouncem
 
       {/* Modal Dialog Card */}
       <div
-        className={`relative w-full max-w-2xl max-h-[92vh] flex flex-col rounded-2xl sm:rounded-3xl border border-gold/40 bg-gradient-to-b from-[#0e1a30] via-[#0b1426] to-[#070e1c] text-white shadow-[0_25px_70px_rgba(0,0,0,0.85),0_0_50px_rgba(201,162,39,0.18)] overflow-hidden z-10 transition-all duration-300 ${
+        className={`relative w-full max-w-2xl max-h-[92vh] flex flex-col rounded-2xl sm:rounded-3xl border border-gold/40 bg-gradient-to-b from-[#1c2f52] via-[#182642] to-[#131f38] text-white shadow-[0_25px_70px_rgba(0,0,0,0.6),0_0_50px_rgba(201,162,39,0.18)] overflow-hidden z-10 transition-all duration-300 ${
           isAnimatingOut ? "scale-95 opacity-0" : "scale-100 opacity-100"
         }`}
         style={{
@@ -151,12 +168,12 @@ export default function RebrandAnnouncementModal({ onExplore }: RebrandAnnouncem
 
             {/* Brand Logo Display */}
             <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-center">
-              <div className="relative h-9 w-44">
+              <div className="relative h-14 w-56 sm:h-16 sm:w-64 rounded-xl bg-white p-2.5 shadow-lg ring-1 ring-white/20">
                 <Image
                   src="/logo-2.jpeg"
                   alt="The Europe Transfers"
                   fill
-                  className="object-contain"
+                  className="object-contain p-1"
                   priority
                 />
               </div>
