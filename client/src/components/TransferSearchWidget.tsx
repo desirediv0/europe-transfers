@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { Suspense, useState, useEffect } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import { useBooking } from "@/context/BookingContext";
 import { api } from "@/lib/api";
@@ -10,9 +10,10 @@ import { HeroSearchBar } from "@/components/HeroSearchBar";
 import { DropdownPickerField, DateTimePickerField, StepperField } from "@/components/SearchFields";
 import { IconMapPin, IconArrowsLeftRight } from "@tabler/icons-react";
 
-export default function TransferSearchWidget() {
+function TransferSearchWidgetInner() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const basePath = pathname?.startsWith("/private-transfers") ? "/private-transfers" : "/fleet";
   const { search, updateSearch } = useBooking();
   const [locations, setLocations] = useState<Location[]>([]);
@@ -21,6 +22,20 @@ export default function TransferSearchWidget() {
   useEffect(() => {
     api.get<Location[]>("/search/locations").then(setLocations).catch(() => {});
   }, []);
+
+  // "Top Destinations" cards on the homepage link here with ?city=<name>
+  // so the picked city is pre-filled as the "From" location instead of
+  // landing on a blank search bar - prefer that city's Airport location
+  // (the most common starting point), falling back to any location in it.
+  useEffect(() => {
+    const city = searchParams.get("city");
+    if (!city || locations.length === 0 || search.fromLocationId) return;
+    const cityLocations = locations.filter((l) => l.city.toLowerCase() === city.toLowerCase());
+    if (cityLocations.length === 0) return;
+    const preferred = cityLocations.find((l) => l.name.toLowerCase().includes("airport")) || cityLocations[0];
+    updateSearch({ fromLocationId: preferred.id, fromLocationName: preferred.name });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locations, searchParams]);
 
   const handleSubmit = async () => {
     if (!search.fromLocationId || !search.toLocationId || !search.pickupDate || !search.pickupTime) return;
@@ -110,5 +125,13 @@ export default function TransferSearchWidget() {
         100+ countries · Fixed price · Free cancellation
       </p>
     </div>
+  );
+}
+
+export default function TransferSearchWidget() {
+  return (
+    <Suspense fallback={<div className="w-full h-20" />}>
+      <TransferSearchWidgetInner />
+    </Suspense>
   );
 }

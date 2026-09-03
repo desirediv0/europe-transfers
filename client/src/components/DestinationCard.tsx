@@ -38,7 +38,7 @@ export default function DestinationCard({ city, loading }: DestinationCardProps)
   const imageSrc = city.image || FALLBACK_IMAGE;
 
   return (
-    <Link href="/private-transfers" className="group block w-full h-80 sm:h-[26rem]">
+    <Link href={`/private-transfers?city=${encodeURIComponent(city.city)}`} className="group block w-full h-80 sm:h-[26rem]">
       <div className="relative h-full w-full rounded-[1.6rem] sm:rounded-[2.2rem] overflow-hidden border border-gray-200/60 shadow-lg transition-all duration-500 hover:shadow-2xl hover:shadow-navy/20 hover:-translate-y-2">
         {/* Background Image */}
         <img
