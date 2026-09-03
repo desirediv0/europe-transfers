@@ -7,7 +7,6 @@ import {
   IconSparkles,
   IconShieldCheck,
   IconStar,
-  IconFilter,
   IconMapPin,
   IconUsers,
 } from "@tabler/icons-react";
@@ -15,14 +14,8 @@ import { api } from "@/lib/api";
 import { HeroSearchBar } from "@/components/HeroSearchBar";
 import { DropdownPickerField, DatePickerField, StepperField } from "@/components/SearchFields";
 
-interface SightseeingTourSummary {
-  id: string;
-  cityName?: string;
-}
-
 function SightseeingSearchContent() {
   const router = useRouter();
-  const [selectedCity, setSelectedCity] = useState("ALL");
   const [cities, setCities] = useState<string[]>([]);
   const [barCity, setBarCity] = useState("");
   const [barDate, setBarDate] = useState<Date | null>(null);
@@ -30,13 +23,8 @@ function SightseeingSearchContent() {
 
   useEffect(() => {
     api
-      .get<{ items: SightseeingTourSummary[] }>("/sightseeing?limit=100")
-      .then((res) => {
-        const names = Array.from(
-          new Set((res.items || []).map((t) => t.cityName).filter((c): c is string => Boolean(c)))
-        ).sort();
-        setCities(names);
-      })
+      .get<string[]>("/sightseeing/cities")
+      .then((res) => setCities(Array.isArray(res) ? res : []))
       .catch(() => setCities([]));
   }, []);
 
@@ -87,7 +75,7 @@ function SightseeingSearchContent() {
                     value={barCity}
                     placeholder="Any city"
                     options={cities.map((c) => ({ id: c, label: c }))}
-                    onChange={(_id, label) => { setBarCity(label); setSelectedCity(label); }}
+                    onChange={(_id, label) => setBarCity(label)}
                   />
                   <DatePickerField label="Activity date" date={barDate} onChange={setBarDate} />
                   <StepperField
@@ -103,37 +91,6 @@ function SightseeingSearchContent() {
             />
           </div>
 
-          {/* City Filter Pills */}
-          {cities.length > 0 && (
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-              <span className="text-xs text-gray-400 font-bold mr-1 flex items-center gap-1">
-                <IconFilter className="h-3.5 w-3.5 text-gold" /> City:
-              </span>
-              <button
-                onClick={() => { setSelectedCity("ALL"); setBarCity(""); }}
-                className={`rounded-full px-4 py-1.5 text-xs font-extrabold transition-all cursor-pointer ${
-                  selectedCity === "ALL"
-                    ? "bg-gold text-navy shadow-md"
-                    : "bg-white/10 text-white hover:bg-white/20 backdrop-blur-md"
-                }`}
-              >
-                All
-              </button>
-              {cities.map((city) => (
-                <button
-                  key={city}
-                  onClick={() => { setSelectedCity(city); setBarCity(city); }}
-                  className={`rounded-full px-4 py-1.5 text-xs font-extrabold transition-all cursor-pointer ${
-                    selectedCity === city
-                      ? "bg-gold text-navy shadow-md"
-                      : "bg-white/10 text-white hover:bg-white/20 backdrop-blur-md"
-                  }`}
-                >
-                  {city}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       </section>
 

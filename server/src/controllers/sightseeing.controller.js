@@ -68,6 +68,23 @@ const ensureTablesExist = async () => {
   }
 };
 
+// Lightweight endpoint for populating the city dropdown/search - returns
+// only distinct active city names instead of full tour payloads, so it
+// stays fast and small no matter how many tours (or cities) exist.
+export const getSightseeingCities = asyncHandler(async (req, res) => {
+  await ensureTablesExist();
+
+  const rows = await prisma.sightseeingTour.findMany({
+    where: { isActive: true, cityName: { not: null } },
+    select: { cityName: true },
+    distinct: ["cityName"],
+    orderBy: { cityName: "asc" },
+  });
+
+  const cities = rows.map((r) => r.cityName).filter(Boolean);
+  return apiResponse(res, 200, "Cities retrieved", cities);
+});
+
 export const getSightseeingTours = asyncHandler(async (req, res) => {
   await ensureTablesExist();
 

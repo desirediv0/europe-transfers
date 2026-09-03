@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   getSightseeingTours,
+  getSightseeingCities,
   getSightseeingBySlug,
   submitSightseeingEnquiry,
   getSightseeingEnquiries,
@@ -29,8 +30,9 @@ const enquirySchema = z.object({
   notes: z.string().optional(),
 });
 
-// Public Routes
+// Public Routes (must be registered before "/:slug" so they aren't shadowed)
 router.get("/", getSightseeingTours);
+router.get("/cities", getSightseeingCities);
 router.post("/enquire", validate(enquirySchema), submitSightseeingEnquiry);
 
 // Admin Routes (must be registered before "/:slug" so they aren't shadowed)
