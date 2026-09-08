@@ -73,3 +73,27 @@ export const getLocations = asyncHandler(async (req, res) => {
   });
   return apiResponse(res, 200, "Locations retrieved", locations);
 });
+
+// Some cities have several same-named locations (e.g. multiple "Paris City
+// Center" rows, each only routed to one specific destination like the
+// airport vs. Disneyland), so the "To" dropdown can't just list every
+// active location - a same-named-but-wrong copy would pass validation but
+// have no route. This returns only destinations actually reachable (an
+// active Route exists) from the given origin, so a mismatch is impossible.
+export const getDestinationsFrom = asyncHandler(async (req, res) => {
+  const { fromLocationId } = req.params;
+  if (!fromLocationId) {
+    throw new ApiError(400, "fromLocationId is required");
+  }
+
+  const routes = await prisma.route.findMany({
+    where: { fromLocationId, isActive: true },
+    include: { toLocation: true },
+  });
+
+  const destinations = routes
+    .filter((r) => r.toLocation.isActive)
+    .map((r) => r.toLocation);
+
+  return apiResponse(res, 200, "Destinations retrieved", destinations);
+});

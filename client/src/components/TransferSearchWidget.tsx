@@ -17,11 +17,41 @@ function TransferSearchWidgetInner() {
   const basePath = pathname?.startsWith("/private-transfers") ? "/private-transfers" : "/fleet";
   const { search, updateSearch } = useBooking();
   const [locations, setLocations] = useState<Location[]>([]);
+  const [destinations, setDestinations] = useState<Location[] | null>(null);
   const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     api.get<Location[]>("/search/locations").then(setLocations).catch(() => {});
   }, []);
+
+  // Several same-named locations can exist for one city (e.g. multiple
+  // "Paris City Center" rows, each only routed to one specific
+  // destination), so once a "From" is picked, narrow "To" down to
+  // locations that actually have a route from it - picking any other
+  // same-named copy would otherwise look valid but return no results.
+  useEffect(() => {
+    if (!search.fromLocationId) {
+      setDestinations(null);
+      return;
+    }
+    let cancelled = false;
+    api
+      .get<Location[]>(`/search/locations/${search.fromLocationId}/destinations`)
+      .then((dests) => {
+        if (cancelled) return;
+        setDestinations(dests);
+        // Clear a "To" selection that isn't actually reachable from the
+        // newly picked "From" (e.g. swapping, or picking a new origin).
+        if (search.toLocationId && !dests.some((d) => d.id === search.toLocationId)) {
+          updateSearch({ toLocationId: "", toLocationName: "" });
+        }
+      })
+      .catch(() => setDestinations(null));
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.fromLocationId]);
 
   // "Top Destinations" cards on the homepage link here with ?city=<name>
   // so the picked city is pre-filled as the "From" location instead of
@@ -68,6 +98,11 @@ function TransferSearchWidgetInner() {
   };
 
   const locationOptions = locations.map((l) => ({ id: l.id, label: l.name, sublabel: l.city }));
+  // Once "From" is picked, restrict "To" to destinations that actually
+  // have a route from it (see effect above) instead of every location.
+  const toOptions = destinations
+    ? destinations.map((l) => ({ id: l.id, label: l.name, sublabel: l.city }))
+    : locationOptions.filter((o) => o.id !== search.fromLocationId);
 
   const canSubmit = !!(search.fromLocationId && search.toLocationId && search.pickupDate && search.pickupTime);
 
@@ -103,8 +138,8 @@ function TransferSearchWidgetInner() {
               label="To"
               icon={IconMapPin}
               value={search.toLocationId}
-              placeholder="Address, airport, hotel, ..."
-              options={locationOptions.filter((o) => o.id !== search.fromLocationId)}
+              placeholder={search.fromLocationId ? "Select a destination" : "Pick a \"From\" location first"}
+              options={toOptions}
               onChange={(id, name) => updateSearch({ toLocationId: id, toLocationName: name })}
             />
             <DateTimePickerField
