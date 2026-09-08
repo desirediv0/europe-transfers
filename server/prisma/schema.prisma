@@ -216,6 +216,7 @@ model CarType {
   isAC        Boolean      @default(true)
   isWiFi      Boolean      @default(false)
   isLuggage   Boolean      @default(true)
+  luggageCapacity Int      @default(2)
   isChildSeat Boolean      @default(false)
   isVIP       Boolean      @default(false)
   isPetFriendly Boolean    @default(false)

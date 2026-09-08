@@ -48,6 +48,7 @@ export const search = asyncHandler(async (req, res) => {
       id: rp.carType.id,
       name: rp.carType.name,
       seats: rp.carType.seats,
+      luggageCapacity: rp.carType.luggageCapacity,
       image: rp.carType.image,
       isAC: rp.carType.isAC,
     },

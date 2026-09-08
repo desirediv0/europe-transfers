@@ -19,7 +19,7 @@ export default function CarTypesPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<CarType | null>(null);
-  const [form, setForm] = useState({ name: "", seats: "", image: "", isAC: true, isWiFi: false, isLuggage: true, isChildSeat: false, isVIP: false, isPetFriendly: false });
+  const [form, setForm] = useState({ name: "", seats: "", luggageCapacity: "2", image: "", isAC: true, isWiFi: false, isLuggage: true, isChildSeat: false, isVIP: false, isPetFriendly: false });
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async (page = 1) => {
@@ -37,11 +37,11 @@ export default function CarTypesPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const openCreate = () => { setEditing(null); setForm({ name: "", seats: "", image: "", isAC: true, isWiFi: false, isLuggage: true, isChildSeat: false, isVIP: false, isPetFriendly: false }); setDialogOpen(true); };
+  const openCreate = () => { setEditing(null); setForm({ name: "", seats: "", luggageCapacity: "2", image: "", isAC: true, isWiFi: false, isLuggage: true, isChildSeat: false, isVIP: false, isPetFriendly: false }); setDialogOpen(true); };
   const openEdit = (item: CarType) => {
     setEditing(item);
     setForm({
-      name: item.name, seats: item.seats.toString(), image: item.image || "",
+      name: item.name, seats: item.seats.toString(), luggageCapacity: (item.luggageCapacity ?? 2).toString(), image: item.image || "",
       isAC: item.isAC, isWiFi: item.isWiFi, isLuggage: item.isLuggage,
       isChildSeat: item.isChildSeat, isVIP: item.isVIP, isPetFriendly: item.isPetFriendly
     });
@@ -52,7 +52,7 @@ export default function CarTypesPage() {
     if (!form.name || !form.seats) { toast.error("Name and seats are required"); return; }
     setSaving(true);
     try {
-      const payload = { name: form.name, seats: parseInt(form.seats), image: form.image || null, isAC: form.isAC, isWiFi: form.isWiFi, isLuggage: form.isLuggage, isChildSeat: form.isChildSeat, isVIP: form.isVIP, isPetFriendly: form.isPetFriendly };
+      const payload = { name: form.name, seats: parseInt(form.seats), luggageCapacity: parseInt(form.luggageCapacity) || 0, image: form.image || null, isAC: form.isAC, isWiFi: form.isWiFi, isLuggage: form.isLuggage, isChildSeat: form.isChildSeat, isVIP: form.isVIP, isPetFriendly: form.isPetFriendly };
       if (editing) {
         await api.put(`/car-types/${editing.id}`, payload);
         toast.success("Car type updated");
@@ -101,6 +101,7 @@ export default function CarTypesPage() {
                 <TableHead>Image</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Seats</TableHead>
+                <TableHead>Luggage</TableHead>
                 <TableHead>AC</TableHead>
                 <TableHead>Features</TableHead>
                 <TableHead>Status</TableHead>
@@ -110,10 +111,10 @@ export default function CarTypesPage() {
             <TableBody>
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i}><TableCell colSpan={7}><Skeleton className="h-4 w-full" /></TableCell></TableRow>
+                <TableRow key={i}><TableCell colSpan={8}><Skeleton className="h-4 w-full" /></TableCell></TableRow>
               ))
             ) : items.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No car types found</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No car types found</TableCell></TableRow>
               ) : (
                 items.map((item) => (
                   <TableRow key={item.id}>
@@ -126,6 +127,7 @@ export default function CarTypesPage() {
                     </TableCell>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{item.seats}</TableCell>
+                    <TableCell>{item.luggageCapacity ?? 2} bags</TableCell>
                     <TableCell><Badge variant={item.isAC ? "default" : "secondary"}>{item.isAC ? "AC" : "Non-AC"}</Badge></TableCell>
                     <TableCell>
                       <div className="flex gap-1 flex-wrap">
@@ -180,6 +182,11 @@ export default function CarTypesPage() {
               <Label>Seats</Label>
               <Input type="number" min="1" value={form.seats} onChange={(e) => setForm({ ...form, seats: e.target.value })} placeholder="e.g. 3" />
               <p className="text-xs text-muted-foreground">Maximum number of passengers this vehicle type can carry, e.g. 3 for a Sedan, 7 for a Minivan.</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Luggage Capacity (bags)</Label>
+              <Input type="number" min="0" value={form.luggageCapacity} onChange={(e) => setForm({ ...form, luggageCapacity: e.target.value })} placeholder="e.g. 2" />
+              <p className="text-xs text-muted-foreground">Number of standard suitcases/bags this vehicle can fit, e.g. 2 for a Sedan, 6 for a Minivan. Shown to customers on the booking page.</p>
             </div>
             <div className="space-y-2">
               <Label>Image</Label>

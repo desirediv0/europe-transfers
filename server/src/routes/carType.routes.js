@@ -18,6 +18,13 @@ const carTypeSchema = z.object({
   seats: z.number().int().min(1),
   image: z.string().url().optional().nullable(),
   isAC: z.boolean().optional(),
+  isWiFi: z.boolean().optional(),
+  isLuggage: z.boolean().optional(),
+  luggageCapacity: z.number().int().min(0).optional(),
+  isChildSeat: z.boolean().optional(),
+  isVIP: z.boolean().optional(),
+  isPetFriendly: z.boolean().optional(),
+  isActive: z.boolean().optional(),
 });
 
 router.get("/", getCarTypes);

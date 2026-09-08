@@ -9,6 +9,7 @@ export interface SearchResult {
     id: string;
     name: string;
     seats: number;
+    luggageCapacity?: number;
     image?: string;
     isAC: boolean;
   };
