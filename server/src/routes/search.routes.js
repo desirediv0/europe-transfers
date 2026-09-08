@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { search, getLocations, getDestinationsFrom } from "../controllers/search.controller.js";
+import { search, getLocations, getDestinationsByName, resolveLocationPair } from "../controllers/search.controller.js";
 import { otpRateLimiter } from "../middlewares/rateLimiter.js";
 import validate from "../middlewares/validate.middleware.js";
 import { z } from "zod";
@@ -13,7 +13,8 @@ const searchSchema = z.object({
 });
 
 router.get("/locations", getLocations);
-router.get("/locations/:fromLocationId/destinations", getDestinationsFrom);
+router.get("/destinations", getDestinationsByName);
+router.get("/resolve-pair", resolveLocationPair);
 router.post("/", validate(searchSchema), search);
 
 export default router;

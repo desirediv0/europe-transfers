@@ -19,39 +19,65 @@ function TransferSearchWidgetInner() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [destinations, setDestinations] = useState<Location[] | null>(null);
   const [searching, setSearching] = useState(false);
+  const [resolving, setResolving] = useState(false);
 
   useEffect(() => {
     api.get<Location[]>("/search/locations").then(setLocations).catch(() => {});
   }, []);
 
-  // Several same-named locations can exist for one city (e.g. multiple
-  // "Paris City Center" rows, each only routed to one specific
-  // destination), so once a "From" is picked, narrow "To" down to
-  // locations that actually have a route from it - picking any other
-  // same-named copy would otherwise look valid but return no results.
+  // A city can have several same-named locations that are each paired
+  // one-to-one with a different destination (e.g. many "Paris City Center"
+  // rows - one routed only to the airport, another only to Disneyland...)
+  // instead of one shared location reused everywhere. So "To" should list
+  // every destination that city serves overall, not just what this one
+  // "From" row happens to reach directly.
   useEffect(() => {
-    if (!search.fromLocationId) {
+    if (!search.fromLocationName) {
       setDestinations(null);
       return;
     }
     let cancelled = false;
     api
-      .get<Location[]>(`/search/locations/${search.fromLocationId}/destinations`)
+      .get<Location[]>(`/search/destinations?fromName=${encodeURIComponent(search.fromLocationName)}`)
       .then((dests) => {
-        if (cancelled) return;
-        setDestinations(dests);
-        // Clear a "To" selection that isn't actually reachable from the
-        // newly picked "From" (e.g. swapping, or picking a new origin).
-        if (search.toLocationId && !dests.some((d) => d.id === search.toLocationId)) {
-          updateSearch({ toLocationId: "", toLocationName: "" });
-        }
+        if (!cancelled) setDestinations(dests);
       })
       .catch(() => setDestinations(null));
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search.fromLocationId]);
+  }, [search.fromLocationName]);
+
+  // The specific "From" row currently selected may not be the one that
+  // actually routes to the chosen "To" name (see above), so resolve the
+  // real pair and snap "From" to the matching row - the visible names
+  // never change, only which underlying row/id is used for each.
+  const resolvePair = async (fromName: string, toName: string) => {
+    setResolving(true);
+    try {
+      const result = await api.get<{ route: { from: Location; to: Location } | null }>(
+        `/search/resolve-pair?fromName=${encodeURIComponent(fromName)}&toName=${encodeURIComponent(toName)}`
+      );
+      if (result.route) {
+        updateSearch({
+          fromLocationId: result.route.from.id,
+          fromLocationName: result.route.from.name,
+          toLocationId: result.route.to.id,
+          toLocationName: result.route.to.name,
+        });
+      }
+    } catch {
+      // leave the plain selection in place; search will surface "no route"
+    } finally {
+      setResolving(false);
+    }
+  };
+
+  const handleToChange = async (toId: string, toName: string) => {
+    updateSearch({ toLocationId: toId, toLocationName: toName });
+    if (!search.fromLocationName) return;
+    await resolvePair(search.fromLocationName, toName);
+  };
 
   // "Top Destinations" cards on the homepage link here with ?city=<name>
   // so the picked city is pre-filled as the "From" location instead of
@@ -86,25 +112,31 @@ function TransferSearchWidgetInner() {
     }
   };
 
-  const swapLocations = () => {
-    const tempId = search.fromLocationId;
-    const tempName = search.fromLocationName;
+  const swapLocations = async () => {
+    const newFromName = search.toLocationName;
+    const newToName = search.fromLocationName;
     updateSearch({
       fromLocationId: search.toLocationId,
-      fromLocationName: search.toLocationName,
-      toLocationId: tempId,
-      toLocationName: tempName,
+      fromLocationName: newFromName,
+      toLocationId: search.fromLocationId,
+      toLocationName: newToName,
     });
+    // Re-resolve to the row that actually routes newFromName -> newToName -
+    // same as picking "To" normally, so a swap can't carry over a mismatch.
+    if (newFromName && newToName) {
+      await resolvePair(newFromName, newToName);
+    }
   };
 
   const locationOptions = locations.map((l) => ({ id: l.id, label: l.name, sublabel: l.city }));
-  // Once "From" is picked, restrict "To" to destinations that actually
-  // have a route from it (see effect above) instead of every location.
+  // Once "From" is picked, "To" shows every destination that city serves
+  // (see the destinations effect above) rather than every location on the
+  // platform; selecting one resolves the real row via handleToChange.
   const toOptions = destinations
     ? destinations.map((l) => ({ id: l.id, label: l.name, sublabel: l.city }))
     : locationOptions.filter((o) => o.id !== search.fromLocationId);
 
-  const canSubmit = !!(search.fromLocationId && search.toLocationId && search.pickupDate && search.pickupTime);
+  const canSubmit = !!(search.fromLocationId && search.toLocationId && search.pickupDate && search.pickupTime && !resolving);
 
   return (
     <div className="w-full">
@@ -140,7 +172,7 @@ function TransferSearchWidgetInner() {
               value={search.toLocationId}
               placeholder={search.fromLocationId ? "Select a destination" : "Pick a \"From\" location first"}
               options={toOptions}
-              onChange={(id, name) => updateSearch({ toLocationId: id, toLocationName: name })}
+              onChange={handleToChange}
             />
             <DateTimePickerField
               date={search.pickupDate}
