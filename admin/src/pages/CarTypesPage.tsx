@@ -19,7 +19,7 @@ export default function CarTypesPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<CarType | null>(null);
-  const [form, setForm] = useState({ name: "", seats: "", luggageCapacity: "2", image: "", isAC: true, isWiFi: false, isLuggage: true, isChildSeat: false, isVIP: false, isPetFriendly: false });
+  const [form, setForm] = useState({ name: "", seats: "", luggageInfo: "2 bags", image: "", isAC: true, isWiFi: false, isLuggage: true, isChildSeat: false, isVIP: false, isPetFriendly: false });
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async (page = 1) => {
@@ -37,11 +37,11 @@ export default function CarTypesPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const openCreate = () => { setEditing(null); setForm({ name: "", seats: "", luggageCapacity: "2", image: "", isAC: true, isWiFi: false, isLuggage: true, isChildSeat: false, isVIP: false, isPetFriendly: false }); setDialogOpen(true); };
+  const openCreate = () => { setEditing(null); setForm({ name: "", seats: "", luggageInfo: "2 bags", image: "", isAC: true, isWiFi: false, isLuggage: true, isChildSeat: false, isVIP: false, isPetFriendly: false }); setDialogOpen(true); };
   const openEdit = (item: CarType) => {
     setEditing(item);
     setForm({
-      name: item.name, seats: item.seats.toString(), luggageCapacity: (item.luggageCapacity ?? 2).toString(), image: item.image || "",
+      name: item.name, seats: item.seats.toString(), luggageInfo: item.luggageInfo ?? "2 bags", image: item.image || "",
       isAC: item.isAC, isWiFi: item.isWiFi, isLuggage: item.isLuggage,
       isChildSeat: item.isChildSeat, isVIP: item.isVIP, isPetFriendly: item.isPetFriendly
     });
@@ -52,7 +52,7 @@ export default function CarTypesPage() {
     if (!form.name || !form.seats) { toast.error("Name and seats are required"); return; }
     setSaving(true);
     try {
-      const payload = { name: form.name, seats: parseInt(form.seats), luggageCapacity: parseInt(form.luggageCapacity) || 0, image: form.image || null, isAC: form.isAC, isWiFi: form.isWiFi, isLuggage: form.isLuggage, isChildSeat: form.isChildSeat, isVIP: form.isVIP, isPetFriendly: form.isPetFriendly };
+      const payload = { name: form.name, seats: parseInt(form.seats), luggageInfo: form.luggageInfo || null, image: form.image || null, isAC: form.isAC, isWiFi: form.isWiFi, isLuggage: form.isLuggage, isChildSeat: form.isChildSeat, isVIP: form.isVIP, isPetFriendly: form.isPetFriendly };
       if (editing) {
         await api.put(`/car-types/${editing.id}`, payload);
         toast.success("Car type updated");
@@ -127,7 +127,7 @@ export default function CarTypesPage() {
                     </TableCell>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{item.seats}</TableCell>
-                    <TableCell>{item.luggageCapacity ?? 2} bags</TableCell>
+                    <TableCell className="max-w-40 truncate" title={item.luggageInfo ?? "2 bags"}>{item.luggageInfo ?? "2 bags"}</TableCell>
                     <TableCell><Badge variant={item.isAC ? "default" : "secondary"}>{item.isAC ? "AC" : "Non-AC"}</Badge></TableCell>
                     <TableCell>
                       <div className="flex gap-1 flex-wrap">
@@ -184,9 +184,9 @@ export default function CarTypesPage() {
               <p className="text-xs text-muted-foreground">Maximum number of passengers this vehicle type can carry, e.g. 3 for a Sedan, 7 for a Minivan.</p>
             </div>
             <div className="space-y-2">
-              <Label>Luggage Capacity (bags)</Label>
-              <Input type="number" min="0" value={form.luggageCapacity} onChange={(e) => setForm({ ...form, luggageCapacity: e.target.value })} placeholder="e.g. 2" />
-              <p className="text-xs text-muted-foreground">Number of standard suitcases/bags this vehicle can fit, e.g. 2 for a Sedan, 6 for a Minivan. Shown to customers on the booking page.</p>
+              <Label>Luggage Capacity</Label>
+              <Input value={form.luggageInfo} onChange={(e) => setForm({ ...form, luggageInfo: e.target.value })} placeholder="e.g. 2 small bags + 2 mid size bags" />
+              <p className="text-xs text-muted-foreground">Describe what this vehicle can fit, in your own words, e.g. "2 small bags + 2 mid size bags" or "6 hand bags + 6 mid size luggages". Shown to customers on the booking page.</p>
             </div>
             <div className="space-y-2">
               <Label>Image</Label>

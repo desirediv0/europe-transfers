@@ -10,6 +10,16 @@ const runSchemaPatches = async () => {
   await prisma.$executeRawUnsafe(
     `ALTER TABLE "CarType" ADD COLUMN IF NOT EXISTS "luggageCapacity" INTEGER NOT NULL DEFAULT 2`
   );
+  // luggageCapacity (a single number) was replaced with free text, so
+  // admins can describe mixed bag sizes, e.g. "6 hand bags + 6 mid size
+  // luggages" instead of just "6". Carry over any existing numeric value
+  // as "<n> bags" before the old column is no longer used.
+  await prisma.$executeRawUnsafe(
+    `ALTER TABLE "CarType" ADD COLUMN IF NOT EXISTS "luggageInfo" TEXT DEFAULT '2 bags'`
+  );
+  await prisma.$executeRawUnsafe(
+    `UPDATE "CarType" SET "luggageInfo" = "luggageCapacity" || ' bags' WHERE "luggageInfo" = '2 bags' AND "luggageCapacity" IS NOT NULL AND "luggageCapacity" != 2`
+  );
 };
 
 const startServer = async () => {

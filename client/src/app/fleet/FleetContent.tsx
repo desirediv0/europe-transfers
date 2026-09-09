@@ -156,7 +156,7 @@ function VehicleCard({
                       </Badge>
                     )}
                     <Badge variant="outline" className="rounded-xl text-xs font-bold gap-1.5 px-3 py-1 bg-slate-50 border-gray-200 text-navy">
-                      <IconLuggage className="h-3.5 w-3.5 text-gold" /> {item.carType.luggageCapacity ?? 2} Bag{(item.carType.luggageCapacity ?? 2) === 1 ? "" : "s"}
+                      <IconLuggage className="h-3.5 w-3.5 text-gold" /> {item.carType.luggageInfo || "2 bags"}
                     </Badge>
                   </div>
                 </div>

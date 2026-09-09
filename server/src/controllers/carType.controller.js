@@ -36,7 +36,7 @@ export const getCarTypeById = asyncHandler(async (req, res) => {
 });
 
 export const createCarType = asyncHandler(async (req, res) => {
-  const { name, seats, image, isAC, isWiFi, isLuggage, luggageCapacity, isChildSeat, isVIP, isPetFriendly } = req.body;
+  const { name, seats, image, isAC, isWiFi, isLuggage, luggageInfo, isChildSeat, isVIP, isPetFriendly } = req.body;
   if (!name || seats == null) {
     throw new ApiError(400, "Name and seats are required");
   }
@@ -47,7 +47,7 @@ export const createCarType = asyncHandler(async (req, res) => {
       isAC: isAC !== false,
       isWiFi: isWiFi === true,
       isLuggage: isLuggage !== false,
-      luggageCapacity: luggageCapacity != null ? parseInt(luggageCapacity, 10) : 2,
+      luggageInfo: luggageInfo || "2 bags",
       isChildSeat: isChildSeat === true,
       isVIP: isVIP === true,
       isPetFriendly: isPetFriendly === true,
@@ -57,7 +57,7 @@ export const createCarType = asyncHandler(async (req, res) => {
 });
 
 export const updateCarType = asyncHandler(async (req, res) => {
-  const { name, seats, image, isAC, isWiFi, isLuggage, luggageCapacity, isChildSeat, isVIP, isPetFriendly, isActive } = req.body;
+  const { name, seats, image, isAC, isWiFi, isLuggage, luggageInfo, isChildSeat, isVIP, isPetFriendly, isActive } = req.body;
 
   const existing = await prisma.carType.findUnique({ where: { id: req.params.id } });
   if (!existing) {
@@ -67,8 +67,7 @@ export const updateCarType = asyncHandler(async (req, res) => {
   const carType = await prisma.carType.update({
     where: { id: req.params.id },
     data: {
-      name, seats, image, isAC, isWiFi, isLuggage,
-      luggageCapacity: luggageCapacity != null ? parseInt(luggageCapacity, 10) : undefined,
+      name, seats, image, isAC, isWiFi, isLuggage, luggageInfo,
       isChildSeat, isVIP, isPetFriendly, isActive,
     },
   });

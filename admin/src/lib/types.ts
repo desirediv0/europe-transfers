@@ -50,7 +50,7 @@ export interface CarType {
   id: string;
   name: string;
   seats: number;
-  luggageCapacity?: number;
+  luggageInfo?: string;
   image?: string;
   isAC: boolean;
   isWiFi: boolean;

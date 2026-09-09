@@ -20,7 +20,7 @@ const carTypeSchema = z.object({
   isAC: z.boolean().optional(),
   isWiFi: z.boolean().optional(),
   isLuggage: z.boolean().optional(),
-  luggageCapacity: z.number().int().min(0).optional(),
+  luggageInfo: z.string().max(200).optional().nullable(),
   isChildSeat: z.boolean().optional(),
   isVIP: z.boolean().optional(),
   isPetFriendly: z.boolean().optional(),
