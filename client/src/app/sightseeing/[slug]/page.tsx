@@ -9,6 +9,7 @@ export const revalidate = 0;
 
 interface Props {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 async function getSightseeingTour(slug: string): Promise<SightseeingTourDetail | null> {
@@ -37,13 +38,23 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
-export default async function SightseeingDetailPage({ params }: Props) {
+export default async function SightseeingDetailPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const sp = searchParams ? await searchParams : undefined;
+  const initialPax = typeof sp?.pax === "string" ? sp.pax : undefined;
+  const initialDate = typeof sp?.date === "string" ? sp.date : undefined;
+
   const tour = await getSightseeingTour(slug);
 
   if (!tour) {
     notFound();
   }
 
-  return <SightseeingDetailClient tour={tour} />;
+  return (
+    <SightseeingDetailClient
+      tour={tour}
+      initialPax={initialPax}
+      initialDate={initialDate}
+    />
+  );
 }

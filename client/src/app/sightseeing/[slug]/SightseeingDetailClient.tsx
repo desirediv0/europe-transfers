@@ -59,9 +59,11 @@ export interface SightseeingTourDetail {
 
 interface Props {
   tour: SightseeingTourDetail;
+  initialPax?: string;
+  initialDate?: string;
 }
 
-export function SightseeingDetailClient({ tour }: Props) {
+export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props) {
   const { format: formatCurrency } = useCurrency();
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<{ name: string; price: number } | null>(null);
@@ -77,15 +79,26 @@ export function SightseeingDetailClient({ tour }: Props) {
     email: string;
   }
 
+  const defaultPax = initialPax || "2";
+  const defaultDate = initialDate || "";
+
+  const getInitialExtraPassengers = (paxVal: string) => {
+    const paxNum = parseInt(paxVal, 10) || 1;
+    const extraCount = Math.max(0, paxNum - 1);
+    return Array.from({ length: extraCount }, () => ({ name: "", phone: "", email: "" }));
+  };
+
   const [form, setForm] = useState({
     name: "",
     email: "",
     phone: "",
-    travelDate: "",
-    pax: "2",
+    travelDate: defaultDate,
+    pax: defaultPax,
     message: "",
   });
-  const [additionalPassengers, setAdditionalPassengers] = useState<PassengerDetail[]>([]);
+  const [additionalPassengers, setAdditionalPassengers] = useState<PassengerDetail[]>(() =>
+    getInitialExtraPassengers(defaultPax)
+  );
 
   // Keeps the additional-passenger fields in sync with the selected pax
   // count: passenger 1 is the lead contact above (name/phone/email);
@@ -112,8 +125,8 @@ export function SightseeingDetailClient({ tour }: Props) {
     name: "",
     email: "",
     phone: "",
-    travelDate: "",
-    pax: "1",
+    travelDate: defaultDate,
+    pax: defaultPax,
   });
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [selectedForPayment, setSelectedForPayment] = useState<{ name: string; price: number } | null>(null);
@@ -163,8 +176,8 @@ export function SightseeingDetailClient({ tour }: Props) {
 
   const handleOpenOption = (opt: { name: string; price: number }) => {
     setSelectedOption(opt);
-    setForm({ name: "", email: "", phone: "", travelDate: "", pax: "2", message: "" });
-    setAdditionalPassengers([{ name: "", phone: "", email: "" }]);
+    setForm({ name: "", email: "", phone: "", travelDate: defaultDate, pax: defaultPax, message: "" });
+    setAdditionalPassengers(getInitialExtraPassengers(defaultPax));
     setEnquiryOpen(true);
   };
 
@@ -226,7 +239,7 @@ export function SightseeingDetailClient({ tour }: Props) {
 
   const handleOpenPayment = (opt: { name: string; price: number }) => {
     setSelectedForPayment(opt);
-    setPaymentForm({ name: "", email: "", phone: "", travelDate: "", pax: "1" });
+    setPaymentForm({ name: "", email: "", phone: "", travelDate: defaultDate, pax: defaultPax });
     setPaymentOpen(true);
   };
 

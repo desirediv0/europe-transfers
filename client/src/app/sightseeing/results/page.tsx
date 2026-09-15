@@ -78,6 +78,11 @@ function ResultsContent() {
       const city = newParams.city !== undefined ? newParams.city : selectedCity;
       const search = newParams.search !== undefined ? newParams.search : debouncedSearch;
 
+      const pax = searchParams.get("pax");
+      const date = searchParams.get("date");
+      if (pax) params.set("pax", pax);
+      if (date) params.set("date", date);
+
       if (page > 1) params.set("page", page.toString());
       if (city && city !== "ALL") params.set("city", city);
       if (search.trim()) params.set("search", search.trim());
@@ -85,7 +90,7 @@ function ResultsContent() {
       const qs = params.toString();
       router.push(`/sightseeing/results${qs ? `?${qs}` : ""}`);
     },
-    [currentPage, selectedCity, debouncedSearch, router]
+    [currentPage, selectedCity, debouncedSearch, router, searchParams]
   );
 
   useEffect(() => {
@@ -324,57 +329,67 @@ function ResultsContent() {
           </div>
         ) : (
           <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {tours.map((tour) => (
-              <Card
-                key={tour.id}
-                className="group border border-gray-200/80 bg-white rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between"
-              >
-                <div className="relative h-48 overflow-hidden bg-slate-100">
-                  <img
-                    src={tour.coverImage || "/images/hero_swiss_alps.png"}
-                    alt={tour.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-3 left-3 flex gap-1.5">
-                    <Badge className="rounded-full bg-[#060C17]/90 text-gold border border-gold/30 backdrop-blur-md text-[10px] font-extrabold px-2.5">
-                      <IconMapPin className="mr-1 h-3 w-3" />
-                      {tour.cityName || "Europe"}
-                    </Badge>
-                  </div>
-                  <div className="absolute bottom-3 right-3">
-                    <Badge className="rounded-full bg-white/90 text-navy backdrop-blur-md text-[10px] font-bold px-2 py-0.5 shadow-sm">
-                      <IconClock className="mr-1 h-3 w-3 text-gold" />
-                      {tour.duration}
-                    </Badge>
-                  </div>
-                </div>
+            {tours.map((tour) => {
+              const tourParams = new URLSearchParams();
+              const paxVal = searchParams.get("pax");
+              const dateVal = searchParams.get("date");
+              if (paxVal) tourParams.set("pax", paxVal);
+              if (dateVal) tourParams.set("date", dateVal);
+              const tourHref = `/sightseeing/${tour.slug}${tourParams.toString() ? `?${tourParams.toString()}` : ""}`;
 
-                <CardContent className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                  <div>
-                    <h3 className="font-extrabold text-sm sm:text-base text-navy leading-snug line-clamp-2 group-hover:text-gold transition-colors">
-                      {tour.title}
-                    </h3>
-                    {tour.summary && (
-                      <p className="text-xs text-gray-500 mt-2 line-clamp-2 leading-relaxed font-normal">
-                        {tour.summary}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Starting from</span>
-                      <span className="text-lg font-black text-navy">{format(Number(tour.priceFrom))}</span>
+              return (
+                <Link
+                  key={tour.id}
+                  href={tourHref}
+                  className="group block h-full focus:outline-hidden"
+                >
+                  <Card className="h-full border border-gray-200/80 bg-white rounded-3xl shadow-md hover:shadow-xl hover:border-gold/50 transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer">
+                    <div className="relative h-48 overflow-hidden bg-slate-100">
+                      <img
+                        src={tour.coverImage || "/images/hero_swiss_alps.png"}
+                        alt={tour.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute top-3 left-3 flex gap-1.5">
+                        <Badge className="rounded-full bg-[#060C17]/90 text-gold border border-gold/30 backdrop-blur-md text-[10px] font-extrabold px-2.5">
+                          <IconMapPin className="mr-1 h-3 w-3" />
+                          {tour.cityName || "Europe"}
+                        </Badge>
+                      </div>
+                      <div className="absolute bottom-3 right-3">
+                        <Badge className="rounded-full bg-white/90 text-navy backdrop-blur-md text-[10px] font-bold px-2 py-0.5 shadow-sm">
+                          <IconClock className="mr-1 h-3 w-3 text-gold" />
+                          {tour.duration}
+                        </Badge>
+                      </div>
                     </div>
-                    <Link href={`/sightseeing/${tour.slug}`}>
-                      <button className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-navy group-hover:bg-gold group-hover:text-navy transition-all shadow-sm cursor-pointer">
-                        <IconArrowRight className="h-4 w-4" />
-                      </button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+
+                    <CardContent className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                      <div>
+                        <h3 className="font-extrabold text-sm sm:text-base text-navy leading-snug line-clamp-2 group-hover:text-gold transition-colors">
+                          {tour.title}
+                        </h3>
+                        {tour.summary && (
+                          <p className="text-xs text-gray-500 mt-2 line-clamp-2 leading-relaxed font-normal">
+                            {tour.summary}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Starting from</span>
+                          <span className="text-lg font-black text-navy">{format(Number(tour.priceFrom))}</span>
+                        </div>
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-navy group-hover:bg-gold group-hover:text-navy transition-all shadow-sm">
+                          <IconArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
         )}
 
