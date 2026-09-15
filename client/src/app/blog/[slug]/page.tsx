@@ -36,10 +36,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     description: post.metaDescription || post.title,
     keywords: post.metaKeywords ? post.metaKeywords.split(",") : undefined,
+    alternates: {
+      canonical: `https://theeuropetransfers.com/blog/${slug}`,
+    },
     openGraph: {
       title: post.metaTitle || post.title,
       description: post.metaDescription || post.title,
+      url: `https://theeuropetransfers.com/blog/${slug}`,
+      type: "article",
       images: post.coverImage ? [{ url: post.coverImage }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.metaTitle || post.title,
+      description: post.metaDescription || post.title,
+      images: post.coverImage ? [post.coverImage] : [],
     },
   };
 }

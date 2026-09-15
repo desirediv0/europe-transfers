@@ -36,7 +36,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     description: pageData.metaDescription || pageData.pageDescription || pageData.title,
     keywords: pageData.metaKeywords ? pageData.metaKeywords.split(",") : undefined,
+    alternates: {
+      canonical: `https://theeuropetransfers.com/${slug}`,
+    },
     openGraph: {
+      title: pageData.metaTitle || pageData.title,
+      description: pageData.metaDescription || pageData.pageDescription || pageData.title,
+      url: `https://theeuropetransfers.com/${slug}`,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
       title: pageData.metaTitle || pageData.title,
       description: pageData.metaDescription || pageData.pageDescription || pageData.title,
     },

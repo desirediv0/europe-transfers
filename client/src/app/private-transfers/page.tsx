@@ -1,7 +1,38 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import env from "@/config/env.config";
 import FleetContent from "../fleet/FleetContent";
 import type { SearchData } from "../fleet/page";
+
+export const metadata: Metadata = {
+  title: "Private Airport & City Transfers in Europe",
+  description:
+    "Book reliable private airport transfers and intercity rides across Europe. Mercedes fleet, professional chauffeurs, flight tracking, fixed pricing. Sedan, SUV, van & minivan options available.",
+  keywords: [
+    "private transfers Europe",
+    "airport transfer Europe",
+    "Europe chauffeur service",
+    "intercity transfer Europe",
+    "Mercedes transfer Europe",
+    "private car hire Europe",
+  ],
+  alternates: {
+    canonical: "https://theeuropetransfers.com/private-transfers",
+  },
+  openGraph: {
+    title: "Private Airport & City Transfers in Europe | The Europe Transfers",
+    description:
+      "Book reliable private airport transfers and intercity rides across Europe. Mercedes fleet, professional chauffeurs, fixed pricing.",
+    url: "https://theeuropetransfers.com/private-transfers",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Private Airport & City Transfers in Europe",
+    description:
+      "Book reliable private airport transfers and intercity rides across Europe with premium Mercedes fleet.",
+  },
+};
 
 function getDemoData(from: string, to: string): SearchData {
   return {
