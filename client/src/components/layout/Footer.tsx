@@ -264,7 +264,17 @@ export function Footer() {
           <Link href="/" className="font-bold text-navy hover:text-gold transition-colors">
             The Europe Transfers Team
           </Link>
-          <span>— First-Class Chauffeured Services Across Europe</span>
+        </div>
+        <div className="flex flex-row items-center justify-center gap-1.5 flex-wrap mt-1">
+          <span>Designed by</span>
+          <Link
+            href="https://desirediv.com/"
+            target="_blank"
+            rel="noreferrer"
+            className="font-bold text-navy hover:text-gold transition-colors"
+          >
+            Desire Div
+          </Link>
         </div>
       </div>
 
