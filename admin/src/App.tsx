@@ -11,6 +11,7 @@ import CarTypesPage from "@/pages/CarTypesPage";
 import VanCoachPage from "@/pages/VanCoachPage";
 import RoutesPage from "@/pages/RoutesPage";
 import PackagesPage from "@/pages/PackagesPage";
+import CountriesPage from "@/pages/CountriesPage";
 import SightseeingPage from "@/pages/SightseeingPage";
 import BookingsPage from "@/pages/BookingsPage";
 import SightseeingOrdersPage from "@/pages/SightseeingOrdersPage";
@@ -83,6 +84,7 @@ export default function App() {
                       <Route path="/van-coach" element={<VanCoachPage />} />
                       <Route path="/routes" element={<RoutesPage />} />
                       <Route path="/packages" element={<PackagesPage />} />
+                      <Route path="/countries" element={<CountriesPage />} />
                       <Route path="/sightseeing" element={<SightseeingPage />} />
                       <Route path="/bookings" element={<BookingsPage />} />
                       <Route path="/sightseeing-orders" element={<SightseeingOrdersPage />} />

@@ -29,6 +29,7 @@ import {
   Ship,
   Briefcase,
   Handshake,
+  Globe,
 } from "lucide-react";
 
 const topNavItems = [
@@ -49,6 +50,7 @@ const vanCoachNavItems = [
 ];
 
 const packagesNavItems = [
+  { label: "Countries", icon: Globe, href: "/countries" },
   { label: "Packages", icon: Package, href: "/packages" },
 ];
 

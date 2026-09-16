@@ -404,8 +404,8 @@ export default function PackagesPage() {
                           <Button variant="ghost" size="icon" onClick={() => openEdit(item)} className="h-8 w-8 text-muted-foreground hover:text-foreground" title="Edit package">
                             <IconPencil className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => openItinerary(item)} className="h-8 w-8 text-muted-foreground hover:text-foreground" title="Manage itinerary">
-                            <IconCalendar className="h-4 w-4" />
+                          <Button variant="outline" size="sm" onClick={() => openItinerary(item)} className="h-8 gap-1.5 text-xs" title="Add or edit the day-by-day itinerary">
+                            <IconCalendar className="h-3.5 w-3.5" /> Itinerary
                           </Button>
                           <Button variant="ghost" size="icon" onClick={() => confirmDelete(item)} className="h-8 w-8 text-destructive/70 hover:text-destructive hover:bg-destructive/10" title="Delete package">
                             <IconTrash className="h-4 w-4" />
@@ -519,6 +519,7 @@ export default function PackagesPage() {
             <DialogDescription>
               {editing ? "Update package details and cover image." : "Create a new tour package."}
               {" "}A package is a multi-day itinerary customers enquire about (not an instant online booking) — shown on the Packages page with a "from" price.
+              {" "}{editing ? "Use the " : "After saving, use the "}<strong>Itinerary</strong> button on this package&apos;s row to add its day-by-day plan.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-5 py-2">
