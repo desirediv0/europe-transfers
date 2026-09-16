@@ -34,6 +34,9 @@ import {
   IconUsers,
 } from "@tabler/icons-react";
 
+const slugify = (s: string) =>
+  s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
 export default function PackagesPage() {
   const { countries } = useData();
   const [activeTab, setActiveTab] = useState<"enquiries" | "packages">("enquiries");
@@ -91,17 +94,27 @@ export default function PackagesPage() {
     loadEnquiries();
   }, [loadPackages, loadEnquiries]);
 
-  const openCreate = () => { setEditing(null); setForm({ title: "", slug: "", countryId: "", durationDays: 1, coverImage: "", summary: "", priceFrom: 0, isActive: true, showOnHomepage: false }); setDialogOpen(true); };
-  const openEdit = (item: Package) => { setEditing(item); setForm({ title: item.title, slug: item.slug, countryId: item.countryId, durationDays: item.durationDays, coverImage: item.coverImage || "", summary: item.summary || "", priceFrom: Number(item.priceFrom) || 0, isActive: item.isActive, showOnHomepage: item.showOnHomepage }); setDialogOpen(true); };
+  const [slugTouched, setSlugTouched] = useState(false);
+
+  const openCreate = () => { setEditing(null); setForm({ title: "", slug: "", countryId: "", durationDays: 1, coverImage: "", summary: "", priceFrom: 0, isActive: true, showOnHomepage: false }); setSlugTouched(false); setDialogOpen(true); };
+  const openEdit = (item: Package) => { setEditing(item); setForm({ title: item.title, slug: item.slug, countryId: item.countryId, durationDays: item.durationDays, coverImage: item.coverImage || "", summary: item.summary || "", priceFrom: Number(item.priceFrom) || 0, isActive: item.isActive, showOnHomepage: item.showOnHomepage }); setSlugTouched(true); setDialogOpen(true); };
+
+  const handleTitleChange = (title: string) => {
+    setForm((f) => ({ ...f, title, slug: slugTouched ? f.slug : slugify(title) }));
+  };
 
   const handleSave = async () => {
-    if (!form.title || !form.slug || !form.countryId || !form.durationDays) {
+    const cleanSlug = slugify(form.slug);
+    if (!form.title || !cleanSlug || !form.countryId || !form.durationDays) {
       toast.error("Title, slug, country, and duration are required");
       return;
     }
     setSaving(true);
     try {
-      const body = { ...form, durationDays: Number(form.durationDays), priceFrom: Number(form.priceFrom) };
+      // Always sanitize on submit too, not just via the auto-fill-from-title
+      // path - a slug typed or pasted directly (e.g. with "&" or spaces)
+      // would otherwise produce a broken package URL.
+      const body = { ...form, slug: cleanSlug, durationDays: Number(form.durationDays), priceFrom: Number(form.priceFrom) };
       if (editing) { await api.put(`/packages/${editing.id}`, body); toast.success("Package updated"); }
       else { await api.post("/packages", body); toast.success("Package created"); }
       setDialogOpen(false); loadPackages(pagination.page);
@@ -534,13 +547,13 @@ export default function PackagesPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Title</Label>
-                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Romantic Paris Getaway" />
+                <Input value={form.title} onChange={(e) => handleTitleChange(e.target.value)} placeholder="e.g. Romantic Paris Getaway" />
                 <p className="text-xs text-muted-foreground">The package name customers see, e.g. "Romantic Paris Getaway".</p>
               </div>
               <div className="space-y-2">
                 <Label>Slug</Label>
-                <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="e.g. romantic-paris-getaway" />
-                <p className="text-xs text-muted-foreground">The web address for this package — lowercase, hyphens instead of spaces, no special characters.</p>
+                <Input value={form.slug} onChange={(e) => { setSlugTouched(true); setForm({ ...form, slug: e.target.value }); }} placeholder="e.g. romantic-paris-getaway" />
+                <p className="text-xs text-muted-foreground">Auto-filled from the title — lowercase, hyphens instead of spaces, no special characters like "&amp;".</p>
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
