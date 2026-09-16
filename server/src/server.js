@@ -20,6 +20,17 @@ const runSchemaPatches = async () => {
   await prisma.$executeRawUnsafe(
     `UPDATE "CarType" SET "luggageInfo" = "luggageCapacity" || ' bags' WHERE "luggageInfo" = '2 bags' AND "luggageCapacity" IS NOT NULL AND "luggageCapacity" != 2`
   );
+  // Package "highlights" (the checklist shown on the package detail page)
+  // used to be a hardcoded list in the client, not admin-editable or
+  // per-package. Stored as a JSON-encoded string array, same pattern as
+  // SightseeingTour.highlights. Existing packages get the old hardcoded
+  // list as their starting value so nothing visibly changes until edited.
+  await prisma.$executeRawUnsafe(
+    `ALTER TABLE "Package" ADD COLUMN IF NOT EXISTS "highlights" TEXT`
+  );
+  await prisma.$executeRawUnsafe(
+    `UPDATE "Package" SET "highlights" = '["Bespoke Private Chauffeured Transfers","Luxury Mercedes-Benz S-Class / V-Class Fleet","English Speaking Professional Chauffeurs","Flight Tracking & Complimentary Wait Time","Customizable Daily Sightseeing Itinerary","24/7 VIP Concierge Travel Assistance"]' WHERE "highlights" IS NULL`
+  );
 };
 
 const startServer = async () => {

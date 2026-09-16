@@ -89,6 +89,7 @@ export interface Package {
   coverImage?: string;
   summary?: string;
   priceFrom?: number;
+  highlights?: string;
   isActive: boolean;
   country?: { id: string; name: string; slug: string };
   itineraryDays?: ItineraryDay[];

@@ -115,6 +115,7 @@ model Package {
   coverImage    String?
   summary       String?
   priceFrom     Decimal?       @db.Decimal(10, 2)
+  highlights    String?
   isActive      Boolean        @default(true)
   showOnHomepage Boolean       @default(false)
   itineraryDays ItineraryDay[]

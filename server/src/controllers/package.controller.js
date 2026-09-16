@@ -62,7 +62,7 @@ export const getPackageById = asyncHandler(async (req, res) => {
 });
 
 export const createPackage = asyncHandler(async (req, res) => {
-  const { title, slug, countryId, durationDays, coverImage, summary, priceFrom, isActive, showOnHomepage } = req.body;
+  const { title, slug, countryId, durationDays, coverImage, summary, priceFrom, highlights, isActive, showOnHomepage } = req.body;
   if (!title || !slug || !countryId || !durationDays) {
     throw new ApiError(400, "Title, slug, country ID, and duration days are required");
   }
@@ -78,14 +78,17 @@ export const createPackage = asyncHandler(async (req, res) => {
   }
 
   const pkg = await prisma.package.create({
-    data: { title, slug, countryId, durationDays, coverImage, summary, priceFrom, isActive, showOnHomepage },
+    data: {
+      title, slug, countryId, durationDays, coverImage, summary, priceFrom, isActive, showOnHomepage,
+      highlights: highlights ? JSON.stringify(highlights) : undefined,
+    },
     include: { country: true },
   });
   return apiResponse(res, 201, "Package created", pkg);
 });
 
 export const updatePackage = asyncHandler(async (req, res) => {
-  const { title, slug, countryId, durationDays, coverImage, summary, priceFrom, isActive, showOnHomepage } = req.body;
+  const { title, slug, countryId, durationDays, coverImage, summary, priceFrom, highlights, isActive, showOnHomepage } = req.body;
 
   const existing = await prisma.package.findUnique({ where: { id: req.params.id } });
   if (!existing) {
@@ -101,7 +104,10 @@ export const updatePackage = asyncHandler(async (req, res) => {
 
   const pkg = await prisma.package.update({
     where: { id: req.params.id },
-    data: { title, slug, countryId, durationDays, coverImage, summary, priceFrom, isActive, showOnHomepage },
+    data: {
+      title, slug, countryId, durationDays, coverImage, summary, priceFrom, isActive, showOnHomepage,
+      highlights: highlights ? JSON.stringify(highlights) : undefined,
+    },
     include: { country: true },
   });
   return apiResponse(res, 200, "Package updated", pkg);

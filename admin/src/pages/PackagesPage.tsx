@@ -32,10 +32,32 @@ import {
   IconPhone,
   IconMail,
   IconUsers,
+  IconSparkles,
+  IconArrowUp,
+  IconArrowDown,
 } from "@tabler/icons-react";
 
 const slugify = (s: string) =>
   s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
+const DEFAULT_HIGHLIGHTS = [
+  "Bespoke Private Chauffeured Transfers",
+  "Luxury Mercedes-Benz S-Class / V-Class Fleet",
+  "English Speaking Professional Chauffeurs",
+  "Flight Tracking & Complimentary Wait Time",
+  "Customizable Daily Sightseeing Itinerary",
+  "24/7 VIP Concierge Travel Assistance",
+];
+
+const safeParseHighlights = (raw?: string): string[] => {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((h): h is string => typeof h === "string") : [];
+  } catch {
+    return [];
+  }
+};
 
 export default function PackagesPage() {
   const { countries } = useData();
@@ -51,6 +73,8 @@ export default function PackagesPage() {
   const [saving, setSaving] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState<Package | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [highlights, setHighlights] = useState<string[]>(DEFAULT_HIGHLIGHTS);
+  const [newHighlightInput, setNewHighlightInput] = useState("");
 
   // Enquiries state
   const [enquiries, setEnquiries] = useState<PackageEnquiry[]>([]);
@@ -96,11 +120,36 @@ export default function PackagesPage() {
 
   const [slugTouched, setSlugTouched] = useState(false);
 
-  const openCreate = () => { setEditing(null); setForm({ title: "", slug: "", countryId: "", durationDays: 1, coverImage: "", summary: "", priceFrom: 0, isActive: true, showOnHomepage: false }); setSlugTouched(false); setDialogOpen(true); };
-  const openEdit = (item: Package) => { setEditing(item); setForm({ title: item.title, slug: item.slug, countryId: item.countryId, durationDays: item.durationDays, coverImage: item.coverImage || "", summary: item.summary || "", priceFrom: Number(item.priceFrom) || 0, isActive: item.isActive, showOnHomepage: item.showOnHomepage }); setSlugTouched(true); setDialogOpen(true); };
+  const openCreate = () => { setEditing(null); setForm({ title: "", slug: "", countryId: "", durationDays: 1, coverImage: "", summary: "", priceFrom: 0, isActive: true, showOnHomepage: false }); setSlugTouched(false); setHighlights(DEFAULT_HIGHLIGHTS); setNewHighlightInput(""); setDialogOpen(true); };
+  const openEdit = (item: Package) => {
+    setEditing(item);
+    setForm({ title: item.title, slug: item.slug, countryId: item.countryId, durationDays: item.durationDays, coverImage: item.coverImage || "", summary: item.summary || "", priceFrom: Number(item.priceFrom) || 0, isActive: item.isActive, showOnHomepage: item.showOnHomepage });
+    setSlugTouched(true);
+    // Existing packages saved before this field existed have none stored -
+    // fall back to the same defaults the site used to hardcode.
+    const parsed = safeParseHighlights(item.highlights);
+    setHighlights(parsed.length > 0 ? parsed : DEFAULT_HIGHLIGHTS);
+    setNewHighlightInput("");
+    setDialogOpen(true);
+  };
 
   const handleTitleChange = (title: string) => {
     setForm((f) => ({ ...f, title, slug: slugTouched ? f.slug : slugify(title) }));
+  };
+
+  const addHighlight = () => {
+    if (!newHighlightInput.trim()) return;
+    setHighlights([...highlights, newHighlightInput.trim()]);
+    setNewHighlightInput("");
+  };
+  const removeHighlight = (idx: number) => setHighlights(highlights.filter((_, i) => i !== idx));
+  const moveHighlight = (idx: number, dir: "up" | "down") => {
+    const targetIdx = dir === "up" ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= highlights.length) return;
+    const copy = [...highlights];
+    const [moved] = copy.splice(idx, 1);
+    copy.splice(targetIdx, 0, moved);
+    setHighlights(copy);
   };
 
   const handleSave = async () => {
@@ -114,7 +163,7 @@ export default function PackagesPage() {
       // Always sanitize on submit too, not just via the auto-fill-from-title
       // path - a slug typed or pasted directly (e.g. with "&" or spaces)
       // would otherwise produce a broken package URL.
-      const body = { ...form, slug: cleanSlug, durationDays: Number(form.durationDays), priceFrom: Number(form.priceFrom) };
+      const body = { ...form, slug: cleanSlug, durationDays: Number(form.durationDays), priceFrom: Number(form.priceFrom), highlights };
       if (editing) { await api.put(`/packages/${editing.id}`, body); toast.success("Package updated"); }
       else { await api.post("/packages", body); toast.success("Package created"); }
       setDialogOpen(false); loadPackages(pagination.page);
@@ -572,6 +621,34 @@ export default function PackagesPage() {
               <Label>Summary</Label>
               <Input value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} placeholder="Short description of the package" />
               <p className="text-xs text-muted-foreground">One or two sentences shown on the package card, e.g. "5 days exploring Paris's most iconic landmarks with a private chauffeur."</p>
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5"><IconSparkles className="h-3.5 w-3.5" /> Package Highlights</Label>
+              <p className="text-xs text-muted-foreground -mt-1">The checklist shown on the package detail page, e.g. "Luxury Mercedes-Benz Fleet". Add, reorder, or remove items.</p>
+              {highlights.length > 0 && (
+                <div className="space-y-1.5">
+                  {highlights.map((h, idx) => (
+                    <div key={idx} className="flex items-center gap-2 rounded-lg border border-border/50 bg-muted/20 px-3 py-2">
+                      <IconCheck className="h-3.5 w-3.5 text-primary shrink-0" />
+                      <span className="text-sm flex-1">{h}</span>
+                      <div className="flex items-center gap-0.5">
+                        <Button type="button" variant="ghost" size="icon" className="h-7 w-7" disabled={idx === 0} onClick={() => moveHighlight(idx, "up")}><IconArrowUp className="h-3.5 w-3.5" /></Button>
+                        <Button type="button" variant="ghost" size="icon" className="h-7 w-7" disabled={idx === highlights.length - 1} onClick={() => moveHighlight(idx, "down")}><IconArrowDown className="h-3.5 w-3.5" /></Button>
+                        <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeHighlight(idx)}><IconTrash className="h-3.5 w-3.5" /></Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="flex gap-2">
+                <Input
+                  value={newHighlightInput}
+                  onChange={(e) => setNewHighlightInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addHighlight(); } }}
+                  placeholder="e.g. 24/7 VIP Concierge Travel Assistance"
+                />
+                <Button type="button" variant="outline" onClick={addHighlight}><IconPlus className="h-4 w-4" /></Button>
+              </div>
             </div>
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5"><IconPhoto className="h-3.5 w-3.5" /> Cover Image</Label>

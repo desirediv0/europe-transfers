@@ -147,6 +147,7 @@ export interface Package {
   coverImage?: string;
   summary?: string;
   priceFrom?: number;
+  highlights?: string;
   isActive: boolean;
   showOnHomepage: boolean;
   country?: Country;

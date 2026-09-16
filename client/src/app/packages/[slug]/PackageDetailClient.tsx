@@ -46,6 +46,17 @@ const DEFAULT_HIGHLIGHTS = [
   "24/7 VIP Concierge Travel Assistance",
 ];
 
+const parseHighlights = (raw?: string): string[] => {
+  if (!raw) return DEFAULT_HIGHLIGHTS;
+  try {
+    const parsed = JSON.parse(raw);
+    const list = Array.isArray(parsed) ? parsed.filter((h): h is string => typeof h === "string") : [];
+    return list.length > 0 ? list : DEFAULT_HIGHLIGHTS;
+  } catch {
+    return DEFAULT_HIGHLIGHTS;
+  }
+};
+
 export function PackageDetailClient({ pkg }: Props) {
   const imageSrc = pkg.coverImage || "/images/hero_swiss_alps.png";
   const countryName = pkg.country?.name || "Europe";
@@ -53,6 +64,7 @@ export function PackageDetailClient({ pkg }: Props) {
   const priceNumber = pkg.priceFrom ? Number(pkg.priceFrom) : 1195;
   const { format } = useCurrency();
   const formattedPrice = format(priceNumber);
+  const highlights = parseHighlights(pkg.highlights);
 
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
@@ -182,7 +194,7 @@ export function PackageDetailClient({ pkg }: Props) {
                 </div>
 
                 <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
-                  {DEFAULT_HIGHLIGHTS.map((item) => (
+                  {highlights.map((item) => (
                     <div key={item} className="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 border border-gray-100">
                       <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gold/15 text-gold flex-shrink-0 mt-0.5">
                         <IconCheck className="h-3.5 w-3.5 stroke-[3]" />
