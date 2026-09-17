@@ -137,11 +137,9 @@ function ResultsContent() {
 
   useEffect(() => {
     api
-      .get<{ items: SightseeingTour[] }>("/sightseeing?limit=100")
+      .get<string[]>("/sightseeing/cities")
       .then((res) => {
-        const names = Array.from(
-          new Set((res.items || []).map((t) => t.cityName).filter((c): c is string => Boolean(c)))
-        ).sort();
+        const names = (Array.isArray(res) ? res : []).filter((c): c is string => Boolean(c)).sort();
         setCities(names);
       })
       .catch(() => setCities([]));

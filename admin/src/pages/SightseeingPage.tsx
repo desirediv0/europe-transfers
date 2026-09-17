@@ -52,6 +52,10 @@ export default function SightseeingPage() {
   // Tours State
   const [tours, setTours] = useState<SightseeingTour[]>([]);
   const [loadingTours, setLoadingTours] = useState(true);
+  const [tourPage, setTourPage] = useState(1);
+  const [tourTotalPages, setTourTotalPages] = useState(1);
+  const [tourTotal, setTourTotal] = useState(0);
+  const TOUR_PAGE_SIZE = 50;
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<SightseeingTour | null>(null);
   const [saving, setSaving] = useState(false);
@@ -125,11 +129,16 @@ export default function SightseeingPage() {
     }
   }, []);
 
-  const loadTours = useCallback(async () => {
+  const loadTours = useCallback(async (page = 1) => {
     setLoadingTours(true);
     try {
-      const data = await api.get<SightseeingTour[]>("/sightseeing?admin=true");
-      setTours(Array.isArray(data) ? data : []);
+      const data = await api.get<{ items: SightseeingTour[]; pagination: { page: number; limit: number; total: number; pages: number } }>(
+        `/sightseeing?admin=true&page=${page}&limit=${TOUR_PAGE_SIZE}`
+      );
+      setTours(Array.isArray(data.items) ? data.items : []);
+      setTourPage(data.pagination?.page || page);
+      setTourTotalPages(data.pagination?.pages || 1);
+      setTourTotal(data.pagination?.total || 0);
     } catch {
       toast.error("Failed to load sightseeing tours");
     } finally {
@@ -139,7 +148,7 @@ export default function SightseeingPage() {
 
   useEffect(() => {
     loadEnquiries();
-    loadTours();
+    loadTours(1);
   }, [loadEnquiries, loadTours]);
 
   const slugify = (text: string) => {
@@ -461,7 +470,7 @@ export default function SightseeingPage() {
         toast.success("Sightseeing tour created");
       }
       setDialogOpen(false);
-      loadTours();
+      loadTours(tourPage);
     } catch (err: any) {
       toast.error(err?.response?.data?.message || err?.message || "Failed to save tour");
     } finally {
@@ -476,7 +485,7 @@ export default function SightseeingPage() {
       await api.del(`/sightseeing/admin/tours/${deleteDialog.id}`);
       toast.success("Sightseeing tour deleted");
       setDeleteDialog(null);
-      loadTours();
+      loadTours(tourPage);
     } catch {
       toast.error("Failed to delete tour");
     } finally {
@@ -539,7 +548,7 @@ export default function SightseeingPage() {
             className={`whitespace-nowrap ${activeTab === "tours" ? "bg-[#1B2A4A] text-white font-bold" : "text-muted-foreground"}`}
           >
             <IconCompass className="h-4 w-4 mr-2" />
-            Experiences ({tours.length})
+            Experiences ({tourTotal > 0 ? tourTotal : tours.length})
           </Button>
         </div>
 
@@ -735,6 +744,35 @@ export default function SightseeingPage() {
                 )}
               </TableBody>
             </Table>
+
+            {/* Pagination Controls */}
+            {tourTotalPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 border-t bg-slate-50/50">
+                <p className="text-xs text-muted-foreground font-medium">
+                  Page {tourPage} of {tourTotalPages} ({tourTotal} total experiences)
+                </p>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={tourPage <= 1 || loadingTours}
+                    onClick={() => { const p = tourPage - 1; setTourPage(p); loadTours(p); }}
+                    className="h-8 text-xs font-bold"
+                  >
+                    <IconArrowLeft className="h-3.5 w-3.5 mr-1" /> Prev
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={tourPage >= tourTotalPages || loadingTours}
+                    onClick={() => { const p = tourPage + 1; setTourPage(p); loadTours(p); }}
+                    className="h-8 text-xs font-bold"
+                  >
+                    Next <IconArrowRight className="h-3.5 w-3.5 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

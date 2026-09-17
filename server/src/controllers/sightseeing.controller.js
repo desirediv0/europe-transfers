@@ -92,7 +92,7 @@ export const getSightseeingTours = asyncHandler(async (req, res) => {
   const city = req.query.city;
   const isAdmin = req.query.admin === "true";
   const page = parseInt(req.query.page, 10) || 1;
-  const limit = isAdmin ? 100 : (parseInt(req.query.limit, 10) || 20);
+  const limit = parseInt(req.query.limit, 10) || (isAdmin ? 50 : 20);
   const skip = (page - 1) * limit;
 
   const where = {
@@ -119,10 +119,6 @@ export const getSightseeingTours = asyncHandler(async (req, res) => {
     }),
     prisma.sightseeingTour.count({ where }),
   ]);
-
-  if (isAdmin) {
-    return apiResponse(res, 200, "Sightseeing tours retrieved", tours);
-  }
 
   return apiResponse(res, 200, "Sightseeing tours retrieved", {
     items: tours,
