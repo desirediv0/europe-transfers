@@ -18,7 +18,7 @@ const packageSchema = z.object({
   coverImage: z.string().url().optional(),
   summary: z.string().optional(),
   priceFrom: z.number().min(0).optional(),
-  highlights: z.array(z.string().min(1)).max(12).optional(),
+  highlights: z.array(z.string().min(1)).max(20).optional(),
   isActive: z.boolean().optional(),
   showOnHomepage: z.boolean().optional(),
 });
