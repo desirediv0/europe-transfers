@@ -19,8 +19,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const refreshCountries = useCallback(async () => {
     try {
-      const data = await api.get<{ items: Country[] }>("/countries?limit=100");
-      setCountries(data.items);
+      const allCountries: Country[] = [];
+      let page = 1;
+      let totalPages = 1;
+      while (page <= totalPages) {
+        const data = await api.get<{ items: Country[]; pagination: { pages: number } }>(
+          `/countries?page=${page}&limit=100`
+        );
+        allCountries.push(...(data.items || []));
+        totalPages = data.pagination?.pages || 1;
+        page++;
+      }
+      setCountries(allCountries);
     } catch {
       // silent
     }
@@ -28,8 +38,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const refreshCities = useCallback(async () => {
     try {
-      const data = await api.get<{ items: City[] }>("/cities?limit=100");
-      setCities(data.items);
+      const allCities: City[] = [];
+      let page = 1;
+      let totalPages = 1;
+      while (page <= totalPages) {
+        const data = await api.get<{ items: City[]; pagination: { pages: number } }>(
+          `/cities?page=${page}&limit=100`
+        );
+        allCities.push(...(data.items || []));
+        totalPages = data.pagination?.pages || 1;
+        page++;
+      }
+      setCities(allCities);
     } catch {
       // silent
     }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,18 +9,49 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useData } from "@/context/DataContext";
 import type { Country } from "@/lib/types";
-import { Plus, Pencil, Trash2, Globe } from "lucide-react";
+import { Plus, Pencil, Trash2, Globe, ChevronLeft, ChevronRight } from "lucide-react";
 
 const slugify = (s: string) =>
   s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  pages: number;
+}
+
+const PAGE_SIZE = 20;
+
 export default function CountriesPage() {
-  const { countries, loading, refreshCountries } = useData();
+  const { refreshCountries } = useData();
+  const [items, setItems] = useState<Country[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: PAGE_SIZE, total: 0, pages: 0 });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Country | null>(null);
   const [form, setForm] = useState({ name: "", slug: "" });
   const [saving, setSaving] = useState(false);
   const [slugTouched, setSlugTouched] = useState(false);
+
+  const load = useCallback(async (page = 1) => {
+    setLoading(true);
+    try {
+      const data = await api.get<{ items: Country[]; pagination: Pagination }>(
+        `/countries?page=${page}&limit=${PAGE_SIZE}`
+      );
+      setItems(data.items || []);
+      setPagination(data.pagination || { page: 1, limit: PAGE_SIZE, total: 0, pages: 0 });
+    } catch {
+      toast.error("Failed to load countries");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load(1);
+  }, [load]);
 
   const openCreate = () => {
     setEditing(null);
@@ -57,6 +88,7 @@ export default function CountriesPage() {
       }
       setDialogOpen(false);
       await refreshCountries();
+      load(pagination.page);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to save");
     } finally {
@@ -70,6 +102,7 @@ export default function CountriesPage() {
       await api.del(`/countries/${id}`);
       toast.success("Country deleted");
       await refreshCountries();
+      load(pagination.page);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to delete");
     }
@@ -102,11 +135,11 @@ export default function CountriesPage() {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
-                ) : countries.length === 0 ? (
+                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+                ) : items.length === 0 ? (
                   <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">No countries found. Click "Add Country" to add one.</TableCell></TableRow>
                 ) : (
-                  countries.map((item) => (
+                  items.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell className="font-medium flex items-center gap-2">
                         <Globe className="h-4 w-4 text-muted-foreground" /> {item.name}
@@ -124,6 +157,34 @@ export default function CountriesPage() {
               </TableBody>
             </Table>
           </div>
+
+          {pagination.pages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t bg-slate-50/50">
+              <p className="text-xs text-muted-foreground font-medium">
+                Page {pagination.page} of {pagination.pages} ({pagination.total} total)
+              </p>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={pagination.page <= 1 || loading}
+                  onClick={() => load(pagination.page - 1)}
+                  className="h-8 text-xs font-bold"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Prev
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={pagination.page >= pagination.pages || loading}
+                  onClick={() => load(pagination.page + 1)}
+                  className="h-8 text-xs font-bold"
+                >
+                  Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
