@@ -93,15 +93,19 @@ function ResultsContent() {
   const numericHours = Number(hours) || 8;
 
   const filteredFleet = fleet.filter((v) => {
-    // Location filter: vehicle names carry the city as a prefix
-    // (e.g. "Barcelona - Standard Sedan"); the 4 original Japan
-    // vehicles (Alphard, Hiace, V-Class, S-Class) have no city
-    // prefix and match every location so they still show up.
+    // Location filter: every vehicle name is expected to carry its city
+    // as a "<City> - <Vehicle>" prefix (set in the admin). A name that
+    // lost that prefix - e.g. an edit that overwrote it back down to
+    // just "Tokyo " - used to match every city search as a fallback;
+    // that silently turned a data-entry mistake into "show this vehicle
+    // for every city", which is how Tokyo vehicles once appeared in an
+    // Amsterdam search. Un-prefixed vehicles now only show on the
+    // unfiltered "Europe" view instead, so a broken name is at least
+    // visible there rather than leaking into every other city's results.
     if (selectedLocationName && selectedLocationName !== "Europe") {
       const loc = selectedLocationName.toLowerCase();
       const nameLower = v.name.toLowerCase();
-      const hasCityPrefix = nameLower.includes(" - ");
-      if (hasCityPrefix && !nameLower.startsWith(loc)) return false;
+      if (!nameLower.startsWith(`${loc} -`)) return false;
     }
     if (!vehicleSearch.trim()) return true;
     const q = vehicleSearch.toLowerCase();

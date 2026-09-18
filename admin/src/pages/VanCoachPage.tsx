@@ -123,6 +123,13 @@ export default function VanCoachPage() {
       toast.error("Name, seats, and 8h/10h/overtime rates are required");
       return;
     }
+    // Warn (don't block) if the "<City> - <Vehicle>" convention is
+    // missing - the website's city search relies on this exact prefix,
+    // so a name without it makes the vehicle vanish from every city's
+    // filtered results (see the note under the Name field).
+    if (!form.name.includes(" - ")) {
+      toast.warning('Name has no "<City> - " prefix — this vehicle won\'t show up in any city search on the website.');
+    }
     setSaving(true);
     try {
       const payload = {
@@ -364,8 +371,11 @@ export default function VanCoachPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Name</Label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Alphard" />
-                <p className="text-xs text-muted-foreground">The vehicle's model name, e.g. "Toyota Alphard", "Mercedes Sprinter".</p>
+                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Tokyo - Alphard" />
+                <p className="text-xs text-muted-foreground">
+                  Must start with "&lt;City&gt; - ", e.g. "Tokyo - Alphard", "Barcelona - Standard Sedan". The website's city search filters
+                  by this exact prefix — dropping it (e.g. saving just "Tokyo") makes this vehicle show up for every city&apos;s search.
+                </p>
               </div>
               <div className="space-y-2">
                 <Label>Seats</Label>
