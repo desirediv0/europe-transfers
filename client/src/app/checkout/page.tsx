@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,8 +33,17 @@ import {
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user, loading: authLoading, verificationStep } = useAuth();
+  const { user, loading: authLoading, verificationStep, refreshUser } = useAuth();
   const { format } = useCurrency();
+
+  // The auth context only fetches /users/me once, at app load - if an
+  // admin approves this user's ID document while their tab is already
+  // open, checkout would otherwise keep blocking on a stale "pending"
+  // status. Re-sync on every visit to this page.
+  useEffect(() => {
+    refreshUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const routeId = searchParams.get("routeId") || "";
   const carTypeId = searchParams.get("carTypeId") || "";

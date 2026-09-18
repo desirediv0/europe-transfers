@@ -98,7 +98,7 @@ function BookingSkeleton() {
 }
 
 export default function AccountPage() {
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading, logout, refreshUser } = useAuth();
   const { format } = useCurrency();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -137,9 +137,16 @@ export default function AccountPage() {
       router.push("/auth/login");
       return;
     }
+    // The auth context only fetches /users/me once, at app load - if the
+    // admin approves a user's ID document while their tab is already open
+    // (e.g. via client-side navigation, or the page just left in a
+    // background tab), this page would otherwise keep showing whatever
+    // verification status was current back then. Re-sync on every visit.
+    refreshUser();
     fetchBookings();
     fetchOrders();
-  }, [user, authLoading, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, authLoading, router]);
 
   const handleLogout = async () => {
     await logout();
