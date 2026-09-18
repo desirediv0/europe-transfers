@@ -60,10 +60,15 @@ const parseHighlights = (raw?: string): string[] => {
 export function PackageDetailClient({ pkg }: Props) {
   const imageSrc = pkg.coverImage || "/images/hero_swiss_alps.png";
   const countryName = pkg.country?.name || "Europe";
-  const priceDisplay = pkg.priceFrom ? Number(pkg.priceFrom).toFixed(0) : "1,195";
-  const priceNumber = pkg.priceFrom ? Number(pkg.priceFrom) : 1195;
+  // priceFrom often arrives as a Decimal string like "0.00", which is
+  // truthy in JS even though the price is unset - check the numeric
+  // value itself so an unpriced package shows "Price on Request"
+  // instead of the misleading "€0".
+  const numericPrice = pkg.priceFrom != null ? Number(pkg.priceFrom) : 0;
+  const hasPrice = numericPrice > 0;
+  const priceDisplay = hasPrice ? numericPrice.toFixed(0) : "On Request";
   const { format } = useCurrency();
-  const formattedPrice = format(priceNumber);
+  const formattedPrice = hasPrice ? format(numericPrice) : "Price on Request";
   const highlights = parseHighlights(pkg.highlights);
 
   const [enquiryOpen, setEnquiryOpen] = useState(false);
@@ -168,9 +173,9 @@ export function PackageDetailClient({ pkg }: Props) {
 
           {/* Starting Price Pill */}
           <div className="mt-6 sm:mt-8 inline-flex items-baseline gap-2.5 sm:gap-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 px-5 py-3 sm:px-6 sm:py-3.5 shadow-xl">
-            <span className="text-[10px] sm:text-xs font-bold text-gray-300 uppercase tracking-wider">Starting From</span>
+            <span className="text-[10px] sm:text-xs font-bold text-gray-300 uppercase tracking-wider">{hasPrice ? "Starting From" : "Pricing"}</span>
             <span className="text-2xl sm:text-4xl font-black text-gold">{formattedPrice}</span>
-            <span className="text-xs text-gray-300 font-medium">/ person</span>
+            {hasPrice && <span className="text-xs text-gray-300 font-medium">/ person</span>}
           </div>
 
         </div>
@@ -305,10 +310,10 @@ export function PackageDetailClient({ pkg }: Props) {
 
                 <div className="pt-5 border-t border-gray-100">
                   <div className="mb-5 flex items-baseline justify-between">
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Price</span>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{hasPrice ? "Total Price" : "Pricing"}</span>
                     <div>
                       <span className="text-2xl sm:text-3xl font-black text-navy">{formattedPrice}</span>
-                      <span className="text-xs text-gray-500 font-medium"> / person</span>
+                      {hasPrice && <span className="text-xs text-gray-500 font-medium"> / person</span>}
                     </div>
                   </div>
 
@@ -351,10 +356,10 @@ export function PackageDetailClient({ pkg }: Props) {
       {/* Sticky Bottom Booking Bar for Mobile Screens */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[#060C17]/95 backdrop-blur-xl border-t border-gold/30 p-3.5 shadow-2xl flex items-center justify-between">
         <div>
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Total Price</span>
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">{hasPrice ? "Total Price" : "Pricing"}</span>
           <div className="flex items-baseline gap-1">
             <span className="text-xl font-black text-gold">{formattedPrice}</span>
-            <span className="text-[10px] text-gray-300">/ person</span>
+            {hasPrice && <span className="text-[10px] text-gray-300">/ person</span>}
           </div>
         </div>
 
@@ -377,7 +382,7 @@ export function PackageDetailClient({ pkg }: Props) {
             <h2 className="text-lg font-black text-white leading-snug">{pkg.title}</h2>
             <div className="flex items-center gap-3 mt-2 text-xs">
               <span className="text-gray-300 font-medium">{pkg.durationDays} Days / {pkg.durationDays - 1} Nights</span>
-              <span className="text-gold font-black text-sm">{formattedPrice} / person</span>
+              <span className="text-gold font-black text-sm">{formattedPrice}{hasPrice ? " / person" : ""}</span>
             </div>
           </div>
 
@@ -473,7 +478,7 @@ export function PackageDetailClient({ pkg }: Props) {
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
-                  <IconSend className="h-4 w-4" /> Send Tour Enquiry ({formattedPrice} / person)
+                  <IconSend className="h-4 w-4" /> Send Tour Enquiry ({formattedPrice}{hasPrice ? " / person" : ""})
                 </span>
               )}
             </Button>

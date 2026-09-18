@@ -58,6 +58,12 @@ export default function PackageCard({ package: pkg, loading }: PackageCardProps)
 
   const fallback = hashGradient(pkg.title);
   const locationText = pkg.country?.name ? `${pkg.country.name}, Europe` : "Europe";
+  // priceFrom often arrives as a Decimal string like "0.00", which is
+  // truthy in JS even though the price is unset — check the numeric
+  // value itself so a package with no price shows "Price on Request"
+  // instead of the misleading "€0".
+  const numericPrice = pkg.priceFrom != null ? Number(pkg.priceFrom) : 0;
+  const hasPrice = numericPrice > 0;
 
   return (
     <Link href={`/packages/${pkg.slug}`} className="group block h-full">
@@ -141,9 +147,11 @@ export default function PackageCard({ package: pkg, loading }: PackageCardProps)
           {/* Price & Floating Action Icon Button */}
           <div className="flex items-center justify-between pt-1">
             <div>
-              <p className="text-[8px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Price</p>
-              <p className="text-sm sm:text-2xl font-black text-navy tracking-tight">
-                {format(pkg.priceFrom ? Number(pkg.priceFrom) : 1195)}
+              <p className="text-[8px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                {hasPrice ? "Total Price" : "Pricing"}
+              </p>
+              <p className={hasPrice ? "text-sm sm:text-2xl font-black text-navy tracking-tight" : "text-xs sm:text-lg font-extrabold text-gold tracking-tight"}>
+                {hasPrice ? format(numericPrice) : "Price on Request"}
               </p>
             </div>
 
