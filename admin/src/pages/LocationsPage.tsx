@@ -191,7 +191,7 @@ export default function LocationsPage() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? "Edit Location" : "Add Location"}</DialogTitle>
             <p className="text-sm text-muted-foreground">
@@ -226,7 +226,7 @@ export default function LocationsPage() {
                   {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
                 </div>
                 {placeResults.length > 0 && (
-                  <div className="absolute z-10 mt-1 w-full rounded-md border bg-background shadow-md max-h-56 overflow-y-auto">
+                  <div className="absolute z-1100 mt-1 w-full rounded-md border bg-background shadow-md max-h-56 overflow-y-auto">
                     {placeResults.map((r, idx) => (
                       <button
                         key={idx}
