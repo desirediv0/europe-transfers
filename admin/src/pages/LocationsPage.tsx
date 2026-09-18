@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +10,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import type { Location, Pagination } from "@/lib/types";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { MapPicker } from "@/components/MapPicker";
+import { Plus, Pencil, Trash2, Search, Loader2 } from "lucide-react";
+
+interface GeocodeResult {
+  display_name: string;
+  lat: string;
+  lon: string;
+}
 
 export default function LocationsPage() {
   const [items, setItems] = useState<Location[]>([]);
@@ -20,6 +27,10 @@ export default function LocationsPage() {
   const [editing, setEditing] = useState<Location | null>(null);
   const [form, setForm] = useState({ name: "", city: "", latitude: "", longitude: "" });
   const [saving, setSaving] = useState(false);
+  const [placeQuery, setPlaceQuery] = useState("");
+  const [placeResults, setPlaceResults] = useState<GeocodeResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(async (page = 1) => {
     setLoading(true);
@@ -36,11 +47,46 @@ export default function LocationsPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const openCreate = () => { setEditing(null); setForm({ name: "", city: "", latitude: "", longitude: "" }); setDialogOpen(true); };
+  const openCreate = () => { setEditing(null); setForm({ name: "", city: "", latitude: "", longitude: "" }); setPlaceQuery(""); setPlaceResults([]); setDialogOpen(true); };
   const openEdit = (item: Location) => {
     setEditing(item);
     setForm({ name: item.name, city: item.city, latitude: item.latitude?.toString() || "", longitude: item.longitude?.toString() || "" });
+    setPlaceQuery("");
+    setPlaceResults([]);
     setDialogOpen(true);
+  };
+
+  // Free-text place search via OpenStreetMap's Nominatim geocoder - lets an
+  // admin type "Barcelona Airport" and jump the map there instead of only
+  // clicking/dragging, so the pin lands on the real place on the first try
+  // instead of relying on manually copied coordinates (the source of the
+  // widespread lat/lng mixups this map replaces).
+  const searchPlace = useCallback((query: string) => {
+    if (searchDebounce.current) clearTimeout(searchDebounce.current);
+    if (!query.trim()) {
+      setPlaceResults([]);
+      return;
+    }
+    searchDebounce.current = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(query)}`
+        );
+        const results: GeocodeResult[] = await res.json();
+        setPlaceResults(results);
+      } catch {
+        setPlaceResults([]);
+      } finally {
+        setSearching(false);
+      }
+    }, 500);
+  }, []);
+
+  const selectPlaceResult = (result: GeocodeResult) => {
+    setForm((f) => ({ ...f, latitude: parseFloat(result.lat).toString(), longitude: parseFloat(result.lon).toString() }));
+    setPlaceResults([]);
+    setPlaceQuery(result.display_name);
   };
 
   const handleSave = async () => {
@@ -163,17 +209,47 @@ export default function LocationsPage() {
               <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="e.g. Rome" />
               <p className="text-xs text-muted-foreground">The city this location is in, e.g. "Rome" — used to group and search locations.</p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Latitude</Label>
-                <Input type="number" step="any" value={form.latitude} onChange={(e) => setForm({ ...form, latitude: e.target.value })} placeholder="41.8003" />
-                <p className="text-xs text-muted-foreground">Optional — copy from Google Maps (right-click the pin → the first number shown).</p>
+            <div className="space-y-2">
+              <Label>Map Position</Label>
+              <p className="text-xs text-muted-foreground -mt-1">
+                Search for the place, then fine-tune by clicking the map or dragging the pin — this sets Latitude/Longitude for you, so there's no coordinate to type or copy-paste wrong.
+              </p>
+              <div className="relative">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={placeQuery}
+                    onChange={(e) => { setPlaceQuery(e.target.value); searchPlace(e.target.value); }}
+                    placeholder="Search a place, e.g. Barcelona Airport"
+                    className="pl-9"
+                  />
+                  {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
+                </div>
+                {placeResults.length > 0 && (
+                  <div className="absolute z-10 mt-1 w-full rounded-md border bg-background shadow-md max-h-56 overflow-y-auto">
+                    {placeResults.map((r, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => selectPlaceResult(r)}
+                        className="block w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors border-b last:border-b-0"
+                      >
+                        {r.display_name}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="space-y-2">
-                <Label>Longitude</Label>
-                <Input type="number" step="any" value={form.longitude} onChange={(e) => setForm({ ...form, longitude: e.target.value })} placeholder="12.2389" />
-                <p className="text-xs text-muted-foreground">Optional — the second number from the same Google Maps coordinates.</p>
-              </div>
+              <MapPicker
+                latitude={form.latitude ? parseFloat(form.latitude) : null}
+                longitude={form.longitude ? parseFloat(form.longitude) : null}
+                onChange={(lat, lng) => setForm((f) => ({ ...f, latitude: lat.toString(), longitude: lng.toString() }))}
+              />
+              <p className="text-xs text-muted-foreground">
+                {form.latitude && form.longitude
+                  ? `Set: ${parseFloat(form.latitude).toFixed(5)}, ${parseFloat(form.longitude).toFixed(5)}`
+                  : "Not set yet — search or click the map above."}
+              </p>
             </div>
           </div>
           <DialogFooter>
