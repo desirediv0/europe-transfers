@@ -77,11 +77,24 @@ export const getSightseeingCities = asyncHandler(async (req, res) => {
   const rows = await prisma.sightseeingTour.findMany({
     where: { isActive: true, cityName: { not: null } },
     select: { cityName: true },
-    distinct: ["cityName"],
     orderBy: { cityName: "asc" },
   });
 
-  const cities = rows.map((r) => r.cityName).filter(Boolean);
+  // Prisma's `distinct` does an exact string match, so a stray leading/
+  // trailing space or a casing slip (e.g. "Milan" vs "Milan " vs "milan")
+  // saved from the admin form would otherwise show up as separate
+  // entries in the city dropdown. Dedupe on a normalized key instead,
+  // keeping the first properly-cased/trimmed spelling seen for display.
+  const seen = new Map();
+  for (const r of rows) {
+    if (!r.cityName) continue;
+    const trimmed = r.cityName.trim();
+    if (!trimmed) continue;
+    const key = trimmed.toLowerCase();
+    if (!seen.has(key)) seen.set(key, trimmed);
+  }
+
+  const cities = [...seen.values()].sort((a, b) => a.localeCompare(b));
   return apiResponse(res, 200, "Cities retrieved", cities);
 });
 
