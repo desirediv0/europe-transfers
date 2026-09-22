@@ -22,7 +22,6 @@ import {
   IconUserCircle,
   IconClock,
   IconCompass,
-  IconArrowRight,
   IconHeadset,
 } from "@tabler/icons-react";
 

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,8 +35,6 @@ import {
   IconArrowRight,
   IconLuggage,
   IconCheck,
-  IconLock,
-  IconFile,
   IconWifi,
   IconBabyCarriage,
   IconCrown,
@@ -119,9 +118,10 @@ function VehicleCard({
         <div className="flex flex-col sm:flex-row">
           <div className="relative h-48 sm:h-auto sm:w-64 bg-slate-900 shrink-0 overflow-hidden">
             {imgSrc ? (
-              <img
+              <Image
                 src={imgSrc}
                 alt={item.carType.name}
+                fill
                 className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
             ) : (
@@ -272,9 +272,10 @@ function FleetGallery({ carTypes, loading, basePath }: { carTypes: CarType[]; lo
           <section className="bg-slate-50 border-b border-gray-200/80 py-12 sm:py-16">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               <div className="relative rounded-3xl overflow-hidden shadow-2xl min-h-[380px] group border border-gray-200/80">
-                <img
+                <Image
                   src="/images/about_luxury_chauffeur.png"
                   alt="Luxury Chauffeured Transfer Europe"
+                  fill
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
@@ -364,7 +365,7 @@ function FleetGallery({ carTypes, loading, basePath }: { carTypes: CarType[]; lo
                       <CardContent className="p-0">
                         <div className="relative h-36 sm:h-56 bg-slate-100 overflow-hidden">
                           {imgSrc ? (
-                            <img src={imgSrc} alt={ct.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                            <Image src={imgSrc} alt={ct.name} fill className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                           ) : (
                             <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-slate-200 text-slate-400">
                               <IconCar className="h-8 w-8" />
@@ -562,9 +563,11 @@ export default function FleetContent({
         <Card className="max-w-xl mx-auto border-gray-100 rounded-3xl overflow-hidden shadow-2xl bg-white">
           <CardContent className="py-14 px-8 text-center flex flex-col items-center">
             <div className="w-full max-w-sm h-56 relative mb-6">
-              <img
+              <Image
                 src="/images/no_vehicles_route_found.png"
                 alt="No vehicles available for this route"
+                width={400}
+                height={224}
                 className="w-full h-full object-contain mx-auto drop-shadow-md"
               />
             </div>

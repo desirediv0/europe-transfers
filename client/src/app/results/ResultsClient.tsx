@@ -39,8 +39,6 @@ import {
   IconLuggage,
   IconCreditCard,
   IconCheck,
-  IconLock,
-  IconFile,
 } from "@tabler/icons-react";
 
 interface ResultsClientProps {
