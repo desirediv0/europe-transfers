@@ -101,7 +101,7 @@ function VehicleCard({
 }) {
   const { format } = useCurrency();
   const imgSrc = item.carType.image || null;
-  const totalPrice = item.price * pax;
+  const totalPrice = item.price;
 
   return (
     <Card
@@ -162,9 +162,6 @@ function VehicleCard({
                 <div className="text-right shrink-0">
                   <div className="text-3xl font-black text-navy tracking-tight">{format(totalPrice)}</div>
                   <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">{item.currency} Total · All-Inclusive</p>
-                  {pax > 1 && (
-                    <p className="text-[10px] text-gray-400 font-semibold mt-0.5">{format(item.price)} × {pax} passengers</p>
-                  )}
                 </div>
               </div>
               <p className="mt-3.5 text-xs text-gray-500 font-medium leading-relaxed">
@@ -507,9 +504,7 @@ export default function FleetContent({
     if (!selected) { return; }
     if (!passenger.name || !passenger.phone) { return; }
 
-    // selected.price is the per-passenger rate; multiply by pax count so
-    // the amount carried into checkout/payment matches what was quoted.
-    const totalPrice = selected.price * sp!.pax;
+    const totalPrice = selected.price;
 
     router.push(
       `/checkout?routeId=${searchData?.route.id}&carTypeId=${selected.carType.id}&routePriceId=${selected.routePriceId}&from=${encodeURIComponent(sp!.from)}&to=${encodeURIComponent(sp!.to)}&date=${sp!.date}&time=${sp!.time}&pax=${sp!.pax}&price=${totalPrice}&currency=${selected.currency}&name=${encodeURIComponent(passenger.name)}&phone=${encodeURIComponent(passenger.phone)}&email=${encodeURIComponent(passenger.email)}`
@@ -710,9 +705,9 @@ export default function FleetContent({
                       <p className="text-lg font-black text-navy">{selected.carType.name}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-black text-navy">{format(selected.price * sp!.pax)}</p>
+                      <p className="text-2xl font-black text-navy">{format(selected.price)}</p>
                       <p className="text-[10px] font-bold text-emerald-600">
-                        {sp!.pax > 1 ? `${format(selected.price)} × ${sp!.pax} passengers` : "Fixed Rate · All-Inclusive"}
+                        Fixed Rate · All-Inclusive
                       </p>
                     </div>
                   </div>

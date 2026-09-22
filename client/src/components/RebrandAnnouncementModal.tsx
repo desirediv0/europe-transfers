@@ -8,23 +8,14 @@ interface RebrandAnnouncementModalProps {
   onExplore?: () => void;
 }
 
-const DISMISSED_KEY = "rebrand-announcement-dismissed";
+const EXPIRY_DATE = new Date("2027-03-22T00:00:00");
 
 export default function RebrandAnnouncementModal({ onExplore }: RebrandAnnouncementModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
 
   useEffect(() => {
-    // Show once ever per browser - stays hidden after the visitor
-    // closes it, even across tabs/visits, until they clear site data.
-    let alreadyDismissed = false;
-    try {
-      alreadyDismissed = localStorage.getItem(DISMISSED_KEY) === "true";
-    } catch {
-      // localStorage unavailable (private mode, blocked cookies, etc.) -
-      // fall back to showing it, same as before.
-    }
-    if (alreadyDismissed) return;
+    if (new Date() > EXPIRY_DATE) return;
 
     const timer = setTimeout(() => {
       setIsOpen(true);
@@ -52,11 +43,6 @@ export default function RebrandAnnouncementModal({ onExplore }: RebrandAnnouncem
   }, [isOpen]);
 
   const handleClose = () => {
-    try {
-      localStorage.setItem(DISMISSED_KEY, "true");
-    } catch {
-      // ignore - worst case it shows again next visit
-    }
     setIsAnimatingOut(true);
     setTimeout(() => {
       setIsOpen(false);
