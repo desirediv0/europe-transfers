@@ -128,13 +128,30 @@ function TransferSearchWidgetInner() {
     }
   };
 
-  const locationOptions = locations.map((l) => ({ id: l.id, label: l.name, sublabel: l.city }));
+  const locationOptions = (() => {
+    const seen = new Map<string, { id: string; label: string; sublabel: string }>();
+    for (const l of locations) {
+      if (!seen.has(l.name)) {
+        seen.set(l.name, { id: l.id, label: l.name, sublabel: l.city });
+      }
+    }
+    return Array.from(seen.values());
+  })();
   // Once "From" is picked, "To" shows every destination that city serves
   // (see the destinations effect above) rather than every location on the
   // platform; selecting one resolves the real row via handleToChange.
-  const toOptions = destinations
-    ? destinations.map((l) => ({ id: l.id, label: l.name, sublabel: l.city }))
-    : locationOptions.filter((o) => o.id !== search.fromLocationId);
+  const toOptions = (() => {
+    const raw = destinations
+      ? destinations.map((l) => ({ id: l.id, label: l.name, sublabel: l.city }))
+      : locationOptions.filter((o) => o.id !== search.fromLocationId);
+    const seen = new Map<string, { id: string; label: string; sublabel: string }>();
+    for (const o of raw) {
+      if (!seen.has(o.label)) {
+        seen.set(o.label, o);
+      }
+    }
+    return Array.from(seen.values());
+  })();
 
   const canSubmit = !!(search.fromLocationId && search.toLocationId && search.pickupDate && search.pickupTime && !resolving);
 

@@ -186,7 +186,7 @@ export function DateTimePickerField({
             </span>
           </button>
         </PopoverTrigger>
-        <PopoverContent className="p-0 z-50 bg-white shadow-2xl rounded-2xl border border-gray-100 flex" align="start" side="bottom" sideOffset={8}>
+        <PopoverContent className="p-0 z-50 bg-white shadow-2xl rounded-2xl border border-gray-100 flex w-[380px]" align="start" side="bottom" sideOffset={8}>
           <Calendar
             mode="single"
             selected={date || undefined}

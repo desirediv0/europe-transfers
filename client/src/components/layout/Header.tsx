@@ -41,7 +41,7 @@ function CurrencySwitcher({ className }: { className?: string }) {
   const { currency, setCurrency } = useCurrency();
   return (
     <Select value={currency} onValueChange={(v) => setCurrency(v as CurrencyCode)}>
-      <SelectTrigger className={cn("h-8 sm:h-9 w-17.5 sm:w-19.5 rounded-xl border-gray-200/80 bg-white px-2.5 text-xs font-bold text-navy", className)}>
+      <SelectTrigger className={cn("h-8 sm:h-9 w-auto min-w-[4.5rem] sm:min-w-[5.5rem] rounded-xl border-gray-200/80 bg-white px-2.5 text-xs font-bold text-navy", className)}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent position="popper" sideOffset={6} align="end" className="min-w-22.5 z-60 bg-white">

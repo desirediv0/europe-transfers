@@ -3,6 +3,46 @@ import apiResponse from "../utils/apiResponse.js";
 import ApiError from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
+const CITY_FROM_NAME = [
+  { pattern: /rome/i, city: "Rome" },
+  { pattern: /paris/i, city: "Paris" },
+  { pattern: /milan/i, city: "Milan" },
+  { pattern: /barcelona/i, city: "Barcelona" },
+  { pattern: /london/i, city: "London" },
+  { pattern: /amsterdam/i, city: "Amsterdam" },
+  { pattern: /berlin/i, city: "Berlin" },
+  { pattern: /vienna/i, city: "Vienna" },
+  { pattern: /prague/i, city: "Prague" },
+  { pattern: /zurich/i, city: "Zurich" },
+  { pattern: /florence/i, city: "Florence" },
+  { pattern: /venice/i, city: "Venice" },
+  { pattern: /naples/i, city: "Naples" },
+  { pattern: /munich/i, city: "Munich" },
+  { pattern: /madrid/i, city: "Madrid" },
+  { pattern: /lisbon/i, city: "Lisbon" },
+  { pattern: /brussels/i, city: "Brussels" },
+  { pattern: /copenhagen/i, city: "Copenhagen" },
+  { pattern: /stockholm/i, city: "Stockholm" },
+  { pattern: /oslo/i, city: "Oslo" },
+  { pattern: /dublin/i, city: "Dublin" },
+  { pattern: /edinburgh/i, city: "Edinburgh" },
+  { pattern: /budapest/i, city: "Budapest" },
+  { pattern: /warsaw/i, city: "Warsaw" },
+  { pattern: /athens/i, city: "Athens" },
+  { pattern: /istanbul/i, city: "Istanbul" },
+  { pattern: /monaco/i, city: "Monaco" },
+  { pattern: /nice/i, city: "Nice" },
+  { pattern: /lyon/i, city: "Lyon" },
+  { pattern: /marseille/i, city: "Marseille" },
+];
+
+function normalizeCity(name, fallbackCity) {
+  for (const { pattern, city } of CITY_FROM_NAME) {
+    if (pattern.test(name)) return city;
+  }
+  return fallbackCity;
+}
+
 export const search = asyncHandler(async (req, res) => {
   const { fromLocationId, toLocationId, passengers } = req.body;
 
@@ -59,8 +99,8 @@ export const search = asyncHandler(async (req, res) => {
   return apiResponse(res, 200, "Search results", {
     route: {
       id: route.id,
-      from: { id: route.fromLocation.id, name: route.fromLocation.name, city: route.fromLocation.city, latitude: route.fromLocation.latitude, longitude: route.fromLocation.longitude },
-      to: { id: route.toLocation.id, name: route.toLocation.name, city: route.toLocation.city, latitude: route.toLocation.latitude, longitude: route.toLocation.longitude },
+      from: { id: route.fromLocation.id, name: route.fromLocation.name, city: normalizeCity(route.fromLocation.name, route.fromLocation.city), latitude: route.fromLocation.latitude, longitude: route.fromLocation.longitude },
+      to: { id: route.toLocation.id, name: route.toLocation.name, city: normalizeCity(route.toLocation.name, route.toLocation.city), latitude: route.toLocation.latitude, longitude: route.toLocation.longitude },
     },
     cars,
   });
@@ -71,7 +111,11 @@ export const getLocations = asyncHandler(async (req, res) => {
     where: { isActive: true },
     orderBy: { city: "asc" },
   });
-  return apiResponse(res, 200, "Locations retrieved", locations);
+  const normalized = locations.map((l) => ({
+    ...l,
+    city: normalizeCity(l.name, l.city),
+  }));
+  return apiResponse(res, 200, "Locations retrieved", normalized);
 });
 
 // Some cities intentionally have several same-named locations - e.g. many
@@ -108,7 +152,7 @@ export const getDestinationsByName = asyncHandler(async (req, res) => {
   for (const r of routes) {
     if (!r.toLocation.isActive || seen.has(r.toLocation.name)) continue;
     seen.add(r.toLocation.name);
-    destinations.push(r.toLocation);
+    destinations.push({ ...r.toLocation, city: normalizeCity(r.toLocation.name, r.toLocation.city) });
   }
 
   return apiResponse(res, 200, "Destinations retrieved", destinations);
@@ -140,6 +184,9 @@ export const resolveLocationPair = asyncHandler(async (req, res) => {
   }
 
   return apiResponse(res, 200, "Route found", {
-    route: { from: route.fromLocation, to: route.toLocation },
+    route: {
+      from: { ...route.fromLocation, city: normalizeCity(route.fromLocation.name, route.fromLocation.city) },
+      to: { ...route.toLocation, city: normalizeCity(route.toLocation.name, route.toLocation.city) },
+    },
   });
 });
