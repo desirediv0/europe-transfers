@@ -21,6 +21,7 @@ import {
   IconArrowLeft,
   IconFilter,
 } from "@tabler/icons-react";
+import Image from "next/image";
 
 interface VanCoachRoutePrice {
   id: string;
@@ -208,7 +209,7 @@ function ResultsContent() {
                   <CardContent className="p-0">
                     <div className="relative h-28 sm:h-48 bg-slate-100 overflow-hidden">
                       {v.image ? (
-                        <img src={v.image} alt={v.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                        <Image src={v.image} alt={v.name} width={800} height={600} unoptimized className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                       ) : (
                         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-slate-200 text-slate-400">
                           <IconCar className="h-6 w-6 sm:h-8 sm:w-8" />

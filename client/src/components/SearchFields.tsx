@@ -147,10 +147,9 @@ const TIME_OPTIONS: string[] = (() => {
   const times: string[] = [];
   for (let h = 0; h < 24; h++) {
     for (let m = 0; m < 60; m += 15) {
-      const hr = h % 12 || 12;
-      const ampm = h < 12 ? "AM" : "PM";
+      const hr = h.toString().padStart(2, "0");
       const min = m.toString().padStart(2, "0");
-      times.push(`${hr}:${min} ${ampm}`);
+      times.push(`${hr}:${min}`);
     }
   }
   return times;
@@ -193,7 +192,7 @@ export function DateTimePickerField({
             onSelect={(d) => { if (d) onDateChange(d); }}
             disabled={{ before: disabledBefore }}
           />
-          <div className="w-36 border-l border-gray-100 max-h-[340px] overflow-y-auto p-2">
+          <div className="w-[4.5rem] border-l border-gray-100 max-h-[340px] overflow-y-auto p-2">
             <span className="block text-[10px] font-bold uppercase tracking-wide text-gray-400 px-2 py-1">Time</span>
             {TIME_OPTIONS.map((t) => (
               <button

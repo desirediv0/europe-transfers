@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { IconArrowRight } from "@tabler/icons-react";
 
 interface CTASectionProps {
@@ -26,9 +27,12 @@ export default function CTASection({
         {/* Main CTA Card Container */}
         <div className="relative rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden bg-navy p-7 sm:p-12 lg:p-16 text-white shadow-2xl border border-white/10 min-h-[460px] flex flex-col justify-between">
           {/* Background Cover Image with Soft Dark Overlay */}
-          <img
+          <Image
             src={imageSrc}
             alt="Europe Transfers CTA"
+            width={1200}
+            height={600}
+            unoptimized
             className="absolute inset-0 h-full w-full object-cover object-center opacity-65 transition-transform duration-1000 hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-navy/90 via-navy/50 to-black/75" />

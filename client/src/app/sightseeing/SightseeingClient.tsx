@@ -10,6 +10,7 @@ import {
   IconMapPin,
   IconUsers,
 } from "@tabler/icons-react";
+import Image from "next/image";
 import { api } from "@/lib/api";
 import { HeroSearchBar } from "@/components/HeroSearchBar";
 import { DropdownPickerField, DatePickerField, StepperField } from "@/components/SearchFields";
@@ -43,9 +44,12 @@ function SightseeingSearchContent() {
       {/* Hero Section */}
       <section className="relative bg-[#060C17] text-white overflow-hidden py-14 sm:py-24 border-b border-white/10">
         <div className="absolute inset-0 bg-gradient-to-t from-[#060C17] via-[#060C17]/80 to-transparent z-10" />
-        <img
+        <Image
           src="/images/hero_swiss_alps.png"
           alt="European Sightseeing Tours"
+          width={1600}
+          height={900}
+          unoptimized
           className="absolute inset-0 w-full h-full object-cover opacity-40"
         />
 

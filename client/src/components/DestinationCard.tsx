@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IconMapPin, IconRoute } from "@tabler/icons-react";
 
@@ -41,9 +42,12 @@ export default function DestinationCard({ city, loading }: DestinationCardProps)
     <Link href={`/private-transfers?city=${encodeURIComponent(city.city)}`} className="group block w-full h-80 sm:h-[26rem]">
       <div className="relative h-full w-full rounded-[1.6rem] sm:rounded-[2.2rem] overflow-hidden border border-gray-200/60 shadow-lg transition-all duration-500 hover:shadow-2xl hover:shadow-navy/20 hover:-translate-y-2">
         {/* Background Image */}
-        <img
+        <Image
           src={imageSrc}
           alt={city.city}
+          width={800}
+          height={600}
+          unoptimized
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
 

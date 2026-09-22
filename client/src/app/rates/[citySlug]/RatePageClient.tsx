@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -142,9 +143,12 @@ export function RatePageClient({ locations, routes, citySlug }: Props) {
     <div className="bg-slate-50/50 min-h-screen">
       {/* Hero Banner */}
       <section className="relative bg-navy overflow-hidden">
-        <img
+        <Image
           src={bgImage}
           alt={cityName}
+          width={1600}
+          height={900}
+          unoptimized
           className="absolute inset-0 h-full w-full object-cover opacity-35"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-navy/90 to-black/75" />

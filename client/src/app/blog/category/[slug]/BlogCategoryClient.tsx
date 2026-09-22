@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { api } from "@/lib/api";
 import type { BlogCategory, BlogPost } from "@/lib/types";
 import { ArrowLeft, Calendar, ArrowRight } from "lucide-react";
@@ -69,7 +70,7 @@ export default function BlogCategoryClient({ category }: Props) {
               >
                 <div className="relative h-48 w-full bg-slate-100 overflow-hidden">
                   {post.coverImage ? (
-                    <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <Image src={post.coverImage} alt={post.title} width={800} height={600} unoptimized className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
                     <div className="w-full h-full bg-[#0F1A2E] flex items-center justify-center p-4 text-white font-bold text-center text-sm">{post.title}</div>
                   )}

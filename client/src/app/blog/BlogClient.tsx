@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import type { BlogPost, BlogCategory, BlogTag, Pagination } from "@/lib/types";
@@ -227,11 +228,13 @@ export default function BlogClient() {
                 {/* Cover Image Container */}
                 <div className="relative h-52 w-full bg-slate-100 overflow-hidden">
                   {post.coverImage ? (
-                    <img
+                    <Image
                       src={post.coverImage}
                       alt={post.title}
+                      width={800}
+                      height={600}
+                      unoptimized
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-[#0F1A2E] to-[#1B2A4A] flex items-center justify-center p-6 text-center text-white font-bold text-lg">

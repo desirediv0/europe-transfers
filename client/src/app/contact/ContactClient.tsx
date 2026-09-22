@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useState, useEffect, Suspense } from "react";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -304,9 +305,12 @@ function ContactFormContent() {
 
         {/* Right Tall Vertical Photo Card */}
         <div className="lg:col-span-5 relative rounded-[2.2rem] overflow-hidden min-h-[420px] lg:min-h-full group shadow-xl">
-          <img
+          <Image
             src="/images/hero_swiss_alps.png"
             alt="Your Journey with Europe Transfers"
+            width={800}
+            height={600}
+            unoptimized
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
@@ -383,16 +387,22 @@ function ContactFormContent() {
 
         <div className="lg:col-span-7 grid grid-cols-2 gap-4 h-56 sm:h-64">
           <div className="relative rounded-3xl overflow-hidden shadow-md">
-            <img
+            <Image
               src="/images/hero_amalfi_coast.png"
               alt="Amalfi Coast Getaway"
+              width={800}
+              height={600}
+              unoptimized
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 hover:scale-105"
             />
           </div>
           <div className="relative rounded-3xl overflow-hidden shadow-md">
-            <img
+            <Image
               src="/images/hero_paris_twilight.png"
               alt="Paris Getaway"
+              width={800}
+              height={600}
+              unoptimized
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 hover:scale-105"
             />
           </div>

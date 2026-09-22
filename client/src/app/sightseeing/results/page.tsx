@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -343,9 +344,12 @@ function ResultsContent() {
                 >
                   <Card className="h-full border border-gray-200/80 bg-white rounded-3xl shadow-md hover:shadow-xl hover:border-gold/50 transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer">
                     <div className="relative h-48 overflow-hidden bg-slate-100">
-                      <img
+                      <Image
                         src={tour.coverImage || "/images/hero_swiss_alps.png"}
                         alt={tour.title}
+                        width={800}
+                        height={600}
+                        unoptimized
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute top-3 left-3 flex gap-1.5">

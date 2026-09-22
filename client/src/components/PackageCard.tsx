@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import type { Package } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -73,9 +74,12 @@ export default function PackageCard({ package: pkg, loading }: PackageCardProps)
         <div>
           <div className="relative h-36 sm:h-60 w-full overflow-hidden rounded-[1.2rem] sm:rounded-[1.8rem] bg-slate-100">
             {pkg.coverImage ? (
-              <img
+              <Image
                 src={pkg.coverImage}
                 alt={pkg.title}
+                width={800}
+                height={600}
+                unoptimized
                 className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
             ) : (

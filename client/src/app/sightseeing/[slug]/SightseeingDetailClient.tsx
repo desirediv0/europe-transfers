@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -342,9 +343,12 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             {/* Active large photo */}
             <div className="relative h-64 sm:h-96 lg:h-[480px] rounded-2xl overflow-hidden shadow-2xl mb-3">
-              <img
+              <Image
                 src={galleryList[activeGalleryIdx]}
                 alt={`${tour.title} - photo ${activeGalleryIdx + 1}`}
+                width={1600}
+                height={900}
+                unoptimized
                 className="w-full h-full object-cover"
               />
               <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-full">
@@ -362,7 +366,7 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
                     : "border-white/20 opacity-60 hover:opacity-100"
                     }`}
                 >
-                  <img src={img} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                  <Image src={img} alt={`Thumb ${idx + 1}`} width={200} height={200} unoptimized className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -380,7 +384,7 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
             {/* Single image only hero (if only 1 image, show it inline) */}
             {galleryList.length === 1 && (
               <div className="relative h-72 sm:h-96 rounded-3xl overflow-hidden shadow-xl">
-                <img src={galleryList[0]} alt={tour.title} className="w-full h-full object-cover" />
+                <Image src={galleryList[0]} alt={tour.title} width={1600} height={900} unoptimized className="w-full h-full object-cover" />
               </div>
             )}
 
@@ -481,7 +485,7 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
                 {/* Extra gallery image in description */}
                 {galleryList[2] && (
                   <div className="mt-6 rounded-2xl overflow-hidden h-60 sm:h-72 shadow-md">
-                    <img src={galleryList[2]} alt={`${tour.title} experience`} className="w-full h-full object-cover" />
+                    <Image src={galleryList[2]} alt={`${tour.title} experience`} width={1600} height={900} unoptimized className="w-full h-full object-cover" />
                   </div>
                 )}
               </div>

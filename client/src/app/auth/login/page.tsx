@@ -235,7 +235,7 @@ export default function LoginPage() {
                 </div>
               ) : (
                 <div className="relative rounded-2xl overflow-hidden border border-gray-200 bg-slate-100 p-2">
-                  <img src={preview} alt="ID Preview" className="h-44 w-full object-contain rounded-xl" />
+                  <Image src={preview} alt="ID Preview" width={400} height={300} unoptimized className="h-44 w-full object-contain rounded-xl" />
                   <button
                     onClick={() => { setFile(null); setPreview(null); }}
                     className="absolute top-4 right-4 bg-navy/80 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
@@ -380,9 +380,11 @@ export default function LoginPage() {
 
         {/* Right Column: Luxury Showcase Photo Card */}
         <div className="hidden lg:block lg:col-span-6 relative min-h-[500px]">
-          <img
+          <Image
             src="/images/about_luxury_chauffeur.png"
             alt="Luxury Chauffeur Transfer Europe"
+            width={800}
+            height={600}
             className="absolute inset-0 h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />

@@ -48,7 +48,6 @@ interface FleetContentProps {
   demoData?: SearchData;
   realData?: SearchData | null;
   error?: string | null;
-  isLoggedIn?: boolean;
   searchParams?: {
     from: string;
     to: string;
@@ -420,13 +419,12 @@ export default function FleetContent({
   demoData,
   realData,
   error: initialError,
-  isLoggedIn = false,
   searchParams: sp,
 }: FleetContentProps) {
   const router = useRouter();
   const pathname = usePathname();
   const basePath = pathname?.startsWith("/private-transfers") ? "/private-transfers" : "/fleet";
-  const { user, verificationStep, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const { format } = useCurrency();
   const [carTypes, setCarTypes] = useState<CarType[]>([]);
   const [loadingCars, setLoadingCars] = useState(true);
@@ -454,7 +452,6 @@ export default function FleetContent({
       .finally(() => setLoadingCars(false));
   }, []);
 
-  const isVerified = verificationStep === "VERIFIED";
   const showRealData = !!realData;
   const searchData = showRealData ? realData! : demoData || null;
   const isLocked = false;

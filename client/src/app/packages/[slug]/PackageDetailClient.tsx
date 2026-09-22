@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -124,9 +125,12 @@ export function PackageDetailClient({ pkg }: Props) {
         
         {/* Background Image with Dark Gradient Overlays */}
         {imageSrc && (
-          <img
+          <Image
             src={imageSrc}
             alt={pkg.title}
+            width={1600}
+            height={900}
+            unoptimized
             className="absolute inset-0 h-full w-full object-cover opacity-60"
           />
         )}

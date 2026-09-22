@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { api } from "@/lib/api";
 import type { BlogPost } from "@/lib/types";
 import {
@@ -82,7 +83,7 @@ export default function BlogPostDetailClient({ post }: Props) {
         {/* Background Overlay Image if present */}
         <div className="absolute inset-0 opacity-20">
           {post.coverImage ? (
-            <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
+            <Image src={post.coverImage} alt={post.title} width={1600} height={900} unoptimized className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full bg-gradient-to-r from-[#0F1A2E] via-[#1B2A4A] to-[#0F1A2E]" />
           )}
@@ -165,9 +166,12 @@ export default function BlogPostDetailClient({ post }: Props) {
               {/* Cover Image */}
               {post.coverImage && (
                 <div className="relative w-full h-[320px] sm:h-[400px] rounded-2xl bg-slate-100 overflow-hidden border border-slate-200">
-                  <img
+                  <Image
                     src={post.coverImage}
                     alt={post.title}
+                    width={800}
+                    height={400}
+                    unoptimized
                     className="w-full h-full object-cover"
                   />
                 </div>

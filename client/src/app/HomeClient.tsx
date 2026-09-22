@@ -589,7 +589,7 @@ export default function HomeClient() {
                 >
                   <div className="relative h-40 bg-navy/5">
                     {vehicle.image ? (
-                      <img src={vehicle.image} alt={vehicle.name} className="h-full w-full object-cover" />
+                      <Image src={vehicle.image} alt={vehicle.name} width={400} height={300} unoptimized className="h-full w-full object-cover" />
                     ) : (
                       <div className="flex h-full items-center justify-center">
                         <IconBus className="h-10 w-10 text-navy/20" />
@@ -641,7 +641,7 @@ export default function HomeClient() {
                 >
                   <div className="relative h-40 bg-navy/5">
                     {tour.coverImage ? (
-                      <img src={tour.coverImage} alt={tour.title} className="h-full w-full object-cover" />
+                      <Image src={tour.coverImage} alt={tour.title} width={400} height={300} unoptimized className="h-full w-full object-cover" />
                     ) : (
                       <div className="flex h-full items-center justify-center">
                         <IconCompass className="h-10 w-10 text-navy/20" />
@@ -799,9 +799,11 @@ export default function HomeClient() {
             {/* Right Column - Tall Vertical Photo Card (5 columns) */}
             <div className="lg:col-span-5 xl:col-span-4 min-h-[380px] lg:min-h-full">
               <div className="group relative h-full min-h-[380px] w-full rounded-[2rem] overflow-hidden border border-gray-200/80 shadow-xl transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
-                <img
+                <Image
                   src="/images/why_choose_us_chauffeur.png"
                   alt="Professional VIP Chauffeur"
+                  width={800}
+                  height={600}
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy/90 via-navy/30 to-transparent" />

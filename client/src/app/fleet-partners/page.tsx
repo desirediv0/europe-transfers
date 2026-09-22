@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { api, ApiError } from "@/lib/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -393,7 +394,7 @@ export default function FleetPartnersPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {images.map((img) => (
                     <div key={img.key} className="relative rounded-xl overflow-hidden border border-gray-200 group">
-                      <img src={img.url} alt="Vehicle" className="h-24 w-full object-cover" />
+                      <Image src={img.url} alt="Vehicle" width={400} height={300} unoptimized className="h-24 w-full object-cover" />
                       <button
                         onClick={() => removeImage(img.key)}
                         className="absolute top-1.5 right-1.5 bg-navy/80 text-white rounded-full p-1 hover:bg-red-600 transition-colors"

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import CTASection from "@/components/CTASection";
 import { Card, CardContent } from "@/components/ui/card";
@@ -157,9 +158,11 @@ export default function AboutPage() {
           </div>
 
           <div className="lg:col-span-6 relative rounded-3xl overflow-hidden shadow-2xl h-[380px] sm:h-[440px] group border border-gray-200/80">
-            <img
+            <Image
               src="/images/why_choose_us_chauffeur.png"
               alt="Chauffeur Excellence"
+              width={800}
+              height={600}
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />

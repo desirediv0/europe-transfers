@@ -1,5 +1,4 @@
 
-import { cookies } from "next/headers";
 import env from "@/config/env.config";
 import FleetContent from "./FleetContent";
 
@@ -88,10 +87,6 @@ export default async function FleetPage({
   const time = typeof sp.time === "string" ? sp.time : "";
   const pax = sp.pax ? Number(sp.pax) : 1;
 
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
-  const isLoggedIn = !!accessToken;
-
   const demoData = getDemoData(from, to);
   let realData: SearchData | null = null;
   let error: string | null = null;
@@ -113,7 +108,6 @@ export default async function FleetPage({
       demoData={demoData}
       realData={realData}
       error={error}
-      isLoggedIn={isLoggedIn}
       searchParams={{ from, to, fromId, toId, date, time, pax }}
     />
   );

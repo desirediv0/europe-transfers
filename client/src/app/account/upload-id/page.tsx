@@ -214,7 +214,7 @@ export default function UploadIdPage() {
               </div>
             ) : (
               <div className="relative rounded-3xl overflow-hidden border border-gray-200 bg-slate-100 p-3 text-center">
-                <img src={preview} alt="ID Preview" className="h-52 w-full object-contain rounded-2xl" />
+                <Image src={preview} alt="ID Preview" width={400} height={300} unoptimized className="h-52 w-full object-contain rounded-2xl" />
                 <button
                   onClick={() => { setFile(null); setPreview(null); }}
                   className="absolute top-4 right-4 bg-navy/80 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors shadow-md"
@@ -252,9 +252,11 @@ export default function UploadIdPage() {
 
         {/* Right Column: Guidance Card */}
         <div className="hidden lg:block lg:col-span-5 relative min-h-[500px]">
-          <img
+          <Image
             src="/images/about_luxury_chauffeur.png"
             alt="Client Document Verification Europe Transfers"
+            width={800}
+            height={600}
             className="absolute inset-0 h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />

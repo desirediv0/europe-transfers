@@ -9,7 +9,6 @@ import type { Package, Country } from "@/lib/types";
 import PackageCard, { PackageCardSkeleton } from "@/components/PackageCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 
 interface PaginationInfo {
   page: number;

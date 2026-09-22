@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import {
   IconBrandLinkedin,
   IconBrandTwitter,
@@ -162,9 +163,12 @@ function PhotoCard({
       onMouseEnter={() => onHover(member.id)}
       onMouseLeave={() => onHover(null)}
     >
-      <img
+      <Image
         src={member.image}
         alt={member.name}
+        width={200}
+        height={200}
+        unoptimized
         className="w-full h-full object-cover transition-all duration-500"
         style={{
           filter: isActive ? "grayscale(0) brightness(1)" : "grayscale(1) brightness(0.8)",

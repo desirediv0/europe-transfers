@@ -9,6 +9,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -490,10 +491,13 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
                       s.renderBackground(index === i, lastIndexRef.current === i)
                     ) : (
                       <>
-                        <img
+                        <Image
                           ref={(el) => { if (el) bgRefs.current[i] = el; }}
                           src={s.background}
                           alt=""
+                          width={1920}
+                          height={1080}
+                          unoptimized
                           className="fx-bg-img"
                         />
                         <div className="fx-bg-overlay" />
