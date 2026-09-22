@@ -166,14 +166,14 @@ export default function FleetPartnersPage() {
     const selected = Array.from(e.target.files || []).filter(validateFile);
     if (selected.length) uploadFiles(selected);
     e.target.value = "";
-  }, [applicationId, images, uploadFiles]);
+  }, [uploadFiles]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setDragActive(false);
     const dropped = Array.from(e.dataTransfer.files || []).filter(validateFile);
     if (dropped.length) uploadFiles(dropped);
-  }, [applicationId, images, uploadFiles]);
+  }, [uploadFiles]);
 
   const removeImage = async (key: string) => {
     if (!applicationId) return;

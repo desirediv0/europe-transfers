@@ -123,7 +123,6 @@ export default async function PrivateTransfersPage({
       demoData={demoData}
       realData={realData}
       error={error}
-      isLoggedIn={isLoggedIn}
       searchParams={{ from, to, fromId, toId, date, time, pax }}
     />
   );
