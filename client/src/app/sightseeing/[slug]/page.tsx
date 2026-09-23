@@ -35,6 +35,15 @@ export async function generateMetadata({ params }: Props) {
   return {
     title: `${tour.seoTitle || tour.title} | Europe Transfers`,
     description: tour.seoDescription || tour.summary || `Book ${tour.title} with priority access and instant voucher.`,
+    alternates: {
+      canonical: `https://theeuropetransfers.com/sightseeing/${slug}`,
+    },
+    openGraph: {
+      title: `${tour.seoTitle || tour.title} | Europe Transfers`,
+      description: tour.seoDescription || tour.summary || `Book ${tour.title} with priority access and instant voucher.`,
+      url: `https://theeuropetransfers.com/sightseeing/${slug}`,
+      type: "website",
+    },
   };
 }
 

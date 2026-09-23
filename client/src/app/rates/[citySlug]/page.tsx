@@ -1,12 +1,22 @@
 import { api } from "@/lib/api";
 import type { Location, Route, RoutePrice } from "@/lib/types";
 import { RatePageClient } from "./RatePageClient";
+import type { Metadata } from "next";
 
 interface Props {
   params: Promise<{ citySlug: string }>;
 }
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { citySlug } = await params;
+  return {
+    alternates: {
+      canonical: `https://theeuropetransfers.com/rates/${citySlug}`,
+    },
+  };
+}
 
 export default async function RatePage({ params }: Props) {
   const { citySlug } = await params;

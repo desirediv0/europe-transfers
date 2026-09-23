@@ -28,6 +28,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `#${tag.name} Articles | Europe Transfers Blog`,
     description: `Browse articles tagged with #${tag.name} on Europe Transfers.`,
+    alternates: {
+      canonical: `https://theeuropetransfers.com/blog/tag/${slug}`,
+    },
   };
 
 }

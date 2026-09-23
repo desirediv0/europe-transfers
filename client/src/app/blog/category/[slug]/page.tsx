@@ -29,6 +29,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: category.metaTitle || `${category.name} Articles | Europe Transfers Blog`,
 
     description: category.metaDescription || category.description || `Read articles in ${category.name}`,
+    alternates: {
+      canonical: `https://theeuropetransfers.com/blog/category/${slug}`,
+    },
   };
 }
 

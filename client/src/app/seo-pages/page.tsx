@@ -5,6 +5,15 @@ import SeoPagesDirectoryClient from "./SeoPagesDirectoryClient";
 export const metadata: Metadata = {
   title: "Regional Destinations & Europe DMC Directory | Europe Transfers",
   description: "Browse all regional B2B Europe DMC pages, travel partner guides, and airport transfer services by city and country.",
+  alternates: {
+    canonical: "https://theeuropetransfers.com/seo-pages",
+  },
+  openGraph: {
+    title: "Regional Destinations & Europe DMC Directory | Europe Transfers",
+    description: "Browse all regional B2B Europe DMC pages, travel partner guides, and airport transfer services by city and country.",
+    url: "https://theeuropetransfers.com/seo-pages",
+    type: "website",
+  },
 };
 
 
