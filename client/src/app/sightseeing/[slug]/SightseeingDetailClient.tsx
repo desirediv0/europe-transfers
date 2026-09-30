@@ -242,6 +242,9 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate, initial
   ]);
 
   const priceDisplay = Number(tour.priceFrom).toFixed(2);
+  // Some tours have no price set yet (price 0, no options) - show
+  // "Price on Request" and enquiry only, instead of "0" and a 0-amount payment.
+  const priced = Number(tour.priceFrom) > 0 || optionsList.some((o) => Number(o.price) > 0);
 
   const handleOpenOption = (opt: TicketOption) => {
     setSelectedOption(opt);
@@ -357,7 +360,7 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate, initial
           <div key={r.key} className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-bold text-navy">{r.label} <span className="text-gray-400 font-medium">({r.hint})</span></p>
-              {u && (
+              {u && priced && (
                 <p className="text-[11px] text-gray-500 font-medium">
                   {u[r.key] > 0 ? formatCurrency(u[r.key]) : "Free"}
                 </p>
@@ -370,7 +373,7 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate, initial
             </div>
           </div>
         ))}
-        {opt && (
+        {opt && priced && (
           <div className="flex items-center justify-between border-t border-gray-200 pt-2">
             <span className="text-xs font-bold text-gray-500">Total ({paxTotal} traveller{paxTotal > 1 ? "s" : ""})</span>
             <span className="text-base font-black text-navy">{formatCurrency(total)}</span>
@@ -436,8 +439,8 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate, initial
             <div>
               <span className="text-xs text-gray-400 uppercase tracking-widest font-bold block mb-1">Starting From</span>
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl sm:text-5xl font-black text-gold">{formatCurrency(Number(tour.priceFrom))}</span>
-                <span className="text-sm text-gray-400 font-medium">/ person</span>
+                <span className="text-4xl sm:text-5xl font-black text-gold">{priced ? formatCurrency(Number(tour.priceFrom)) : "Price on Request"}</span>
+                {priced && <span className="text-sm text-gray-400 font-medium">/ person</span>}
               </div>
             </div>
             <Button
@@ -662,8 +665,8 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate, initial
                   <div>
                     <span className="text-xs text-gray-400 uppercase tracking-widest font-bold block">Starting From</span>
                     <div className="flex items-baseline gap-2 mt-1">
-                      <span className="text-3xl font-black text-gold">{formatCurrency(Number(tour.priceFrom))}</span>
-                      <span className="text-xs text-gray-400">/ person</span>
+                      <span className="text-3xl font-black text-gold">{priced ? formatCurrency(Number(tour.priceFrom)) : "Price on Request"}</span>
+                      {priced && <span className="text-xs text-gray-400">/ person</span>}
                     </div>
                   </div>
                 </div>
@@ -717,13 +720,15 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate, initial
                   >
                     Enquire & Reserve Now <IconArrowRight className="ml-1.5 h-4 w-4" />
                   </Button>
-                  <Button
-                    onClick={() => handleOpenPayment(optionsList[0] || { name: tour.title, price: Number(tour.priceFrom) })}
-                    variant="outline"
-                    className="w-full rounded-xl py-3.5 border-2 border-navy text-navy hover:bg-navy hover:text-white font-black text-sm cursor-pointer"
-                  >
-                    <IconCreditCard className="mr-1.5 h-4 w-4" /> Pay Now & Confirm
-                  </Button>
+                  {priced && (
+                    <Button
+                      onClick={() => handleOpenPayment(optionsList[0] || { name: tour.title, price: Number(tour.priceFrom) })}
+                      variant="outline"
+                      className="w-full rounded-xl py-3.5 border-2 border-navy text-navy hover:bg-navy hover:text-white font-black text-sm cursor-pointer"
+                    >
+                      <IconCreditCard className="mr-1.5 h-4 w-4" /> Pay Now & Confirm
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
 
@@ -762,8 +767,8 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate, initial
               <div className="mt-2 flex items-center gap-3">
                 <span className="text-xs text-gray-300 font-medium">Selected:</span>
                 <span className="text-xs text-gold font-extrabold">{selectedOption.name}</span>
-                <span className="text-base font-black text-white">{formatCurrency(Number(selectedOption.price))}</span>
-                <span className="text-[11px] text-gray-400">/ person</span>
+                <span className="text-base font-black text-white">{priced ? formatCurrency(Number(selectedOption.price)) : "Price on Request"}</span>
+                {priced && <span className="text-[11px] text-gray-400">/ person</span>}
               </div>
             )}
           </div>

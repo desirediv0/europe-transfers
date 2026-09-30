@@ -388,8 +388,8 @@ function ResultsContent() {
 
                       <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
                         <div>
-                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Starting from</span>
-                          <span className="text-lg font-black text-navy">{format(Number(tour.priceFrom))}</span>
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">{Number(tour.priceFrom) > 0 ? "Starting from" : "Pricing"}</span>
+                          <span className="text-lg font-black text-navy">{Number(tour.priceFrom) > 0 ? format(Number(tour.priceFrom)) : "On Request"}</span>
                         </div>
                         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-navy group-hover:bg-gold group-hover:text-navy transition-all shadow-sm">
                           <IconArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />

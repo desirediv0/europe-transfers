@@ -651,7 +651,7 @@ export default function HomeClient() {
                   <div className="p-5">
                     <p className="text-sm font-black text-navy leading-snug">{tour.title}</p>
                     <p className="text-xs text-gray-500 mt-1">{tour.cityName}{tour.countryName ? `, ${tour.countryName}` : ""} · {tour.duration}</p>
-                    <p className="text-sm font-bold text-gold mt-3">From €{Number(tour.priceFrom).toFixed(0)}</p>
+                    <p className="text-sm font-bold text-gold mt-3">{Number(tour.priceFrom) > 0 ? `From €${Number(tour.priceFrom).toFixed(0)}` : "Price on Request"}</p>
                   </div>
                 </Link>
               ))}
