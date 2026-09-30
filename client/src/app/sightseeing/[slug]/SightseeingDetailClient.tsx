@@ -62,6 +62,7 @@ interface Props {
   tour: SightseeingTourDetail;
   initialPax?: string;
   initialDate?: string;
+  initialCounts?: Partial<AgeCounts>;
 }
 
 interface TicketOption {
@@ -82,10 +83,8 @@ interface AgeCounts {
 
 const isNum = (v: unknown): v is number => typeof v === "number" && !Number.isNaN(v);
 
-// Child/youth/infant categories only apply to options where the admin set a
-// child or youth price; otherwise the option stays adult-only as before.
-const hasAgePricing = (o: TicketOption | null) => !!o && (isNum(o.childPrice) || isNum(o.youthPrice));
-
+// Child/youth default to the adult price until the admin sets their own;
+// infants are free unless an infant price is set.
 const unitPrices = (o: TicketOption) => ({
   adult: Number(o.price) || 0,
   youth: isNum(o.youthPrice) ? o.youthPrice : Number(o.price) || 0,
@@ -110,7 +109,7 @@ const describeCounts = (c: AgeCounts) =>
     .map((r) => `${c[r.key]} ${r.label}${c[r.key] > 1 ? "s" : ""} (${r.hint})`)
     .join(", ");
 
-export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props) {
+export function SightseeingDetailClient({ tour, initialPax, initialDate, initialCounts }: Props) {
   const { format: formatCurrency } = useCurrency();
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<TicketOption | null>(null);
@@ -143,12 +142,20 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
     pax: defaultPax,
     message: "",
   });
-  const [additionalPassengers, setAdditionalPassengers] = useState<PassengerDetail[]>(() =>
-    getInitialExtraPassengers(defaultPax)
-  );
+  const [additionalPassengers, setAdditionalPassengers] = useState<PassengerDetail[]>([]);
 
-  const initialAdults = Math.max(1, parseInt(defaultPax, 10) || 2);
-  const [counts, setCounts] = useState<AgeCounts>({ adult: initialAdults, youth: 0, child: 0, infant: 0 });
+  const startCounts: AgeCounts = initialCounts
+    ? {
+        adult: Math.max(0, initialCounts.adult ?? 0),
+        youth: Math.max(0, initialCounts.youth ?? 0),
+        child: Math.max(0, initialCounts.child ?? 0),
+        infant: Math.max(0, initialCounts.infant ?? 0),
+      }
+    : { adult: Math.max(1, parseInt(defaultPax, 10) || 2), youth: 0, child: 0, infant: 0 };
+  if (startCounts.adult + startCounts.youth + startCounts.child + startCounts.infant < 1) startCounts.adult = 1;
+  const startPax = startCounts.adult + startCounts.youth + startCounts.child + startCounts.infant;
+  const startNeedingDetails = startCounts.adult + startCounts.youth + startCounts.child;
+  const [counts, setCounts] = useState<AgeCounts>(startCounts);
   const paxTotal = counts.adult + counts.youth + counts.child + counts.infant;
 
   // Keeps the additional-passenger fields in sync with the selected pax
@@ -238,9 +245,9 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
 
   const handleOpenOption = (opt: TicketOption) => {
     setSelectedOption(opt);
-    setCounts({ adult: initialAdults, youth: 0, child: 0, infant: 0 });
-    setForm({ name: "", email: "", phone: "", travelDate: defaultDate, pax: String(initialAdults), message: "" });
-    setAdditionalPassengers(getInitialExtraPassengers(String(initialAdults)));
+    setCounts(startCounts);
+    setForm({ name: "", email: "", phone: "", travelDate: defaultDate, pax: String(startPax), message: "" });
+    setAdditionalPassengers(getInitialExtraPassengers(String(startNeedingDetails)));
     setEnquiryOpen(true);
   };
 
@@ -275,7 +282,7 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
               .map((p, i) => `${i + 2}. ${p.name} — ${p.phone} — ${p.email}`)
               .join("\n")
           : "";
-        const travellerNotes = hasAgePricing(selectedOption)
+        const travellerNotes = counts.youth + counts.child + counts.infant > 0
           ? `\n\nTravellers: ${describeCounts(counts)}\nEstimated total: EUR ${enquiryTotal.toFixed(2)}`
           : "";
 
@@ -306,9 +313,9 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
 
   const handleOpenPayment = (opt: TicketOption) => {
     setSelectedForPayment(opt);
-    setCounts({ adult: initialAdults, youth: 0, child: 0, infant: 0 });
-    setAdditionalPassengers(getInitialExtraPassengers(String(initialAdults)));
-    setPaymentForm({ name: "", email: "", phone: "", travelDate: defaultDate, pax: String(initialAdults) });
+    setCounts(startCounts);
+    setAdditionalPassengers(getInitialExtraPassengers(String(startNeedingDetails)));
+    setPaymentForm({ name: "", email: "", phone: "", travelDate: defaultDate, pax: String(startPax) });
     setPaymentOpen(true);
   };
 
@@ -331,15 +338,14 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
       customerPhone: paymentForm.phone,
       travelDate: paymentForm.travelDate || undefined,
       pax: paxTotal,
-      optionSelected: hasAgePricing(selectedForPayment)
+      optionSelected: counts.youth + counts.child + counts.infant > 0
         ? `${selectedForPayment.name} - ${describeCounts(counts)}`
         : selectedForPayment.name,
     });
   };
 
   const renderTravelers = (opt: TicketOption | null) => {
-    const agePriced = hasAgePricing(opt);
-    const rows = agePriced ? AGE_ROWS : AGE_ROWS.slice(0, 1);
+    const rows = AGE_ROWS;
     const u = opt ? unitPrices(opt) : null;
     const total = opt ? optionTotal(opt, counts) : 0;
     return (

@@ -258,3 +258,85 @@ export function StepperField({
     </SearchField>
   );
 }
+
+export interface TravelerCounts {
+  adult: number;
+  youth: number;
+  child: number;
+  infant: number;
+}
+
+const TRAVELER_ROWS: Array<{ key: keyof TravelerCounts; label: string; hint: string }> = [
+  { key: "adult", label: "Adults", hint: "Ages 18 and above" },
+  { key: "youth", label: "Youth", hint: "Ages 12-17" },
+  { key: "child", label: "Children", hint: "Ages 2-11" },
+  { key: "infant", label: "Infants", hint: "Under 2 years" },
+];
+
+// Age-wise traveller picker (adult / youth / child / infant) for search bars
+// where ticket prices differ by age.
+export function TravelersPickerField({
+  label = "Travelers",
+  icon = IconUsers,
+  value,
+  onChange,
+  divider = false,
+}: {
+  label?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  value: TravelerCounts;
+  onChange: (v: TravelerCounts) => void;
+  divider?: boolean;
+}) {
+  const total = value.adult + value.youth + value.child + value.infant;
+
+  const change = (key: keyof TravelerCounts, delta: number) => {
+    const next = { ...value, [key]: Math.max(0, Math.min(20, value[key] + delta)) };
+    const sum = next.adult + next.youth + next.child + next.infant;
+    // At least one adult-or-older traveller must remain.
+    if (sum < 1 || next.adult + next.youth + next.child < 1) return;
+    onChange(next);
+  };
+
+  return (
+    <SearchField icon={icon} label={label} divider={divider}>
+      <Popover>
+        <PopoverTrigger asChild>
+          <button type="button" className="flex w-full items-center text-left cursor-pointer outline-none border-0 bg-transparent p-0">
+            <span className="truncate text-sm text-navy font-semibold">
+              {total} {total === 1 ? "traveler" : "travelers"}
+            </span>
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-72 p-4 z-50 bg-white shadow-2xl rounded-2xl border border-gray-100 space-y-3" align="start" side="bottom" sideOffset={8}>
+          {TRAVELER_ROWS.map((r) => (
+            <div key={r.key} className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-bold text-navy">{r.label}</p>
+                <p className="text-[11px] text-gray-500 font-medium">{r.hint}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => change(r.key, -1)}
+                  disabled={value[r.key] <= 0}
+                  className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 text-gray-600 disabled:opacity-30 hover:border-gray-400 cursor-pointer"
+                >
+                  <IconMinus className="h-3 w-3" />
+                </button>
+                <span className="text-sm text-navy font-semibold w-4 text-center">{value[r.key]}</span>
+                <button
+                  type="button"
+                  onClick={() => change(r.key, 1)}
+                  className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:border-gray-400 cursor-pointer"
+                >
+                  <IconPlus className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </PopoverContent>
+      </Popover>
+    </SearchField>
+  );
+}

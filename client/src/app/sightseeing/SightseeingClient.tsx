@@ -13,14 +13,14 @@ import {
 import Image from "next/image";
 import { api } from "@/lib/api";
 import { HeroSearchBar } from "@/components/HeroSearchBar";
-import { DropdownPickerField, DatePickerField, StepperField } from "@/components/SearchFields";
+import { DropdownPickerField, DatePickerField, TravelersPickerField, type TravelerCounts } from "@/components/SearchFields";
 
 function SightseeingSearchContent() {
   const router = useRouter();
   const [cities, setCities] = useState<string[]>([]);
   const [barCity, setBarCity] = useState("");
   const [barDate, setBarDate] = useState<Date | null>(null);
-  const [barTravelers, setBarTravelers] = useState(2);
+  const [barTravelers, setBarTravelers] = useState<TravelerCounts>({ adult: 2, youth: 0, child: 0, infant: 0 });
 
   useEffect(() => {
     api
@@ -33,7 +33,11 @@ function SightseeingSearchContent() {
     const params = new URLSearchParams();
     if (barCity) params.set("city", barCity);
     if (barDate) params.set("date", barDate.toISOString().split("T")[0]);
-    params.set("pax", String(barTravelers));
+    params.set("pax", String(barTravelers.adult + barTravelers.youth + barTravelers.child + barTravelers.infant));
+    params.set("adults", String(barTravelers.adult));
+    if (barTravelers.youth) params.set("youth", String(barTravelers.youth));
+    if (barTravelers.child) params.set("children", String(barTravelers.child));
+    if (barTravelers.infant) params.set("infants", String(barTravelers.infant));
     const qs = params.toString();
     router.push(`/sightseeing/results${qs ? `?${qs}` : ""}`);
   };
@@ -82,12 +86,11 @@ function SightseeingSearchContent() {
                     onChange={(_id, label) => setBarCity(label)}
                   />
                   <DatePickerField label="Activity date" date={barDate} onChange={setBarDate} />
-                  <StepperField
+                  <TravelersPickerField
                     label="Travelers"
                     icon={IconUsers}
                     value={barTravelers}
                     onChange={setBarTravelers}
-                    unitLabel={(n) => (n === 1 ? "traveler" : "travelers")}
                     divider={false}
                   />
                 </>

@@ -52,6 +52,13 @@ export default async function SightseeingDetailPage({ params, searchParams }: Pr
   const sp = searchParams ? await searchParams : undefined;
   const initialPax = typeof sp?.pax === "string" ? sp.pax : undefined;
   const initialDate = typeof sp?.date === "string" ? sp.date : undefined;
+  const num = (v: string | string[] | undefined) => (typeof v === "string" && /^d+$/.test(v) ? parseInt(v, 10) : undefined);
+  // Age-wise counts from the search bar (adults/youth/children/infants);
+  // absent when the visitor arrived without them.
+  const initialCounts =
+    num(sp?.adults) !== undefined
+      ? { adult: num(sp?.adults), youth: num(sp?.youth), child: num(sp?.children), infant: num(sp?.infants) }
+      : undefined;
 
   const tour = await getSightseeingTour(slug);
 
@@ -64,6 +71,7 @@ export default async function SightseeingDetailPage({ params, searchParams }: Pr
       tour={tour}
       initialPax={initialPax}
       initialDate={initialDate}
+      initialCounts={initialCounts}
     />
   );
 }

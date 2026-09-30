@@ -83,6 +83,10 @@ function ResultsContent() {
       const date = searchParams.get("date");
       if (pax) params.set("pax", pax);
       if (date) params.set("date", date);
+      for (const k of ["adults", "youth", "children", "infants"]) {
+        const v = searchParams.get(k);
+        if (v) params.set(k, v);
+      }
 
       if (page > 1) params.set("page", page.toString());
       if (city && city !== "ALL") params.set("city", city);
@@ -334,6 +338,10 @@ function ResultsContent() {
               const dateVal = searchParams.get("date");
               if (paxVal) tourParams.set("pax", paxVal);
               if (dateVal) tourParams.set("date", dateVal);
+              for (const k of ["adults", "youth", "children", "infants"]) {
+                const v = searchParams.get(k);
+                if (v) tourParams.set(k, v);
+              }
               const tourHref = `/sightseeing/${tour.slug}${tourParams.toString() ? `?${tourParams.toString()}` : ""}`;
 
               return (
