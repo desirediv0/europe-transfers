@@ -191,6 +191,7 @@ export default function SightseeingOrdersPage() {
                       <div>
                         <p className="font-medium text-sm truncate max-w-[200px]">{order.productName}</p>
                         {order.optionSelected && <p className="text-xs text-gray-500">{order.optionSelected}</p>}
+                        <p className="text-xs font-semibold text-slate-500">{order.pax || 1} traveller{(order.pax || 1) > 1 ? "s" : ""}</p>
                       </div>
                     </TableCell>
                     <TableCell className="font-bold">
