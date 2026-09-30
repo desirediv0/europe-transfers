@@ -225,6 +225,27 @@ export const submitVanCoachEnquiry = asyncHandler(async (req, res) => {
     );
   `);
 
+  // Double-click / retry guard: an identical enquiry from the same email in
+  // the last 10 minutes is treated as the same one - no second row or email.
+  const dupe = await prisma.$queryRawUnsafe(
+    `SELECT "id" FROM "VanCoachEnquiry"
+     WHERE LOWER("email") = LOWER($1) AND "vehicleName" = $2 AND "location" = $3
+       AND "hours" = $4::int
+       AND "pickupAddress" IS NOT DISTINCT FROM $5::text
+       AND "notes" IS NOT DISTINCT FROM $6::text
+       AND "createdAt" > NOW() - INTERVAL '10 minutes'
+     LIMIT 1`,
+    email,
+    vehicleName,
+    location,
+    parseInt(hours, 10) || 0,
+    pickupAddress || null,
+    itineraryNotes || null
+  );
+  if (dupe.length > 0) {
+    return apiResponse(res, 201, "Enquiry already received", { id: dupe[0].id, duplicate: true });
+  }
+
   const id = `vce_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
   await prisma.$executeRawUnsafe(
     `INSERT INTO "VanCoachEnquiry" ("id", "vehicleId", "vehicleName", "location", "hours", "rate", "customerName", "phone", "email", "pickupAddress", "notes", "status", "createdAt", "updatedAt")

@@ -178,6 +178,28 @@ export const submitSightseeingEnquiry = asyncHandler(async (req, res) => {
     throw new ApiError(400, "sightseeingTitle, name, phone, and email are required");
   }
 
+  // Double-click / retry guard: an identical enquiry from the same email in
+  // the last 10 minutes is treated as the same one - no second row or email.
+  const dupe = await prisma.$queryRawUnsafe(
+    `SELECT "id" FROM "SightseeingEnquiry"
+     WHERE LOWER("email") = LOWER($1) AND "sightseeingTitle" = $2
+       AND "optionSelected" IS NOT DISTINCT FROM $3::text
+       AND "travelDate" IS NOT DISTINCT FROM $4::text
+       AND "pax" = $5::int
+       AND "notes" IS NOT DISTINCT FROM $6::text
+       AND "createdAt" > NOW() - INTERVAL '10 minutes'
+     LIMIT 1`,
+    email,
+    sightseeingTitle,
+    optionSelected || null,
+    travelDate || null,
+    parseInt(pax, 10) || 1,
+    message || notes || null
+  );
+  if (dupe.length > 0) {
+    return apiResponse(res, 201, "Enquiry already received", { id: dupe[0].id, duplicate: true });
+  }
+
   const id = `se_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
   const finalNotes = message || notes || null;
   const paxCount = parseInt(pax, 10) || 1;

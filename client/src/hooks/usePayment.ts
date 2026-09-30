@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
@@ -24,6 +24,9 @@ interface PaymentParams {
 
 export function usePayment() {
   const [loading, setLoading] = useState(false);
+  // Synchronous guard: state updates are async, so a fast double-click could
+  // otherwise start two payments before `loading` re-renders as true.
+  const inFlight = useRef(false);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -34,6 +37,8 @@ export function usePayment() {
       return;
     }
 
+    if (inFlight.current) return;
+    inFlight.current = true;
     setLoading(true);
     try {
       const orderData = await api.post<{
@@ -52,17 +57,31 @@ export function usePayment() {
         description: params.productName,
         order_id: orderData.razorpayOrderId,
         handler: async (response: RazorpayResponse) => {
-          try {
-            await api.post("/payments/verify-payment", {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              orderId: orderData.orderId,
-            });
+          // The customer has already been charged at this point, so retry the
+          // verification a few times before giving up - the server ignores
+          // repeats, so a retry can never double-process the order.
+          let verified = false;
+          for (let attempt = 0; attempt < 3 && !verified; attempt++) {
+            try {
+              await api.post("/payments/verify-payment", {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                orderId: orderData.orderId,
+              });
+              verified = true;
+            } catch {
+              await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
+            }
+          }
+          if (verified) {
             toast.success("Payment successful! Booking confirmed.");
             router.push("/account#orders");
-          } catch {
-            toast.error("Payment verification failed. Please contact support.");
+          } else {
+            toast.error(
+              `Payment received but confirmation is pending. Please do not pay again - contact support with payment ID ${response.razorpay_payment_id}.`,
+              { duration: 15000 }
+            );
           }
         },
         prefill: {
@@ -81,6 +100,7 @@ export function usePayment() {
         toast.error("Failed to initiate payment. Please try again.");
       }
     } finally {
+      inFlight.current = false;
       setLoading(false);
     }
   };

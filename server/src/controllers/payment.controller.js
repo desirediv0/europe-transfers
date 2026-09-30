@@ -32,6 +32,37 @@ export const createOrder = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Missing required fields: productType, productId, productName, amount, customerName, customerEmail, customerPhone");
   }
 
+  const userId = req.user?.id || null;
+  const orderPax = parseInt(pax, 10) || 1;
+
+  // Double-click / retry guard: if the same user already has an unpaid order
+  // for exactly this booking created in the last 15 minutes, hand back that
+  // same order instead of creating a second Razorpay order + DB row.
+  const recent = await prisma.order.findFirst({
+    where: {
+      userId,
+      status: "CREATED",
+      productType,
+      productId,
+      amount: Number(amount),
+      pax: orderPax,
+      optionSelected: optionSelected || null,
+      travelDate: travelDate || null,
+      razorpayOrderId: { not: null },
+      createdAt: { gt: new Date(Date.now() - 15 * 60 * 1000) },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  if (recent && recent.amountInr != null) {
+    return apiResponse(res, 200, "Order already created", {
+      orderId: recent.id,
+      razorpayOrderId: recent.razorpayOrderId,
+      amount: Math.round(Number(recent.amountInr) * 100),
+      currency: "INR",
+      key: process.env.RAZORPAY_KEY_ID,
+    });
+  }
+
   // The site always sends its base EUR price here; Razorpay (INR-only account)
   // always charges the customer in INR, converted at today's rate.
   const rates = await getRates();
@@ -53,8 +84,6 @@ export const createOrder = asyncHandler(async (req, res) => {
     },
   });
 
-  const userId = req.user?.id || null;
-
   const order = await prisma.order.create({
     data: {
       userId,
@@ -71,7 +100,7 @@ export const createOrder = asyncHandler(async (req, res) => {
       customerEmail,
       customerPhone,
       travelDate: travelDate || null,
-      pax: parseInt(pax, 10) || 1,
+      pax: orderPax,
       optionSelected: optionSelected || null,
       notes: notes || null,
     },
@@ -93,6 +122,20 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Missing payment verification fields");
   }
 
+  const orderToVerify = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!orderToVerify) {
+    throw new ApiError(404, "Order not found");
+  }
+  // The signed Razorpay order must be the one created for THIS order, and
+  // it must belong to the logged-in user - otherwise a valid signature from
+  // one payment could be replayed to mark a different order as paid.
+  if (orderToVerify.razorpayOrderId !== razorpay_order_id) {
+    throw new ApiError(400, "Payment does not match this order");
+  }
+  if (orderToVerify.userId && req.user?.id && orderToVerify.userId !== req.user.id) {
+    throw new ApiError(403, "This order belongs to another account");
+  }
+
   const body = razorpay_order_id + "|" + razorpay_payment_id;
   const expectedSignature = crypto
     .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
@@ -102,8 +145,10 @@ export const verifyPayment = asyncHandler(async (req, res) => {
   const isValid = expectedSignature === razorpay_signature;
 
   if (!isValid) {
-    await prisma.order.update({
-      where: { id: orderId },
+    // Only an unpaid order can be marked failed - never downgrade one that
+    // was already captured.
+    await prisma.order.updateMany({
+      where: { id: orderId, status: "CREATED" },
       data: { status: "FAILED" },
     });
     throw new ApiError(400, "Payment verification failed");
