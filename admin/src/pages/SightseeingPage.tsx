@@ -40,6 +40,19 @@ import {
   IconArrowRight,
 } from "@tabler/icons-react";
 
+interface OptionRow {
+  name: string;
+  price: number;
+  duration?: string;
+  childPrice?: number;
+  youthPrice?: number;
+  infantPrice?: number;
+}
+
+// Blank input means "no separate price for this age group".
+const optPrice = (v: number | string | undefined): number | undefined =>
+  v === undefined || v === "" || Number.isNaN(Number(v)) ? undefined : Number(v);
+
 export default function SightseeingPage() {
   const [activeTab, setActiveTab] = useState<"enquiries" | "tours">("enquiries");
 
@@ -90,12 +103,15 @@ export default function SightseeingPage() {
   const [editingIncludeIndex, setEditingIncludeIndex] = useState<number | null>(null);
   const [editingIncludeText, setEditingIncludeText] = useState("");
 
-  const [optionsList, setOptionsList] = useState<Array<{ name: string; price: number; duration?: string }>>([]);
+  const [optionsList, setOptionsList] = useState<OptionRow[]>([]);
+  const [newOptChild, setNewOptChild] = useState<number | string>("");
+  const [newOptYouth, setNewOptYouth] = useState<number | string>("");
+  const [newOptInfant, setNewOptInfant] = useState<number | string>("");
   const [newOptName, setNewOptName] = useState("");
   const [newOptPrice, setNewOptPrice] = useState<number | string>(0);
   const [newOptDuration, setNewOptDuration] = useState("");
   const [editingOptionIndex, setEditingOptionIndex] = useState<number | null>(null);
-  const [editingOptionData, setEditingOptionData] = useState<{ name: string; price: number; duration?: string }>({ name: "", price: 0, duration: "" });
+  const [editingOptionData, setEditingOptionData] = useState<OptionRow>({ name: "", price: 0, duration: "" });
 
   const [scheduleList, setScheduleList] = useState<Array<{ type: string; address: string; metro?: string; time?: string }>>([]);
   const [newScheduleType, setNewScheduleType] = useState("Departure");
@@ -321,11 +337,17 @@ export default function SightseeingPage() {
         name: newOptName.trim(),
         price: Number(newOptPrice) || 0,
         duration: newOptDuration.trim() || form.duration,
+        childPrice: optPrice(newOptChild),
+        youthPrice: optPrice(newOptYouth),
+        infantPrice: optPrice(newOptInfant),
       },
     ]);
     setNewOptName("");
     setNewOptPrice(0);
     setNewOptDuration("");
+    setNewOptChild("");
+    setNewOptYouth("");
+    setNewOptInfant("");
   };
   const removeOption = (idx: number) => {
     setOptionsList(optionsList.filter((_, i) => i !== idx));
@@ -342,6 +364,9 @@ export default function SightseeingPage() {
       name: editingOptionData.name.trim(),
       price: Number(editingOptionData.price) || 0,
       duration: editingOptionData.duration?.trim() || form.duration,
+      childPrice: optPrice(editingOptionData.childPrice),
+      youthPrice: optPrice(editingOptionData.youthPrice),
+      infantPrice: optPrice(editingOptionData.infantPrice),
     };
     setOptionsList(copy);
     setEditingOptionIndex(null);
@@ -1103,6 +1128,15 @@ export default function SightseeingPage() {
                 </Button>
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-white p-3 rounded-xl border">
+                <p className="sm:col-span-3 text-[11px] font-semibold text-slate-500">
+                  Optional age-wise prices for the option being added (€ per person). Leave blank to keep this option adult-only. Adult 18+, Youth 12-17, Child 2-11, Infant under 2 (blank Infant = free).
+                </p>
+                <Input type="number" step="0.01" placeholder="Youth 12-17 (€)" value={newOptYouth} onChange={(e) => setNewOptYouth(e.target.value)} className="h-9 text-xs font-bold" />
+                <Input type="number" step="0.01" placeholder="Child 2-11 (€)" value={newOptChild} onChange={(e) => setNewOptChild(e.target.value)} className="h-9 text-xs font-bold" />
+                <Input type="number" step="0.01" placeholder="Infant <2 (€, blank = free)" value={newOptInfant} onChange={(e) => setNewOptInfant(e.target.value)} className="h-9 text-xs font-bold" />
+              </div>
+
               {/* List of Added Options */}
               {optionsList.length > 0 && (
                 <div className="space-y-2 pt-1">
@@ -1132,6 +1166,11 @@ export default function SightseeingPage() {
                               <IconX className="h-3.5 w-3.5" />
                             </Button>
                           </div>
+                          <div className="sm:col-span-4 grid grid-cols-3 gap-2">
+                            <Input type="number" step="0.01" value={editingOptionData.youthPrice ?? ""} onChange={(e) => setEditingOptionData({ ...editingOptionData, youthPrice: e.target.value === "" ? undefined : Number(e.target.value) })} className="h-8 text-xs font-bold" placeholder="Youth 12-17 (€)" />
+                            <Input type="number" step="0.01" value={editingOptionData.childPrice ?? ""} onChange={(e) => setEditingOptionData({ ...editingOptionData, childPrice: e.target.value === "" ? undefined : Number(e.target.value) })} className="h-8 text-xs font-bold" placeholder="Child 2-11 (€)" />
+                            <Input type="number" step="0.01" value={editingOptionData.infantPrice ?? ""} onChange={(e) => setEditingOptionData({ ...editingOptionData, infantPrice: e.target.value === "" ? undefined : Number(e.target.value) })} className="h-8 text-xs font-bold" placeholder="Infant <2 (€)" />
+                          </div>
                         </div>
                       ) : (
                         <div className="flex items-center justify-between">
@@ -1143,6 +1182,13 @@ export default function SightseeingPage() {
                             {opt.duration && (
                               <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
                                 <IconClock className="h-3 w-3 text-[#C9A227]" /> {opt.duration}
+                              </span>
+                            )}
+                            {(opt.youthPrice != null || opt.childPrice != null || opt.infantPrice != null) && (
+                              <span className="text-[11px] font-semibold text-slate-500">
+                                {opt.youthPrice != null && `Youth €${Number(opt.youthPrice).toFixed(2)} `}
+                                {opt.childPrice != null && `Child €${Number(opt.childPrice).toFixed(2)} `}
+                                {opt.infantPrice != null && `Infant €${Number(opt.infantPrice).toFixed(2)}`}
                               </span>
                             )}
                           </div>

@@ -64,10 +64,56 @@ interface Props {
   initialDate?: string;
 }
 
+interface TicketOption {
+  name: string;
+  price: number;
+  duration?: string;
+  childPrice?: number;
+  youthPrice?: number;
+  infantPrice?: number;
+}
+
+interface AgeCounts {
+  adult: number;
+  youth: number;
+  child: number;
+  infant: number;
+}
+
+const isNum = (v: unknown): v is number => typeof v === "number" && !Number.isNaN(v);
+
+// Child/youth/infant categories only apply to options where the admin set a
+// child or youth price; otherwise the option stays adult-only as before.
+const hasAgePricing = (o: TicketOption | null) => !!o && (isNum(o.childPrice) || isNum(o.youthPrice));
+
+const unitPrices = (o: TicketOption) => ({
+  adult: Number(o.price) || 0,
+  youth: isNum(o.youthPrice) ? o.youthPrice : Number(o.price) || 0,
+  child: isNum(o.childPrice) ? o.childPrice : Number(o.price) || 0,
+  infant: isNum(o.infantPrice) ? o.infantPrice : 0,
+});
+
+const optionTotal = (o: TicketOption, c: AgeCounts) => {
+  const u = unitPrices(o);
+  return u.adult * c.adult + u.youth * c.youth + u.child * c.child + u.infant * c.infant;
+};
+
+const AGE_ROWS: Array<{ key: keyof AgeCounts; label: string; hint: string }> = [
+  { key: "adult", label: "Adult", hint: "18+ years" },
+  { key: "youth", label: "Youth", hint: "12-17 years" },
+  { key: "child", label: "Child", hint: "2-11 years" },
+  { key: "infant", label: "Infant", hint: "Under 2 years" },
+];
+
+const describeCounts = (c: AgeCounts) =>
+  AGE_ROWS.filter((r) => c[r.key] > 0)
+    .map((r) => `${c[r.key]} ${r.label}${c[r.key] > 1 ? "s" : ""} (${r.hint})`)
+    .join(", ");
+
 export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props) {
   const { format: formatCurrency } = useCurrency();
   const [enquiryOpen, setEnquiryOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<{ name: string; price: number } | null>(null);
+  const [selectedOption, setSelectedOption] = useState<TicketOption | null>(null);
   const [successOpen, setSuccessOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [activeGalleryIdx, setActiveGalleryIdx] = useState(0);
@@ -101,6 +147,10 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
     getInitialExtraPassengers(defaultPax)
   );
 
+  const initialAdults = Math.max(1, parseInt(defaultPax, 10) || 2);
+  const [counts, setCounts] = useState<AgeCounts>({ adult: initialAdults, youth: 0, child: 0, infant: 0 });
+  const paxTotal = counts.adult + counts.youth + counts.child + counts.infant;
+
   // Keeps the additional-passenger fields in sync with the selected pax
   // count: passenger 1 is the lead contact above (name/phone/email);
   // passengers 2..N each get their own Name/Phone/Email row.
@@ -112,6 +162,17 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
       while (next.length < extraCount) next.push({ name: "", phone: "", email: "" });
       return next;
     });
+  };
+
+  // Infants don't need contact details, everyone else does.
+  const updateCount = (key: keyof AgeCounts, delta: number) => {
+    const next = { ...counts, [key]: Math.max(0, Math.min(30, counts[key] + delta)) };
+    if (next.adult + next.youth + next.child + next.infant < 1) return;
+    setCounts(next);
+    const total = String(next.adult + next.youth + next.child + next.infant);
+    setForm((f) => ({ ...f, pax: total }));
+    setPaymentForm((f) => ({ ...f, pax: total }));
+    syncAdditionalPassengers(String(next.adult + next.youth + next.child));
   };
 
   const updateAdditionalPassenger = (index: number, field: keyof PassengerDetail, value: string) => {
@@ -130,7 +191,7 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
     pax: defaultPax,
   });
   const [paymentOpen, setPaymentOpen] = useState(false);
-  const [selectedForPayment, setSelectedForPayment] = useState<{ name: string; price: number } | null>(null);
+  const [selectedForPayment, setSelectedForPayment] = useState<TicketOption | null>(null);
   const { initiatePayment, loading: paymentLoading } = usePayment();
 
   const parseJson = <T,>(str?: string, fallback: T = [] as T): T => {
@@ -164,7 +225,7 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
     "Local guide assistance",
   ]);
 
-  const optionsList: Array<{ name: string; price: number; duration?: string }> = parseJson(tour.options, [
+  const optionsList: TicketOption[] = parseJson(tour.options, [
     { name: `${tour.title} (Standard Access)`, price: Number(tour.priceFrom), duration: tour.duration },
   ]);
 
@@ -175,10 +236,11 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
 
   const priceDisplay = Number(tour.priceFrom).toFixed(2);
 
-  const handleOpenOption = (opt: { name: string; price: number }) => {
+  const handleOpenOption = (opt: TicketOption) => {
     setSelectedOption(opt);
-    setForm({ name: "", email: "", phone: "", travelDate: defaultDate, pax: defaultPax, message: "" });
-    setAdditionalPassengers(getInitialExtraPassengers(defaultPax));
+    setCounts({ adult: initialAdults, youth: 0, child: 0, infant: 0 });
+    setForm({ name: "", email: "", phone: "", travelDate: defaultDate, pax: String(initialAdults), message: "" });
+    setAdditionalPassengers(getInitialExtraPassengers(String(initialAdults)));
     setEnquiryOpen(true);
   };
 
@@ -199,9 +261,10 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
       setSubmitting(true);
       try {
         const activeOptName = selectedOption?.name || tour.title;
-        const activeOptPrice = selectedOption ? Number(selectedOption.price).toFixed(2) : priceDisplay;
+        const enquiryTotal = selectedOption ? optionTotal(selectedOption, counts) : Number(priceDisplay);
+        const activeOptPrice = enquiryTotal.toFixed(2);
 
-        setLastBooking({ option: activeOptName, date: form.travelDate, pax: form.pax });
+        setLastBooking({ option: activeOptName, date: form.travelDate, pax: String(paxTotal) });
 
         // The backend stores one lead-contact name/phone/email; additional
         // passengers' details are appended into the notes so nothing is
@@ -211,6 +274,9 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
             additionalPassengers
               .map((p, i) => `${i + 2}. ${p.name} — ${p.phone} — ${p.email}`)
               .join("\n")
+          : "";
+        const travellerNotes = hasAgePricing(selectedOption)
+          ? `\n\nTravellers: ${describeCounts(counts)}\nEstimated total: EUR ${enquiryTotal.toFixed(2)}`
           : "";
 
       await api.post("/sightseeing/enquire", {
@@ -223,8 +289,8 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
         phone: form.phone,
         email: form.email,
         travelDate: form.travelDate || undefined,
-        pax: parseInt(form.pax, 10) || 2,
-        message: (form.message || "") + passengerNotes || undefined,
+        pax: paxTotal,
+        message: (form.message || "") + travellerNotes + passengerNotes || undefined,
       });
 
       setSubmitting(false);
@@ -238,9 +304,11 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
     }
   };
 
-  const handleOpenPayment = (opt: { name: string; price: number }) => {
+  const handleOpenPayment = (opt: TicketOption) => {
     setSelectedForPayment(opt);
-    setPaymentForm({ name: "", email: "", phone: "", travelDate: defaultDate, pax: defaultPax });
+    setCounts({ adult: initialAdults, youth: 0, child: 0, infant: 0 });
+    setAdditionalPassengers(getInitialExtraPassengers(String(initialAdults)));
+    setPaymentForm({ name: "", email: "", phone: "", travelDate: defaultDate, pax: String(initialAdults) });
     setPaymentOpen(true);
   };
 
@@ -256,15 +324,54 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
       productType: "SIGHTSEEING",
       productId: tour.id,
       productName: selectedForPayment.name,
-      amount: selectedForPayment.price,
+      amount: optionTotal(selectedForPayment, counts),
       currency: "EUR",
       customerName: paymentForm.name,
       customerEmail: paymentForm.email,
       customerPhone: paymentForm.phone,
       travelDate: paymentForm.travelDate || undefined,
-      pax: parseInt(paymentForm.pax, 10) || 1,
-      optionSelected: selectedForPayment.name,
+      pax: paxTotal,
+      optionSelected: hasAgePricing(selectedForPayment)
+        ? `${selectedForPayment.name} - ${describeCounts(counts)}`
+        : selectedForPayment.name,
     });
+  };
+
+  const renderTravelers = (opt: TicketOption | null) => {
+    const agePriced = hasAgePricing(opt);
+    const rows = agePriced ? AGE_ROWS : AGE_ROWS.slice(0, 1);
+    const u = opt ? unitPrices(opt) : null;
+    const total = opt ? optionTotal(opt, counts) : 0;
+    return (
+      <div className="rounded-xl border border-gray-200 bg-slate-50 p-3 space-y-2">
+        <Label className="text-xs font-black text-navy flex items-center gap-1">
+          <IconUsers className="h-3.5 w-3.5 text-gold" /> Travellers
+        </Label>
+        {rows.map((r) => (
+          <div key={r.key} className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold text-navy">{r.label} <span className="text-gray-400 font-medium">({r.hint})</span></p>
+              {u && (
+                <p className="text-[11px] text-gray-500 font-medium">
+                  {u[r.key] > 0 ? formatCurrency(u[r.key]) : "Free"}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={() => updateCount(r.key, -1)} className="h-7 w-7 rounded-full border border-gray-300 text-navy font-bold hover:border-gold cursor-pointer">-</button>
+              <span className="w-5 text-center text-sm font-black text-navy">{counts[r.key]}</span>
+              <button type="button" onClick={() => updateCount(r.key, 1)} className="h-7 w-7 rounded-full border border-gray-300 text-navy font-bold hover:border-gold cursor-pointer">+</button>
+            </div>
+          </div>
+        ))}
+        {opt && (
+          <div className="flex items-center justify-between border-t border-gray-200 pt-2">
+            <span className="text-xs font-bold text-gray-500">Total ({paxTotal} traveller{paxTotal > 1 ? "s" : ""})</span>
+            <span className="text-base font-black text-navy">{formatCurrency(total)}</span>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -729,27 +836,9 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
                   </PopoverContent>
                 </Popover>
               </div>
-              <div>
-                <Label className="text-xs font-black text-navy flex items-center gap-1">
-                  <IconUsers className="h-3.5 w-3.5 text-gold" /> Passengers
-                </Label>
-                <select
-                  value={form.pax}
-                  onChange={(e) => {
-                    setForm({ ...form, pax: e.target.value });
-                    syncAdditionalPassengers(e.target.value);
-                  }}
-                  className="w-full h-11 rounded-xl border border-gray-200 bg-slate-50 px-3 text-xs font-bold text-navy focus:outline-none focus:border-gold mt-1"
-                >
-                  <option value="1">1 Person</option>
-                  <option value="2">2 People</option>
-                  <option value="3">3 People</option>
-                  <option value="4">4 People</option>
-                  <option value="5">5 People</option>
-                  <option value="6">6+ Group</option>
-                </select>
-              </div>
             </div>
+
+            {renderTravelers(selectedOption)}
 
             {additionalPassengers.length > 0 && (
               <div className="space-y-3 rounded-xl border border-gold/30 bg-gold/5 p-3">
@@ -946,24 +1035,9 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
                   className="h-11 rounded-xl border-gray-200 text-xs font-semibold mt-1"
                 />
               </div>
-              <div>
-                <Label className="text-xs font-black text-navy flex items-center gap-1">
-                  <IconUsers className="h-3.5 w-3.5 text-gold" /> Passengers
-                </Label>
-                <select
-                  value={paymentForm.pax}
-                  onChange={(e) => setPaymentForm({ ...paymentForm, pax: e.target.value })}
-                  className="w-full h-11 rounded-xl border border-gray-200 bg-slate-50 px-3 text-xs font-bold text-navy focus:outline-none focus:border-gold mt-1"
-                >
-                  <option value="1">1 Person</option>
-                  <option value="2">2 People</option>
-                  <option value="3">3 People</option>
-                  <option value="4">4 People</option>
-                  <option value="5">5 People</option>
-                  <option value="6">6+ Group</option>
-                </select>
-              </div>
             </div>
+
+            {renderTravelers(selectedForPayment)}
 
             <Button
               type="submit"
@@ -976,7 +1050,7 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate }: Props
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
-                  <IconCreditCard className="h-4 w-4" /> Pay {selectedForPayment ? formatCurrency(Number(selectedForPayment.price)) : formatCurrency(0)} Now
+                  <IconCreditCard className="h-4 w-4" /> Pay {selectedForPayment ? formatCurrency(optionTotal(selectedForPayment, counts)) : formatCurrency(0)} Now
                 </span>
               )}
             </Button>
