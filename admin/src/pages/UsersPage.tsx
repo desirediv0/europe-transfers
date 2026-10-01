@@ -179,22 +179,22 @@ export default function UsersPage() {
 
           {viewUser?.companyName && (
             <div className="space-y-3 text-sm">
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-lg border p-3">
-                <p className="col-span-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Company</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 rounded-lg border p-3">
+                <p className="sm:col-span-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Company</p>
                 <p><span className="text-muted-foreground">Name:</span> {viewUser.companyName}</p>
                 <p><span className="text-muted-foreground">Type:</span> {viewUser.businessType || "-"}</p>
                 <p><span className="text-muted-foreground">Country:</span> {viewUser.companyCountry || "-"}</p>
                 <p><span className="text-muted-foreground">Reg. No:</span> {viewUser.registrationNumber || "-"}</p>
                 <p><span className="text-muted-foreground">VAT / Tax ID:</span> {viewUser.vatId || "-"}</p>
-                <p className="col-span-2"><span className="text-muted-foreground">Address:</span> {viewUser.businessAddress || "-"}</p>
+                <p className="sm:col-span-2"><span className="text-muted-foreground">Address:</span> {viewUser.businessAddress || "-"}</p>
               </div>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-lg border p-3">
-                <p className="col-span-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Primary Contact</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 rounded-lg border p-3">
+                <p className="sm:col-span-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Primary Contact</p>
                 <p><span className="text-muted-foreground">Name:</span> {viewUser.name}</p>
                 <p><span className="text-muted-foreground">Title:</span> {viewUser.jobTitle || "-"}</p>
                 <p><span className="text-muted-foreground">Email:</span> {viewUser.email}</p>
                 <p><span className="text-muted-foreground">Phone:</span> {viewUser.phone}</p>
-                <p className="col-span-2"><span className="text-muted-foreground">Country / City:</span> {viewUser.contactLocation || "-"}</p>
+                <p className="sm:col-span-2"><span className="text-muted-foreground">Country / City:</span> {viewUser.contactLocation || "-"}</p>
               </div>
               <div className="rounded-lg border p-3 space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Consents</p>
