@@ -35,10 +35,6 @@ interface RouteForm {
   prices: Record<string, string>;
 }
 
-function getInitials(name: string) {
-  return name?.charAt(0).toUpperCase() || "?";
-}
-
 export default function RoutesPage() {
   const [items, setItems] = useState<Route[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
