@@ -347,6 +347,11 @@ model Booking {
   travelTime    String?
   pax           Int
   luggageNotes  String?
+  flightDetails String?
+  agentContact  String?
+  agentEmail    String?
+  razorpayOrderId String?
+  amountInr     Decimal?      @db.Decimal(10, 2)
   price         Decimal       @db.Decimal(10, 2)
   currency      String        @default("EUR")
   paymentStatus PaymentStatus @default(PENDING)

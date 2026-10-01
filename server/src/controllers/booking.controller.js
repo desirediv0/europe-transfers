@@ -105,6 +105,9 @@ export const createBooking = asyncHandler(async (req, res) => {
     travelTime,
     pax,
     luggageNotes,
+    flightDetails,
+    agentContact,
+    agentEmail,
     message,
   } = req.body;
 
@@ -129,27 +132,58 @@ export const createBooking = asyncHandler(async (req, res) => {
     throw new ApiError(400, "No price set for this car on this route");
   }
 
+  const details = {
+    customerName,
+    email: email || null,
+    pickupAddress: pickupAddress || "",
+    dropAddress: dropAddress || "",
+    luggageNotes: luggageNotes || null,
+    flightDetails: flightDetails || null,
+    agentContact: agentContact || null,
+    agentEmail: agentEmail || null,
+    message: message || null,
+    // Price always comes from the route's price table, never from the client.
+    price: routePrice.price,
+    currency: routePrice.currency,
+  };
+  const include = {
+    route: { include: { fromLocation: true, toLocation: true } },
+    carType: true,
+  };
+
+  // Double-click / retry guard: the same still-unpaid booking (same phone,
+  // route, vehicle, date, time and passengers) created in the last 10
+  // minutes is reused (with the latest details) instead of duplicated.
+  const existing = await prisma.booking.findFirst({
+    where: {
+      phone,
+      routeId,
+      carTypeId,
+      travelDate: new Date(travelDate),
+      travelTime: travelTime || null,
+      pax,
+      paymentStatus: "PENDING",
+      bookingStatus: { not: "CANCELLED" },
+      createdAt: { gt: new Date(Date.now() - 10 * 60 * 1000) },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  if (existing) {
+    const reused = await prisma.booking.update({ where: { id: existing.id }, data: details, include });
+    return apiResponse(res, 201, "Booking created", reused);
+  }
+
   const booking = await prisma.booking.create({
     data: {
       route: { connect: { id: routeId } },
       carType: { connect: { id: carTypeId } },
-      customerName,
       phone,
-      email: email || null,
-      pickupAddress: pickupAddress || "",
-      dropAddress: dropAddress || "",
       travelDate: new Date(travelDate),
       travelTime: travelTime || null,
       pax,
-      luggageNotes: luggageNotes || null,
-      price: routePrice.price,
-      currency: routePrice.currency,
-      message: message || null,
+      ...details,
     },
-    include: {
-      route: { include: { fromLocation: true, toLocation: true } },
-      carType: true,
-    },
+    include,
   });
 
   return apiResponse(res, 201, "Booking created", booking);

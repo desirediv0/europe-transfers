@@ -107,12 +107,23 @@ export default function BookingsPage() {
                     <div className="text-sm">
                       <div className="font-medium">{item.customerName}</div>
                       <div className="text-muted-foreground">{item.phone}</div>
+                      {item.email && <div className="text-muted-foreground break-all">{item.email}</div>}
+                      {(item.agentContact || item.agentEmail) && (
+                        <div className="mt-1 text-xs border-t pt-1">
+                          <span className="font-semibold">Agent:</span> {item.agentContact}
+                          {item.agentEmail && <div className="break-all">{item.agentEmail}</div>}
+                        </div>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
                       <div>{item.route?.fromLocation?.name || "N/A"}</div>
                       <div className="text-muted-foreground">→ {item.route?.toLocation?.name || "N/A"}</div>
+                      {item.flightDetails && <div className="mt-1 text-xs"><span className="font-semibold">Flight/Train:</span> {item.flightDetails}</div>}
+                      {item.pickupAddress && <div className="text-xs"><span className="font-semibold">Pickup:</span> {item.pickupAddress}</div>}
+                      {item.dropAddress && <div className="text-xs"><span className="font-semibold">Drop-off:</span> {item.dropAddress}</div>}
+                      {item.luggageNotes && <div className="text-xs"><span className="font-semibold">Notes:</span> {item.luggageNotes}</div>}
                     </div>
                   </TableCell>
                   <TableCell>{item.carType?.name || "N/A"}</TableCell>
@@ -129,6 +140,7 @@ export default function BookingsPage() {
                   </TableCell>
                   <TableCell>
                     <Badge variant={paymentStatusColors[item.paymentStatus] || "default"}>{item.paymentStatus}</Badge>
+                    {item.paymentId && <div className="mt-1 text-[10px] text-muted-foreground break-all max-w-[110px]">{item.paymentId}</div>}
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col gap-1">

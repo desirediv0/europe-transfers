@@ -426,7 +426,8 @@ export default function FleetContent({
   const [carTypes, setCarTypes] = useState<CarType[]>([]);
   const [loadingCars, setLoadingCars] = useState(true);
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
-  const [passenger, setPassenger] = useState({ name: user?.name || "", phone: user?.phone || "", email: user?.email || "" });
+  const [passenger, setPassenger] = useState({ name: user?.name || "", phone: user?.phone || "", email: user?.email || "", flight: "", pickup: "", drop: "", agentContact: "", agentEmail: "" });
+  const [formError, setFormError] = useState("");
   const [error, setError] = useState(initialError);
   const mapRef = useRef<maplibregl.Map | null>(null);
 
@@ -438,7 +439,7 @@ export default function FleetContent({
 
   useEffect(() => {
     if (user) {
-      setPassenger({ name: user.name || "", phone: user.phone || "", email: user.email || "" });
+      setPassenger((p) => ({ ...p, name: user.name || "", phone: user.phone || "", email: user.email || "" }));
     }
   }, [user]);
 
@@ -502,13 +503,37 @@ export default function FleetContent({
   const handleContinue = () => {
     if (isLocked) return;
     if (!selected) { return; }
-    if (!passenger.name || !passenger.phone) { return; }
+    const emailRe = /^[^s@]+@[^s@]+.[^s@]+$/;
+    if (!passenger.name.trim() || !passenger.phone.trim()) { setFormError("Name and phone number are required."); return; }
+    if (!emailRe.test(passenger.email.trim())) { setFormError("Please enter a valid passenger email address."); return; }
+    if (!passenger.flight.trim()) { setFormError("Please enter your flight or train details."); return; }
+    if (!passenger.pickup.trim() || !passenger.drop.trim()) { setFormError("Pick up and drop off addresses are required."); return; }
+    if (passenger.agentEmail.trim() && !emailRe.test(passenger.agentEmail.trim())) { setFormError("Agent email address is not valid."); return; }
+    setFormError("");
 
     const totalPrice = selected.price;
 
-    router.push(
-      `/checkout?routeId=${searchData?.route.id}&carTypeId=${selected.carType.id}&routePriceId=${selected.routePriceId}&from=${encodeURIComponent(sp!.from)}&to=${encodeURIComponent(sp!.to)}&date=${sp!.date}&time=${sp!.time}&pax=${sp!.pax}&price=${totalPrice}&currency=${selected.currency}&name=${encodeURIComponent(passenger.name)}&phone=${encodeURIComponent(passenger.phone)}&email=${encodeURIComponent(passenger.email)}`
-    );
+    const q = new URLSearchParams({
+      routeId: String(searchData?.route.id),
+      carTypeId: selected.carType.id,
+      routePriceId: String(selected.routePriceId),
+      from: sp!.from,
+      to: sp!.to,
+      date: sp!.date,
+      time: sp!.time,
+      pax: String(sp!.pax),
+      price: String(totalPrice),
+      currency: selected.currency,
+      name: passenger.name.trim(),
+      phone: passenger.phone.trim(),
+      email: passenger.email.trim(),
+      flight: passenger.flight.trim(),
+      pickup: passenger.pickup.trim(),
+      drop: passenger.drop.trim(),
+      agentContact: passenger.agentContact.trim(),
+      agentEmail: passenger.agentEmail.trim(),
+    });
+    router.push(`/checkout?${q.toString()}`);
   };
 
   const selected = selectedIdx !== null && searchData ? searchData.cars[selectedIdx] : null;
@@ -739,20 +764,71 @@ export default function FleetContent({
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-extrabold text-navy">Email Address</label>
+                    <label className="text-xs font-extrabold text-navy">Passenger Email Address <span className="text-red-500">*</span></label>
                     <input
                       type="email"
-                      placeholder="e.g. codeshorts007@gmail.com"
+                      placeholder="e.g. john@example.com"
                       value={passenger.email}
                       onChange={(e) => setPassenger((p) => ({ ...p, email: e.target.value }))}
                       className="mt-1.5 w-full rounded-2xl border border-gray-200 bg-slate-50/50 p-3.5 text-xs font-semibold text-navy placeholder:text-gray-400 focus:outline-none focus:border-gold focus:bg-white transition-all shadow-inner"
                     />
                   </div>
+                  <div>
+                    <label className="text-xs font-extrabold text-navy">Flight Details / Train Details <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      placeholder="e.g. BA 304 arriving 14:30 / Eurostar 9014"
+                      value={passenger.flight}
+                      onChange={(e) => setPassenger((p) => ({ ...p, flight: e.target.value }))}
+                      className="mt-1.5 w-full rounded-2xl border border-gray-200 bg-slate-50/50 p-3.5 text-xs font-semibold text-navy placeholder:text-gray-400 focus:outline-none focus:border-gold focus:bg-white transition-all shadow-inner"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-extrabold text-navy">Pick up Address <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      placeholder="Hotel / address / terminal"
+                      value={passenger.pickup}
+                      onChange={(e) => setPassenger((p) => ({ ...p, pickup: e.target.value }))}
+                      className="mt-1.5 w-full rounded-2xl border border-gray-200 bg-slate-50/50 p-3.5 text-xs font-semibold text-navy placeholder:text-gray-400 focus:outline-none focus:border-gold focus:bg-white transition-all shadow-inner"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-extrabold text-navy">Drop off Address <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      placeholder="Hotel / address / terminal"
+                      value={passenger.drop}
+                      onChange={(e) => setPassenger((p) => ({ ...p, drop: e.target.value }))}
+                      className="mt-1.5 w-full rounded-2xl border border-gray-200 bg-slate-50/50 p-3.5 text-xs font-semibold text-navy placeholder:text-gray-400 focus:outline-none focus:border-gold focus:bg-white transition-all shadow-inner"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-extrabold text-navy">Agent Contact Details</label>
+                    <input
+                      type="text"
+                      placeholder="Agent name & phone (optional)"
+                      value={passenger.agentContact}
+                      onChange={(e) => setPassenger((p) => ({ ...p, agentContact: e.target.value }))}
+                      className="mt-1.5 w-full rounded-2xl border border-gray-200 bg-slate-50/50 p-3.5 text-xs font-semibold text-navy placeholder:text-gray-400 focus:outline-none focus:border-gold focus:bg-white transition-all shadow-inner"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-extrabold text-navy">Agent Email Address</label>
+                    <input
+                      type="email"
+                      placeholder="agent@company.com (optional)"
+                      value={passenger.agentEmail}
+                      onChange={(e) => setPassenger((p) => ({ ...p, agentEmail: e.target.value }))}
+                      className="mt-1.5 w-full rounded-2xl border border-gray-200 bg-slate-50/50 p-3.5 text-xs font-semibold text-navy placeholder:text-gray-400 focus:outline-none focus:border-gold focus:bg-white transition-all shadow-inner"
+                    />
+                  </div>
+                  {formError && <p className="text-xs font-bold text-red-600">{formError}</p>}
                 </div>
 
                 <Button
                   onClick={handleContinue}
-                  disabled={!selected || !passenger.name || !passenger.phone}
+                  disabled={!selected}
                   className="mt-4 w-full h-13 rounded-2xl bg-gold hover:bg-gold-light text-navy font-black text-sm shadow-xl shadow-gold/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
                   Proceed to Checkout <IconArrowRight className="h-4 w-4 stroke-[3]" />

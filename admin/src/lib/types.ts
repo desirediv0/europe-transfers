@@ -184,6 +184,9 @@ export interface Booking {
   travelTime?: string;
   pax: number;
   luggageNotes?: string;
+  flightDetails?: string;
+  agentContact?: string;
+  agentEmail?: string;
   price: number;
   currency: string;
   paymentStatus: "PENDING" | "PAID" | "PARTIAL" | "FAILED" | "REFUNDED";

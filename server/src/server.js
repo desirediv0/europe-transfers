@@ -54,6 +54,16 @@ const runB2bUserPatches = async () => {
   await prisma.$executeRawUnsafe(`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "privacyAcceptedAt" TIMESTAMP(3)`);
 };
 
+// Private Transfers bookings: flight/train details, booking-agent contact,
+// and the Razorpay order the booking is being paid through.
+const runBookingPatches = async () => {
+  await prisma.$executeRawUnsafe(`ALTER TABLE "Booking" ADD COLUMN IF NOT EXISTS "flightDetails" TEXT`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE "Booking" ADD COLUMN IF NOT EXISTS "agentContact" TEXT`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE "Booking" ADD COLUMN IF NOT EXISTS "agentEmail" TEXT`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE "Booking" ADD COLUMN IF NOT EXISTS "razorpayOrderId" TEXT`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE "Booking" ADD COLUMN IF NOT EXISTS "amountInr" DECIMAL(10,2)`);
+};
+
 const startServer = async () => {
   try {
     await prisma.$connect();
@@ -61,6 +71,7 @@ const startServer = async () => {
 
     await runSchemaPatches();
     await runB2bUserPatches();
+    await runBookingPatches();
     console.log("Schema patches applied");
 
     app.listen(env.PORT, () => {

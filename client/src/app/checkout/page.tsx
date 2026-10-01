@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,10 +61,15 @@ function CheckoutContent() {
     countryCode: "+39",
     phone: searchParams.get("phone") || "",
     email: searchParams.get("email") || "",
-    pickupAddress: "",
-    dropAddress: "",
+    flightDetails: searchParams.get("flight") || "",
+    pickupAddress: searchParams.get("pickup") || "",
+    dropAddress: searchParams.get("drop") || "",
     luggageNotes: "",
+    agentContact: searchParams.get("agentContact") || "",
+    agentEmail: searchParams.get("agentEmail") || "",
   });
+  // Guards against a double click creating two bookings / Razorpay orders.
+  const payingRef = useRef(false);
 
   const fullPhone = `${form.countryCode}${form.phone.replace(/^\+/, "").replace(/\s/g, "")}`;
 
@@ -73,8 +78,26 @@ function CheckoutContent() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const handlePay = async () => {
+    if (payingRef.current) return;
     if (!form.customerName || !form.phone) {
       toast.error("Name and phone are required");
+      return;
+    }
+    const emailRe = /^[^s@]+@[^s@]+.[^s@]+$/;
+    if (!emailRe.test(form.email.trim())) {
+      toast.error("Please enter a valid passenger email address");
+      return;
+    }
+    if (!form.flightDetails.trim()) {
+      toast.error("Please enter your flight or train details");
+      return;
+    }
+    if (!form.pickupAddress.trim() || !form.dropAddress.trim()) {
+      toast.error("Pick up and drop off addresses are required");
+      return;
+    }
+    if (form.agentEmail.trim() && !emailRe.test(form.agentEmail.trim())) {
+      toast.error("Agent email address is not valid");
       return;
     }
 
@@ -84,6 +107,7 @@ function CheckoutContent() {
       return;
     }
 
+    payingRef.current = true;
     setStep("paying");
     setErrorMessage("");
 
@@ -93,9 +117,12 @@ function CheckoutContent() {
         carTypeId,
         customerName: form.customerName,
         phone: fullPhone,
-        email: form.email || undefined,
-        pickupAddress: form.pickupAddress || undefined,
-        dropAddress: form.dropAddress || undefined,
+        email: form.email.trim(),
+        pickupAddress: form.pickupAddress.trim(),
+        dropAddress: form.dropAddress.trim(),
+        flightDetails: form.flightDetails.trim(),
+        agentContact: form.agentContact.trim() || undefined,
+        agentEmail: form.agentEmail.trim() || undefined,
         travelDate: date,
         travelTime: time,
         pax: parseInt(pax),
@@ -108,7 +135,7 @@ function CheckoutContent() {
         currency: string;
         keyId: string;
         description: string;
-      }>("/payments/create-order", { bookingId: newBooking.id });
+      }>("/payments/booking/create-order", { bookingId: newBooking.id });
 
       await initRazorpay({
         key: orderData.keyId,
@@ -125,7 +152,7 @@ function CheckoutContent() {
         theme: { color: "#C9A227" },
         handler: async (response: RazorpayResponse) => {
           try {
-            const verified = await api.post<Booking>("/payments/verify", {
+            const verified = await api.post<Booking>("/payments/booking/verify", {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
@@ -137,11 +164,14 @@ function CheckoutContent() {
           } catch {
             setBooking({ ...newBooking, paymentStatus: "PENDING" } as Booking);
             setStep("success");
-            toast.success("Booking confirmed! Payment is being verified.");
+            toast.warning("Payment received, verification pending. Please do not pay again.");
+          } finally {
+            payingRef.current = false;
           }
         },
       });
     } catch (err) {
+      payingRef.current = false;
       const msg = err instanceof Error ? err.message : "Payment failed";
       setErrorMessage(msg);
       setStep("failed");
@@ -453,7 +483,7 @@ function CheckoutContent() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-black text-navy">Email Address (for Receipt & Booking Voucher)</Label>
+                    <Label className="text-xs font-black text-navy">Passenger Email Address (for Receipt & Booking Voucher) <span className="text-red-500">*</span></Label>
                     <Input
                       type="email"
                       value={form.email}
@@ -474,22 +504,35 @@ function CheckoutContent() {
                       </div>
                       Chauffeur Directions & Flight Info
                     </h3>
-                    <span className="text-[10px] font-bold text-gray-400">Optional</span>
+                    <span className="text-[10px] font-black text-gold bg-gold/10 px-2 py-0.5 rounded-md border border-gold/20">Required</span>
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-black text-navy">Pickup Location Details / Flight Number</Label>
+                    <Label className="text-xs font-black text-navy">Flight Details / Train Details <span className="text-red-500">*</span></Label>
                     <Input
-                      value={form.pickupAddress}
-                      onChange={(e) => setForm({ ...form, pickupAddress: e.target.value })}
-                      placeholder="e.g. Milan Malpensa Terminal 1, Arrival Hall / Flight LX142"
+                      type="text"
+                      value={form.flightDetails}
+                      onChange={(e) => setForm({ ...form, flightDetails: e.target.value })}
+                      placeholder="e.g. BA 304 arriving 14:30 / Eurostar 9014"
                       disabled={step === "paying"}
                       className="h-11 rounded-xl border-gray-200 bg-slate-50/70 text-xs font-bold text-navy focus:bg-white focus:border-gold transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-black text-navy">Drop-off Destination Address</Label>
+                    <Label className="text-xs font-black text-navy">Pick up Address <span className="text-red-500">*</span></Label>
                     <Input
+                      type="text"
+                      value={form.pickupAddress}
+                      onChange={(e) => setForm({ ...form, pickupAddress: e.target.value })}
+                      placeholder="e.g. Milan Malpensa Terminal 1, Arrival Hall"
+                      disabled={step === "paying"}
+                      className="h-11 rounded-xl border-gray-200 bg-slate-50/70 text-xs font-bold text-navy focus:bg-white focus:border-gold transition-all"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-black text-navy">Drop off Address <span className="text-red-500">*</span></Label>
+                    <Input
+                      type="text"
                       value={form.dropAddress}
                       onChange={(e) => setForm({ ...form, dropAddress: e.target.value })}
                       placeholder="e.g. Hotel Armani, Via Alessandro Manzoni 31, Milan"
@@ -503,6 +546,28 @@ function CheckoutContent() {
                       value={form.luggageNotes}
                       onChange={(e) => setForm({ ...form, luggageNotes: e.target.value })}
                       placeholder="e.g. 2 large suit cases + 1 child seat needed"
+                      disabled={step === "paying"}
+                      className="h-11 rounded-xl border-gray-200 bg-slate-50/70 text-xs font-bold text-navy focus:bg-white focus:border-gold transition-all"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-black text-navy">Agent Contact Details</Label>
+                    <Input
+                      type="text"
+                      value={form.agentContact}
+                      onChange={(e) => setForm({ ...form, agentContact: e.target.value })}
+                      placeholder="Agent name & phone (optional)"
+                      disabled={step === "paying"}
+                      className="h-11 rounded-xl border-gray-200 bg-slate-50/70 text-xs font-bold text-navy focus:bg-white focus:border-gold transition-all"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-black text-navy">Agent Email Address</Label>
+                    <Input
+                      type="email"
+                      value={form.agentEmail}
+                      onChange={(e) => setForm({ ...form, agentEmail: e.target.value })}
+                      placeholder="agent@company.com (optional)"
                       disabled={step === "paying"}
                       className="h-11 rounded-xl border-gray-200 bg-slate-50/70 text-xs font-bold text-navy focus:bg-white focus:border-gold transition-all"
                     />

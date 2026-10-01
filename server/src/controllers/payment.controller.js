@@ -237,6 +237,168 @@ export const verifyPayment = asyncHandler(async (req, res) => {
   return apiResponse(res, 200, "Payment verified successfully", { order });
 });
 
+// ─── Private Transfers booking payments ─────────────────
+// A Private Transfers booking is created first (POST /bookings, priced from
+// the route price table) and then paid here. Razorpay charges in INR, so the
+// booking's EUR price is converted at today's rate, same as the other orders.
+
+const bookingInclude = {
+  route: { include: { fromLocation: true, toLocation: true } },
+  carType: true,
+};
+
+export const createBookingOrder = asyncHandler(async (req, res) => {
+  const { bookingId } = req.body;
+  if (!bookingId) {
+    throw new ApiError(400, "bookingId is required");
+  }
+
+  const booking = await prisma.booking.findUnique({ where: { id: bookingId }, include: bookingInclude });
+  if (!booking) {
+    throw new ApiError(404, "Booking not found");
+  }
+  if (booking.paymentStatus === "PAID") {
+    throw new ApiError(400, "This booking is already paid");
+  }
+  if (booking.bookingStatus === "CANCELLED") {
+    throw new ApiError(400, "This booking was cancelled");
+  }
+
+  const description = `${booking.route.fromLocation.name} to ${booking.route.toLocation.name} - ${booking.carType.name}`;
+
+  // Double-click / retry guard: reuse the Razorpay order already created
+  // for this booking instead of creating another one.
+  if (booking.razorpayOrderId && booking.amountInr != null) {
+    return apiResponse(res, 200, "Order already created", {
+      orderId: booking.razorpayOrderId,
+      amount: Math.round(Number(booking.amountInr) * 100),
+      currency: "INR",
+      keyId: process.env.RAZORPAY_KEY_ID,
+      description,
+    });
+  }
+
+  const rates = await getRates();
+  const amountEur = Number(booking.price);
+  const amountInr = Math.round(amountEur * rates.INR * 100) / 100;
+  const amountInPaise = Math.round(amountInr * 100);
+
+  const razorpayOrder = await razorpay.orders.create({
+    amount: amountInPaise,
+    currency: "INR",
+    receipt: `booking_${booking.id}`,
+    notes: { bookingId: booking.id, customerName: booking.customerName },
+  });
+
+  await prisma.booking.update({
+    where: { id: booking.id },
+    data: { razorpayOrderId: razorpayOrder.id, amountInr },
+  });
+
+  return apiResponse(res, 201, "Order created", {
+    orderId: razorpayOrder.id,
+    amount: amountInPaise,
+    currency: "INR",
+    keyId: process.env.RAZORPAY_KEY_ID,
+    description,
+  });
+});
+
+const detailRow = (label, value) =>
+  value
+    ? `<tr><td style="padding:6px 0;color:#64748b;width:150px;">${label}</td><td style="padding:6px 0;font-weight:bold;">${value}</td></tr>`
+    : "";
+
+export const verifyBookingPayment = asyncHandler(async (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, bookingId } = req.body;
+  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !bookingId) {
+    throw new ApiError(400, "Missing payment verification fields");
+  }
+
+  const booking = await prisma.booking.findUnique({ where: { id: bookingId }, include: bookingInclude });
+  if (!booking) {
+    throw new ApiError(404, "Booking not found");
+  }
+  // The signed Razorpay order must be the one created for THIS booking.
+  if (booking.razorpayOrderId !== razorpay_order_id) {
+    throw new ApiError(400, "Payment does not match this booking");
+  }
+
+  const expected = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+    .update(razorpay_order_id + "|" + razorpay_payment_id)
+    .digest("hex");
+  if (expected !== razorpay_signature) {
+    await prisma.booking.updateMany({
+      where: { id: bookingId, paymentStatus: "PENDING" },
+      data: { paymentStatus: "FAILED" },
+    });
+    throw new ApiError(400, "Payment verification failed");
+  }
+
+  // Idempotent: a repeated verify call never re-processes or re-emails.
+  if (booking.paymentStatus === "PAID") {
+    return apiResponse(res, 200, "Payment already verified", booking);
+  }
+
+  const { count } = await prisma.booking.updateMany({
+    where: { id: bookingId, paymentStatus: { not: "PAID" } },
+    data: { paymentStatus: "PAID", paymentId: razorpay_payment_id, bookingStatus: "CONFIRMED" },
+  });
+  const paid = await prisma.booking.findUnique({ where: { id: bookingId }, include: bookingInclude });
+  if (count === 0) {
+    return apiResponse(res, 200, "Payment already verified", paid);
+  }
+
+  const route = `${paid.route.fromLocation.name} → ${paid.route.toLocation.name}`;
+  const travelDate = new Date(paid.travelDate).toDateString();
+  const summary = `
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      ${detailRow("Route", route)}
+      ${detailRow("Vehicle", paid.carType.name)}
+      ${detailRow("Date / Time", `${travelDate}${paid.travelTime ? " · " + paid.travelTime : ""}`)}
+      ${detailRow("Passengers", String(paid.pax))}
+      ${detailRow("Flight / Train", paid.flightDetails)}
+      ${detailRow("Pickup address", paid.pickupAddress)}
+      ${detailRow("Drop-off address", paid.dropAddress)}
+      ${detailRow("Passenger", paid.customerName)}
+      ${detailRow("Passenger email", paid.email)}
+      ${detailRow("Passenger phone", paid.phone)}
+      ${detailRow("Agent contact", paid.agentContact)}
+      ${detailRow("Agent email", paid.agentEmail)}
+      ${detailRow("Paid", `₹${paid.amountInr ?? ""} (EUR ${paid.price})`)}
+      ${detailRow("Payment ID", razorpay_payment_id)}
+    </table>`;
+  const wrap = (title, intro) => `
+    <div style="font-family:Arial,sans-serif;padding:24px;color:#0B1528;background:#f8fafc;">
+      <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:16px;padding:24px;border:1px solid #e2e8f0;">
+        <h2 style="color:#060C17;margin-top:0;">${title}</h2>${intro}${summary}
+      </div>
+    </div>`;
+
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "info@theeuropetransfers.com";
+    await sendEmail({ to: adminEmail, subject: `Transfer Booking Paid: ${route}`, html: wrap("New paid transfer booking", "") });
+  } catch (err) {
+    console.error("Failed to send admin booking email:", err);
+  }
+  // Passenger gets the confirmation; the booking agent (if given) gets a copy.
+  const recipients = [...new Set([paid.email, paid.agentEmail].filter(Boolean))];
+  for (const to of recipients) {
+    try {
+      await sendEmail({
+        to,
+        subject: `Booking Confirmed - ${route}`,
+        html: wrap("Booking Confirmed!", `<p style="font-size:14px;color:#475569;">Your private transfer payment was received. Our team will share driver details before pickup.</p>`),
+      });
+    } catch (err) {
+      console.error("Failed to send booking confirmation email:", err);
+    }
+  }
+
+  return apiResponse(res, 200, "Payment verified successfully", paid);
+});
+
 export const getOrder = asyncHandler(async (req, res) => {
   const order = await prisma.order.findUnique({
     where: { id: req.params.id },

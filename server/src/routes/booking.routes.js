@@ -29,6 +29,9 @@ const bookingSchema = z.object({
   travelTime: z.string().optional(),
   pax: z.number().int().min(1),
   luggageNotes: z.string().optional(),
+  flightDetails: z.string().max(300).optional(),
+  agentContact: z.string().max(200).optional(),
+  agentEmail: z.string().email().max(150).optional(),
   message: z.string().optional(),
 });
 
