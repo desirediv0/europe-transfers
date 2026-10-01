@@ -18,6 +18,22 @@ const userSelect = {
   isEmailVerified: true,
   rejectionReason: true,
   createdAt: true,
+  companyName: true,
+  businessType: true,
+  companyCountry: true,
+  registrationNumber: true,
+  vatId: true,
+  businessAddress: true,
+  jobTitle: true,
+  contactLocation: true,
+  companyCertUrl: true,
+  vatCertUrl: true,
+  authIdUrl: true,
+  addressProofUrl: true,
+  authorizedConfirmed: true,
+  commsConsent: true,
+  termsAcceptedAt: true,
+  privacyAcceptedAt: true,
 };
 
 export const getUsers = asyncHandler(async (req, res) => {

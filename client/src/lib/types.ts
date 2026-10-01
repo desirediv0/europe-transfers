@@ -7,6 +7,11 @@ export interface User {
   idDocumentStatus: "PENDING" | "VERIFIED" | "REJECTED";
   isEmailVerified: boolean;
   rejectionReason?: string;
+  companyName?: string | null;
+  companyCertUrl?: string | null;
+  vatCertUrl?: string | null;
+  authIdUrl?: string | null;
+  addressProofUrl?: string | null;
 }
 
 export interface Country {

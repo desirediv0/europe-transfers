@@ -1,4 +1,6 @@
 import bcrypt from "bcryptjs";
+import { randomUUID } from "crypto";
+import { detectFileType } from "../utils/fileSignature.js";
 import prisma from "../config/db.js";
 import apiResponse from "../utils/apiResponse.js";
 import ApiError from "../utils/apiError.js";
@@ -19,17 +21,47 @@ const userSelect = {
   idDocumentStatus: true,
   isEmailVerified: true,
   rejectionReason: true,
+  companyName: true,
+  businessType: true,
+  companyCountry: true,
+  registrationNumber: true,
+  vatId: true,
+  businessAddress: true,
+  jobTitle: true,
+  contactLocation: true,
+  companyCertUrl: true,
+  vatCertUrl: true,
+  authIdUrl: true,
+  addressProofUrl: true,
 };
 
 // ─── Register ────────────────────────────────────────────
 export const register = asyncHandler(async (req, res) => {
-  const { name, email, phone, password, confirmPassword } = req.body;
+  const {
+    name,
+    email,
+    phone,
+    password,
+    confirmPassword,
+    companyName,
+    businessType,
+    companyCountry,
+    registrationNumber,
+    vatId,
+    businessAddress,
+    jobTitle,
+    contactLocation,
+    confirmAuthorized,
+    acceptTerms,
+    acceptPrivacy,
+    commsConsent,
+  } = req.body;
 
   if (password !== confirmPassword) {
     throw new ApiError(400, "Passwords do not match");
   }
 
-  const existingEmail = await prisma.user.findUnique({ where: { email } });
+  const existingEmail = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
   if (existingEmail) {
     throw new ApiError(400, "Email already registered");
   }
@@ -42,7 +74,26 @@ export const register = asyncHandler(async (req, res) => {
   const passwordHash = await bcrypt.hash(password, 12);
 
   const user = await prisma.user.create({
-    data: { name, email, phone, passwordHash },
+    data: {
+      name,
+      email: email.toLowerCase(),
+      phone,
+      passwordHash,
+      companyName,
+      businessType,
+      companyCountry,
+      registrationNumber,
+      vatId: vatId || null,
+      businessAddress,
+      jobTitle,
+      contactLocation,
+      authorizedConfirmed: confirmAuthorized === true,
+      commsConsent: commsConsent === true,
+      // Consent is recorded with a timestamp, not just a boolean, so there
+      // is proof of when it was given.
+      termsAcceptedAt: acceptTerms === true ? new Date() : null,
+      privacyAcceptedAt: acceptPrivacy === true ? new Date() : null,
+    },
     select: userSelect,
   });
 
@@ -298,6 +349,80 @@ export const uploadId = asyncHandler(async (req, res) => {
   }
 
   return apiResponse(res, 200, "ID document uploaded. Verification will be completed within 12-24 hours.", user);
+});
+
+// ─── Upload compliance documents (B2B registration) ──────
+const DOC_FIELDS = [
+  { field: "companyCert", column: "companyCertUrl", label: "company-registration-certificate" },
+  { field: "vatCert", column: "vatCertUrl", label: "vat-certificate" },
+  { field: "authId", column: "authIdUrl", label: "authorized-person-id" },
+  { field: "addressProof", column: "addressProofUrl", label: "proof-of-address" },
+];
+
+export const uploadDocuments = asyncHandler(async (req, res) => {
+  const files = req.files || {};
+  const current = await prisma.user.findUnique({ where: { id: req.user.id } });
+
+  // Company certificate and authorized-person ID are mandatory (either
+  // uploaded now or already on file from an earlier upload); VAT certificate
+  // and proof of address are optional.
+  if (!files.companyCert?.[0] && !current.companyCertUrl) {
+    throw new ApiError(400, "Company Registration Certificate is required.");
+  }
+  if (!files.authId?.[0] && !current.authIdUrl) {
+    throw new ApiError(400, "Authorized Person ID is required.");
+  }
+
+  const data = {};
+  for (const { field, column, label } of DOC_FIELDS) {
+    const file = files[field]?.[0];
+    if (!file) continue;
+    // Trust the file's real bytes, not the browser-supplied type or name.
+    const detected = detectFileType(file.buffer);
+    if (!detected) {
+      throw new ApiError(400, `${label.replace(/-/g, " ")}: unsupported or corrupted file. Use PDF, JPG, PNG or WEBP.`);
+    }
+    // Server-generated key (no user-supplied file name in the path).
+    const key = `kyc/${req.user.id}/${randomUUID()}-${label}.${detected.ext}`;
+    data[column] = await uploadToR2({ ...file, mimetype: detected.mime }, key);
+  }
+
+  const companyCertUrl = data.companyCertUrl || current.companyCertUrl;
+  const user = await prisma.user.update({
+    where: { id: req.user.id },
+    data: {
+      ...data,
+      // The platform's existing verification gate (checkout, bookings) keys
+      // off idDocumentUrl/idDocumentStatus, so the company certificate
+      // doubles as the primary document it reviews.
+      idDocumentUrl: companyCertUrl,
+      idDocumentStatus: "PENDING",
+      rejectionReason: null,
+    },
+    select: userSelect,
+  });
+
+  const adminEmails = await prisma.admin.findMany({ select: { email: true } });
+  for (const admin of adminEmails) {
+    await sendEmail({
+      to: admin.email,
+      subject: `New Business Verification Request — ${user.companyName || user.name}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:20px;">
+          <h2 style="color:#1a1a2e;">New Business Verification Request</h2>
+          <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+            <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">Company</td><td style="padding:8px;border-bottom:1px solid #eee;">${user.companyName || "-"}</td></tr>
+            <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">Contact</td><td style="padding:8px;border-bottom:1px solid #eee;">${user.name}</td></tr>
+            <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">Email</td><td style="padding:8px;border-bottom:1px solid #eee;">${user.email}</td></tr>
+            <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">Phone</td><td style="padding:8px;border-bottom:1px solid #eee;">${user.phone}</td></tr>
+          </table>
+          <p>Please review the company details and documents in the admin panel.</p>
+        </div>
+      `,
+    });
+  }
+
+  return apiResponse(res, 200, "Documents uploaded. Verification will be completed within 12-24 hours.", user);
 });
 
 // ─── Refresh Token ───────────────────────────────────────

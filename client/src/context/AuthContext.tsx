@@ -5,6 +5,26 @@ import { api } from "@/lib/api";
 import env from "@/config/env.config";
 import type { User } from "@/lib/types";
 
+export interface RegisterData {
+  name: string;
+  email: string;
+  phone: string;
+  jobTitle: string;
+  contactLocation: string;
+  password: string;
+  confirmPassword: string;
+  companyName: string;
+  businessType: string;
+  companyCountry: string;
+  registrationNumber: string;
+  vatId: string;
+  businessAddress: string;
+  confirmAuthorized: boolean;
+  acceptTerms: boolean;
+  acceptPrivacy: boolean;
+  commsConsent: boolean;
+}
+
 export type VerificationStep = "UPLOAD_ID" | "PENDING_REVIEW" | "ID_REJECTED" | "VERIFIED";
 
 interface AuthContextType {
@@ -12,10 +32,11 @@ interface AuthContextType {
   loading: boolean;
   verificationStep: VerificationStep | null;
   login: (email: string, code: string) => Promise<{ verificationStep: VerificationStep; user: User }>;
-  register: (data: { name: string; email: string; phone: string; password: string; confirmPassword: string }) => Promise<void>;
+  register: (data: RegisterData) => Promise<void>;
   requestOtp: (email: string) => Promise<void>;
   verifyOtp: (email: string, code: string) => Promise<{ verificationStep: VerificationStep; user: User }>;
   uploadId: (file: File) => Promise<void>;
+  uploadDocuments: (form: FormData) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -94,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return data;
   };
 
-  const register = async (formData: { name: string; email: string; phone: string; password: string; confirmPassword: string }) => {
+  const register = async (formData: RegisterData) => {
     await api.post("/auth/register", formData);
   };
 
@@ -117,6 +138,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setVerificationStep("PENDING_REVIEW");
   };
 
+  const uploadDocuments = async (form: FormData) => {
+    const data = await api.post<User>("/auth/upload-documents", form);
+    setUser(data);
+    setVerificationStep("PENDING_REVIEW");
+  };
+
   const logout = async () => {
     await api.post("/auth/logout");
     setUser(null);
@@ -124,7 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, verificationStep, login, register, requestOtp, verifyOtp, uploadId, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, verificationStep, login, register, requestOtp, verifyOtp, uploadId, uploadDocuments, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

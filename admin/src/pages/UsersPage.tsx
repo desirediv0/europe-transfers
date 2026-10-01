@@ -104,7 +104,10 @@ export default function UsersPage() {
                 <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No users found</TableCell></TableRow>
               ) : items.map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.name}</TableCell>
+                  <TableCell className="font-medium">
+                    {item.name}
+                    {item.companyName && <p className="text-xs font-normal text-muted-foreground">{item.companyName}</p>}
+                  </TableCell>
                   <TableCell>{item.email}</TableCell>
                   <TableCell>{item.phone}</TableCell>
                   <TableCell>
@@ -171,9 +174,57 @@ export default function UsersPage() {
 
       {/* View ID Document Dialog */}
       <Dialog open={!!viewUser} onOpenChange={() => setViewUser(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader><DialogTitle>ID Document — {viewUser?.name}</DialogTitle></DialogHeader>
-          {viewUser?.idDocumentUrl ? (
+        <DialogContent className="max-w-2xl max-h-[88vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>{viewUser?.companyName ? "Business Details" : "ID Document"} — {viewUser?.companyName || viewUser?.name}</DialogTitle></DialogHeader>
+
+          {viewUser?.companyName && (
+            <div className="space-y-3 text-sm">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-lg border p-3">
+                <p className="col-span-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Company</p>
+                <p><span className="text-muted-foreground">Name:</span> {viewUser.companyName}</p>
+                <p><span className="text-muted-foreground">Type:</span> {viewUser.businessType || "-"}</p>
+                <p><span className="text-muted-foreground">Country:</span> {viewUser.companyCountry || "-"}</p>
+                <p><span className="text-muted-foreground">Reg. No:</span> {viewUser.registrationNumber || "-"}</p>
+                <p><span className="text-muted-foreground">VAT / Tax ID:</span> {viewUser.vatId || "-"}</p>
+                <p className="col-span-2"><span className="text-muted-foreground">Address:</span> {viewUser.businessAddress || "-"}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-lg border p-3">
+                <p className="col-span-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Primary Contact</p>
+                <p><span className="text-muted-foreground">Name:</span> {viewUser.name}</p>
+                <p><span className="text-muted-foreground">Title:</span> {viewUser.jobTitle || "-"}</p>
+                <p><span className="text-muted-foreground">Email:</span> {viewUser.email}</p>
+                <p><span className="text-muted-foreground">Phone:</span> {viewUser.phone}</p>
+                <p className="col-span-2"><span className="text-muted-foreground">Country / City:</span> {viewUser.contactLocation || "-"}</p>
+              </div>
+              <div className="rounded-lg border p-3 space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Consents</p>
+                <p>Authorized to register this business: <strong>{viewUser.authorizedConfirmed ? "Yes" : "No"}</strong></p>
+                <p>Terms &amp; Conditions: <strong>{viewUser.termsAcceptedAt ? new Date(viewUser.termsAcceptedAt).toLocaleString() : "Not accepted"}</strong></p>
+                <p>Privacy Policy: <strong>{viewUser.privacyAcceptedAt ? new Date(viewUser.privacyAcceptedAt).toLocaleString() : "Not accepted"}</strong></p>
+                <p>Service communications: <strong>{viewUser.commsConsent ? "Consented" : "No"}</strong></p>
+              </div>
+              <div className="rounded-lg border p-3 space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Verification Documents</p>
+                {[
+                  { label: "Company Registration Certificate", url: viewUser.companyCertUrl, required: true },
+                  { label: "Authorized Person ID", url: viewUser.authIdUrl, required: true },
+                  { label: "VAT Certificate", url: viewUser.vatCertUrl, required: false },
+                  { label: "Proof of Business Address", url: viewUser.addressProofUrl, required: false },
+                ].map((d) => (
+                  <div key={d.label} className="flex items-center justify-between gap-3">
+                    <span>{d.label}{d.required ? " *" : ""}</span>
+                    {d.url ? (
+                      <a href={d.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline text-sm">Open</a>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">{d.required ? "Missing" : "Not provided"}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!viewUser?.companyName && (viewUser?.idDocumentUrl ? (
             <div className="flex justify-center bg-gray-100 rounded-lg p-4">
               <img
                 src={viewUser.idDocumentUrl}
@@ -200,7 +251,7 @@ export default function UsersPage() {
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">No document uploaded</div>
-          )}
+          ))}
           <div className="flex justify-center gap-2">
             <Button variant="outline" onClick={() => setViewUser(null)}>Close</Button>
             {viewUser?.idDocumentUrl && (

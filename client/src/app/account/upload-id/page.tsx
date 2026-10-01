@@ -1,16 +1,13 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { KycDocumentsForm } from "@/components/KycDocumentsForm";
 import { useAuth } from "@/context/AuthContext";
 import {
-  IconUpload,
-  IconX,
-  IconLoader2,
   IconArrowLeft,
   IconCheck,
   IconClock,
@@ -21,67 +18,9 @@ import {
 } from "@tabler/icons-react";
 
 export default function UploadIdPage() {
-  const { uploadId, verificationStep } = useAuth();
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { verificationStep } = useAuth();
   const [uploaded, setUploaded] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0];
-    if (!selected) return;
-
-    if (!selected.type.match(/^image\/(jpeg|png|webp|gif)$/)) {
-      toast.error("Invalid file type. Only JPEG, PNG, WEBP, and GIF are allowed.");
-      return;
-    }
-
-    if (selected.size > 5 * 1024 * 1024) {
-      toast.error("File size must be less than 5MB");
-      return;
-    }
-
-    setFile(selected);
-    const reader = new FileReader();
-    reader.onload = (e) => setPreview(e.target?.result as string);
-    reader.readAsDataURL(selected);
-  }, []);
-
-  const handleUpload = async () => {
-    if (!file) {
-      toast.error("Please select a document image to upload");
-      return;
-    }
-    setLoading(true);
-    try {
-      await uploadId(file);
-      setUploaded(true);
-      toast.success("Document uploaded successfully! Verification completes within 12-24 hours.");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragActive(false);
-    const dropped = e.dataTransfer.files?.[0];
-    if (dropped && dropped.type.match(/^image\/(jpeg|png|webp|gif)$/)) {
-      if (dropped.size > 5 * 1024 * 1024) {
-        toast.error("File size must be less than 5MB");
-        return;
-      }
-      setFile(dropped);
-      const reader = new FileReader();
-      reader.onload = (ev) => setPreview(ev.target?.result as string);
-      reader.readAsDataURL(dropped);
-    }
-  }, []);
 
   // Upload success screen / Pending Review
   if (uploaded || verificationStep === "PENDING_REVIEW") {
@@ -182,64 +121,13 @@ export default function UploadIdPage() {
             </div>
 
             <span className="text-[10px] font-black text-gold uppercase tracking-widest">Client Verification</span>
-            <h2 className="text-2xl font-black text-navy mt-1">Upload Government ID</h2>
+            <h2 className="text-2xl font-black text-navy mt-1">Upload Verification Documents</h2>
             <p className="text-xs text-gray-500 mt-1">
-              Please upload a clear photo of your passport, national identity card, or driving license.
+              Upload your company registration certificate and the authorized person&apos;s ID (VAT certificate and proof of address are optional).
             </p>
           </div>
 
-          <div className="space-y-4">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-
-            {!preview ? (
-              <div
-                onDrop={handleDrop}
-                onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-                onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
-                onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-all ${dragActive ? "border-gold bg-gold/10 scale-102" : "border-gray-300 hover:border-gold hover:bg-slate-50"
-                  }`}
-              >
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gold/15 text-gold mx-auto mb-4">
-                  <IconUpload className="h-8 w-8" />
-                </div>
-                <p className="text-sm font-black text-navy">Click or Drag & Drop Passport / ID File</p>
-                <p className="text-xs text-gray-400 mt-1">Upload clear image (JPG, PNG, WEBP max 5MB)</p>
-              </div>
-            ) : (
-              <div className="relative rounded-3xl overflow-hidden border border-gray-200 bg-slate-100 p-3 text-center">
-                <Image src={preview} alt="ID Preview" width={400} height={300} unoptimized className="h-52 w-full object-contain rounded-2xl" />
-                <button
-                  onClick={() => { setFile(null); setPreview(null); }}
-                  className="absolute top-4 right-4 bg-navy/80 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors shadow-md"
-                >
-                  <IconX className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-
-            <Button
-              disabled={!file || loading}
-              onClick={handleUpload}
-              className="w-full h-12 rounded-xl bg-gold hover:bg-gold-light text-navy font-black text-xs shadow-lg shadow-gold/20 cursor-pointer disabled:opacity-50"
-            >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <IconLoader2 className="h-4 w-4 animate-spin" /> Submitting Document...
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <IconCheck className="h-4 w-4" /> Submit ID for Verification
-                </span>
-              )}
-            </Button>
-          </div>
+          <KycDocumentsForm onUploaded={() => setUploaded(true)} />
 
           <div className="pt-4 border-t border-gray-100 flex items-center justify-between text-[11px] font-semibold text-gray-400">
             <span className="flex items-center gap-1">

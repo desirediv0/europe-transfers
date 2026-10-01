@@ -63,6 +63,24 @@ model User {
   idDocumentStatus IdDocumentStatus  @default(PENDING)
   isEmailVerified  Boolean          @default(false)
   rejectionReason  String?
+  // B2B company registration + compliance (all optional so existing
+  // individual accounts keep working)
+  companyName         String?
+  businessType        String?
+  companyCountry      String?
+  registrationNumber  String?
+  vatId               String?
+  businessAddress     String?
+  jobTitle            String?
+  contactLocation     String?
+  companyCertUrl      String?
+  vatCertUrl          String?
+  authIdUrl           String?
+  addressProofUrl     String?
+  authorizedConfirmed Boolean   @default(false)
+  commsConsent        Boolean   @default(false)
+  termsAcceptedAt     DateTime?
+  privacyAcceptedAt   DateTime?
   otps             Otp[]
   orders           Order[]
   createdAt        DateTime         @default(now())

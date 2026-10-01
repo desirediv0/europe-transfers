@@ -15,6 +15,22 @@ export interface User {
   isEmailVerified: boolean;
   rejectionReason?: string;
   createdAt: string;
+  companyName?: string | null;
+  businessType?: string | null;
+  companyCountry?: string | null;
+  registrationNumber?: string | null;
+  vatId?: string | null;
+  businessAddress?: string | null;
+  jobTitle?: string | null;
+  contactLocation?: string | null;
+  companyCertUrl?: string | null;
+  vatCertUrl?: string | null;
+  authIdUrl?: string | null;
+  addressProofUrl?: string | null;
+  authorizedConfirmed?: boolean;
+  commsConsent?: boolean;
+  termsAcceptedAt?: string | null;
+  privacyAcceptedAt?: string | null;
 }
 
 export interface Country {
