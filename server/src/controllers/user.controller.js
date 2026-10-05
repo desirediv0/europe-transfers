@@ -87,6 +87,7 @@ export const verifyUserDocument = asyncHandler(async (req, res) => {
   // Send email notification to user
   if (status === "VERIFIED") {
     await sendEmail({
+      category: "registration",
       to: user.email,
       subject: "ID Verified Successfully — Europe Transfers",
       html: `
@@ -105,6 +106,7 @@ export const verifyUserDocument = asyncHandler(async (req, res) => {
     });
   } else if (status === "REJECTED") {
     await sendEmail({
+      category: "registration",
       to: user.email,
       subject: "ID Verification Rejected — Europe Transfers",
       html: `

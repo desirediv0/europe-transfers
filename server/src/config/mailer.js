@@ -11,9 +11,12 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendEmail = async ({ to, subject, html }) => {
+// category "registration" sends from info@; everything else (bookings, payments, enquiries) from sales@
+export const sendEmail = async ({ to, subject, html, category }) => {
+  const isRegistration = category === "registration";
   return transporter.sendMail({
-    from: env.MAIL_FROM,
+    from: isRegistration ? env.REGISTRATION_MAIL_FROM : env.MAIL_FROM,
+    replyTo: isRegistration ? env.REGISTRATION_EMAIL : env.SALES_EMAIL,
     to,
     subject,
     html,

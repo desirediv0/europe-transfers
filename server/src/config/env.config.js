@@ -11,6 +11,10 @@ if (missing.length > 0) {
   throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
 }
 
+const defaultSalesEmail = process.env.SALES_EMAIL || "sales@theeuropetransfers.com";
+const defaultRegistrationEmail = process.env.REGISTRATION_EMAIL || "info@theeuropetransfers.com";
+const defaultAdminEmail = process.env.ADMIN_EMAIL || defaultSalesEmail;
+
 const env = Object.freeze({
   PORT: parseInt(process.env.PORT, 10) || 4000,
   NODE_ENV: process.env.NODE_ENV || "development",
@@ -36,7 +40,11 @@ const env = Object.freeze({
   BREVO_SMTP_PORT: parseInt(process.env.BREVO_SMTP_PORT, 10) || 587,
   BREVO_SMTP_USER: process.env.BREVO_SMTP_USER || "",
   BREVO_SMTP_PASS: process.env.BREVO_SMTP_PASS || "",
-  MAIL_FROM: process.env.MAIL_FROM || "Europe Transfers <no-reply@europetransfers.com>",
+  MAIL_FROM: process.env.MAIL_FROM || `Europe Transfers <${defaultSalesEmail}>`,
+  REGISTRATION_MAIL_FROM: process.env.REGISTRATION_MAIL_FROM || `Europe Transfers <${defaultRegistrationEmail}>`,
+  SALES_EMAIL: process.env.SALES_EMAIL || defaultSalesEmail,
+  REGISTRATION_EMAIL: process.env.REGISTRATION_EMAIL || defaultRegistrationEmail,
+  ADMIN_EMAIL: process.env.ADMIN_EMAIL || defaultAdminEmail,
 
   OTP_EXPIRES_MIN: parseInt(process.env.OTP_EXPIRES_MIN, 10) || 5,
 });

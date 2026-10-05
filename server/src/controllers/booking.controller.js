@@ -1,9 +1,10 @@
 import prisma from "../config/db.js";
+import env from "../config/env.config.js";
+import env from "../config/env.config.js";
 import apiResponse from "../utils/apiResponse.js";
 import ApiError from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { sendEmail } from "../config/mailer.js";
-
 export const getMyBookings = asyncHandler(async (req, res) => {
   const phone = req.user.phone;
   const email = req.user.email;
@@ -227,7 +228,7 @@ export const cancelBooking = asyncHandler(async (req, res) => {
 
   // Send Email Notification to Admin
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "info@theeuropetransfers.com";
+    const adminEmail = env.ADMIN_EMAIL || env.SALES_EMAIL;
     await sendEmail({
       to: adminEmail,
       subject: `🚨 Booking Cancelled #${updated.id} - ${updated.customerName}`,

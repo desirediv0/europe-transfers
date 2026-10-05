@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
 import { detectFileType } from "../utils/fileSignature.js";
 import prisma from "../config/db.js";
+import env from "../config/env.config.js";
 import apiResponse from "../utils/apiResponse.js";
 import ApiError from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -106,6 +107,7 @@ export const register = asyncHandler(async (req, res) => {
   });
 
   await sendEmail({
+    category: "registration",
     to: email,
     subject: "Verify Your Email — Europe Transfers",
     html: `
@@ -146,6 +148,7 @@ export const requestOtp = asyncHandler(async (req, res) => {
   });
 
   await sendEmail({
+    category: "registration",
     to: email,
     subject: "Your Europe Transfers Login Code",
     html: `
@@ -329,9 +332,15 @@ export const uploadId = asyncHandler(async (req, res) => {
     select: { email: true },
   });
 
-  for (const admin of adminEmails) {
+  const registrationRecipients = [
+    env.REGISTRATION_EMAIL,
+    ...adminEmails.map((admin) => admin.email).filter(Boolean),
+  ].filter((email, index, array) => email && array.indexOf(email) === index);
+
+  for (const recipient of registrationRecipients) {
     await sendEmail({
-      to: admin.email,
+      category: "registration",
+      to: recipient,
       subject: `New ID Verification Request — ${user.name}`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:20px;">
@@ -403,9 +412,15 @@ export const uploadDocuments = asyncHandler(async (req, res) => {
   });
 
   const adminEmails = await prisma.admin.findMany({ select: { email: true } });
-  for (const admin of adminEmails) {
+  const registrationRecipients = [
+    env.REGISTRATION_EMAIL,
+    ...adminEmails.map((admin) => admin.email).filter(Boolean),
+  ].filter((email, index, array) => email && array.indexOf(email) === index);
+
+  for (const recipient of registrationRecipients) {
     await sendEmail({
-      to: admin.email,
+      category: "registration",
+      to: recipient,
       subject: `New Business Verification Request — ${user.companyName || user.name}`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:20px;">

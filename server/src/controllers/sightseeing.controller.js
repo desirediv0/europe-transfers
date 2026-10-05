@@ -1,4 +1,5 @@
 import prisma from "../config/db.js";
+import env from "../config/env.config.js";
 import apiResponse from "../utils/apiResponse.js";
 import ApiError from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -239,7 +240,7 @@ export const submitSightseeingEnquiry = asyncHandler(async (req, res) => {
 
   const priceInr = await priceToInrDisplay(priceDisplay);
 
-  const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "info@theeuropetransfers.com";
+  const adminEmail = env.ADMIN_EMAIL || env.SALES_EMAIL;
   try {
     await sendEmail({
       to: adminEmail,

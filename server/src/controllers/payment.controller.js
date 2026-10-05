@@ -1,6 +1,7 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import prisma from "../config/db.js";
+import env from "../config/env.config.js";
 import apiResponse from "../utils/apiResponse.js";
 import ApiError from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -185,7 +186,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
   const order = await prisma.order.findUnique({ where: { id: orderId } });
 
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "info@theeuropetransfers.com";
+    const adminEmail = env.ADMIN_EMAIL || env.SALES_EMAIL;
     await sendEmail({
       to: adminEmail,
       subject: `Payment Received: ${order.productName}`,
@@ -377,7 +378,7 @@ export const verifyBookingPayment = asyncHandler(async (req, res) => {
     </div>`;
 
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || process.env.BREVO_SMTP_USER || "info@theeuropetransfers.com";
+    const adminEmail = env.ADMIN_EMAIL || env.SALES_EMAIL;
     await sendEmail({ to: adminEmail, subject: `Transfer Booking Paid: ${route}`, html: wrap("New paid transfer booking", "") });
   } catch (err) {
     console.error("Failed to send admin booking email:", err);

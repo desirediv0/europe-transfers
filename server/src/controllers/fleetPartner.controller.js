@@ -4,6 +4,7 @@ import ApiError from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { uploadToR2, deleteFromR2 } from "../config/r2.js";
 import { sendEmail } from "../config/mailer.js";
+import env from "../config/env.config.js";
 
 const paginateArgs = (page = 1, limit = 20) => ({ skip: (page - 1) * limit, take: limit });
 
@@ -167,10 +168,14 @@ export const submitApplication = asyncHandler(async (req, res) => {
       <div>${imagesHtml}</div>
     </div>`;
 
+    const recipients = [env.REGISTRATION_EMAIL, ...admins.map((a) => a.email)].filter(
+      (email, i, arr) => email && arr.indexOf(email) === i
+    );
+
     await Promise.allSettled(
-      admins.map((admin) =>
-        sendEmail({ to: admin.email, subject: `New Fleet Partner Application — ${application.name}`, html: adminHtml }).catch((err) =>
-          console.error(`Failed to send fleet partner email to ${admin.email}:`, err)
+      recipients.map((to) =>
+        sendEmail({ category: "registration", to, subject: `New Fleet Partner Application — ${application.name}`, html: adminHtml }).catch((err) =>
+          console.error(`Failed to send fleet partner email to ${to}:`, err)
         )
       )
     );
@@ -189,6 +194,7 @@ export const submitApplication = asyncHandler(async (req, res) => {
     </div>`;
 
     await sendEmail({
+      category: "registration",
       to: application.email,
       subject: "Your Europe Transfers Fleet Partner Application Has Been Received",
       html: applicantHtml,
