@@ -1,6 +1,5 @@
 import prisma from "../config/db.js";
 import env from "../config/env.config.js";
-import env from "../config/env.config.js";
 import apiResponse from "../utils/apiResponse.js";
 import ApiError from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
