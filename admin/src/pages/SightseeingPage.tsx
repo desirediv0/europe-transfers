@@ -1106,10 +1106,11 @@ export default function SightseeingPage() {
                   />
                 </div>
                 <div>
+                  <label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Adult 18+ price (€)</label>
                   <Input
                     type="number"
                     step="0.01"
-                    placeholder="Price (€)"
+                    placeholder="Adult price (€)"
                     value={newOptPrice}
                     onChange={(e) => setNewOptPrice(e.target.value)}
                     className="h-9 text-xs font-bold"
@@ -1132,9 +1133,9 @@ export default function SightseeingPage() {
                 <p className="sm:col-span-3 text-[11px] font-semibold text-slate-500">
                   Optional age-wise prices for the option being added (€ per person). Leave blank to keep this option adult-only. Adult 18+, Youth 12-17, Child 2-11, Infant under 2 (blank Infant = free).
                 </p>
-                <Input type="number" step="0.01" placeholder="Youth 12-17 (€)" value={newOptYouth} onChange={(e) => setNewOptYouth(e.target.value)} className="h-9 text-xs font-bold" />
-                <Input type="number" step="0.01" placeholder="Child 2-11 (€)" value={newOptChild} onChange={(e) => setNewOptChild(e.target.value)} className="h-9 text-xs font-bold" />
-                <Input type="number" step="0.01" placeholder="Infant <2 (€, blank = free)" value={newOptInfant} onChange={(e) => setNewOptInfant(e.target.value)} className="h-9 text-xs font-bold" />
+                <div><label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Youth 12-17 price (€)</label><Input type="number" step="0.01" placeholder="Youth 12-17 (€)" value={newOptYouth} onChange={(e) => setNewOptYouth(e.target.value)} className="h-9 text-xs font-bold" /></div>
+                <div><label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Child 2-11 price (€)</label><Input type="number" step="0.01" placeholder="Child 2-11 (€)" value={newOptChild} onChange={(e) => setNewOptChild(e.target.value)} className="h-9 text-xs font-bold" /></div>
+                <div><label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Infant under 2 price (€)</label><Input type="number" step="0.01" placeholder="Infant <2 (€, blank = free)" value={newOptInfant} onChange={(e) => setNewOptInfant(e.target.value)} className="h-9 text-xs font-bold" /></div>
               </div>
 
               {/* List of Added Options */}
@@ -1150,14 +1151,14 @@ export default function SightseeingPage() {
                             className="h-8 text-xs font-bold sm:col-span-2"
                             placeholder="Option Name"
                           />
-                          <Input
+                          <div><label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Adult 18+ price (€)</label><Input
                             type="number"
                             step="0.01"
                             value={editingOptionData.price}
                             onChange={(e) => setEditingOptionData({ ...editingOptionData, price: Number(e.target.value) })}
                             className="h-8 text-xs font-bold"
                             placeholder="Price"
-                          />
+                          /></div>
                           <div className="flex items-center gap-1 justify-end">
                             <Button type="button" size="sm" onClick={() => saveEditOption(idx)} className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 font-bold">
                               <IconCheck className="h-3.5 w-3.5 mr-1" /> Save
@@ -1167,9 +1168,12 @@ export default function SightseeingPage() {
                             </Button>
                           </div>
                           <div className="sm:col-span-4 grid grid-cols-3 gap-2">
-                            <Input type="number" step="0.01" value={editingOptionData.youthPrice ?? ""} onChange={(e) => setEditingOptionData({ ...editingOptionData, youthPrice: e.target.value === "" ? undefined : Number(e.target.value) })} className="h-8 text-xs font-bold" placeholder="Youth 12-17 (€)" />
-                            <Input type="number" step="0.01" value={editingOptionData.childPrice ?? ""} onChange={(e) => setEditingOptionData({ ...editingOptionData, childPrice: e.target.value === "" ? undefined : Number(e.target.value) })} className="h-8 text-xs font-bold" placeholder="Child 2-11 (€)" />
-                            <Input type="number" step="0.01" value={editingOptionData.infantPrice ?? ""} onChange={(e) => setEditingOptionData({ ...editingOptionData, infantPrice: e.target.value === "" ? undefined : Number(e.target.value) })} className="h-8 text-xs font-bold" placeholder="Infant <2 (€)" />
+                            <div><label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Youth 12-17 price (€)</label><Input type="number" step="0.01" value={editingOptionData.youthPrice ?? ""} onChange={(e) => setEditingOptionData({ ...editingOptionData, youthPrice: e.target.value === "" ? undefined : Number(e.target.value) })} className="h-8 text-xs font-bold" placeholder="Youth 12-17 (€)" /></div>
+                            <div><label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Child 2-11 price (€)</label><Input type="number" step="0.01" value={editingOptionData.childPrice ?? ""} onChange={(e) => setEditingOptionData({ ...editingOptionData, childPrice: e.target.value === "" ? undefined : Number(e.target.value) })} className="h-8 text-xs font-bold" placeholder="Child 2-11 (€)" /></div>
+                            <div><label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Infant under 2 price (€)</label><Input type="number" step="0.01" value={editingOptionData.infantPrice ?? ""} onChange={(e) => setEditingOptionData({ ...editingOptionData, infantPrice: e.target.value === "" ? undefined : Number(e.target.value) })} className="h-8 text-xs font-bold" placeholder="Infant <2 (€)" /></div>
+                            <p className="col-span-3 text-[11px] font-semibold text-slate-500">
+                              The "Price" box above is the Adult (18+) price. Leave Youth/Child blank to charge the adult price; leave Infant blank for Free. Click the green Save, then save the tour with the main Update button at the bottom.
+                            </p>
                           </div>
                         </div>
                       ) : (
