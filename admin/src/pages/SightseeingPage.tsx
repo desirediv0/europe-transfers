@@ -349,6 +349,19 @@ export default function SightseeingPage() {
     setNewOptYouth("");
     setNewOptInfant("");
   };
+  // Inline price edit: each age price can be typed straight into the option
+  // row. Blank youth/child/infant clears that price (adult price / free).
+  const updateOptionPrice = (
+    idx: number,
+    key: "price" | "youthPrice" | "childPrice" | "infantPrice",
+    value: string
+  ) => {
+    setOptionsList((list) =>
+      list.map((o, i) =>
+        i !== idx ? o : key === "price" ? { ...o, price: Number(value) || 0 } : { ...o, [key]: optPrice(value) }
+      )
+    );
+  };
   const removeOption = (idx: number) => {
     setOptionsList(optionsList.filter((_, i) => i !== idx));
     if (editingOptionIndex === idx) setEditingOptionIndex(null);
@@ -1177,6 +1190,7 @@ export default function SightseeingPage() {
                           </div>
                         </div>
                       ) : (
+                        <>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <span className="font-extrabold text-[#1B2A4A] text-sm">{opt.name}</span>
@@ -1242,6 +1256,13 @@ export default function SightseeingPage() {
                             </Button>
                           </div>
                         </div>
+                        <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 border-t border-slate-100 pt-3">
+                          <div><label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Adult 18+ (€)</label><Input type="number" step="0.01" min="0" value={opt.price ?? ""} onChange={(e) => updateOptionPrice(idx, "price", e.target.value)} className="h-8 text-xs font-bold" /></div>
+                          <div><label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Youth 12-17 (€)</label><Input type="number" step="0.01" min="0" placeholder="same as adult" value={opt.youthPrice ?? ""} onChange={(e) => updateOptionPrice(idx, "youthPrice", e.target.value)} className="h-8 text-xs font-bold" /></div>
+                          <div><label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Child 2-11 (€)</label><Input type="number" step="0.01" min="0" placeholder="same as adult" value={opt.childPrice ?? ""} onChange={(e) => updateOptionPrice(idx, "childPrice", e.target.value)} className="h-8 text-xs font-bold" /></div>
+                          <div><label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Infant under 2 (€)</label><Input type="number" step="0.01" min="0" placeholder="free" value={opt.infantPrice ?? ""} onChange={(e) => updateOptionPrice(idx, "infantPrice", e.target.value)} className="h-8 text-xs font-bold" /></div>
+                        </div>
+                        </>
                       )}
                     </div>
                   ))}
