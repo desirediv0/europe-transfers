@@ -22,6 +22,16 @@ interface PaymentParams {
   notes?: string;
 }
 
+interface PaymentCallbacks {
+  // Awaited right before the Razorpay popup opens. Lets the caller close a
+  // modal (e.g. a Radix Dialog) that would otherwise lock pointer events and
+  // focus, making the popup unclickable.
+  onBeforeCheckout?: () => void | Promise<void>;
+  // Called when checkout ends without a successful payment, so the caller
+  // can bring its modal back.
+  onCheckoutAborted?: () => void;
+}
+
 export function usePayment() {
   const [loading, setLoading] = useState(false);
   // Synchronous guard: state updates are async, so a fast double-click could
@@ -30,7 +40,7 @@ export function usePayment() {
   const { user } = useAuth();
   const router = useRouter();
 
-  const initiatePayment = async (params: PaymentParams) => {
+  const initiatePayment = async (params: PaymentParams, callbacks: PaymentCallbacks = {}) => {
     if (!user) {
       toast.error("Please login to make a payment");
       router.push("/auth/login");
@@ -48,6 +58,8 @@ export function usePayment() {
         currency: string;
         key: string;
       }>("/payments/create-order", params);
+
+      await callbacks.onBeforeCheckout?.();
 
       await initRazorpay({
         key: orderData.key,
@@ -92,6 +104,7 @@ export function usePayment() {
         theme: { color: "#D4A843" },
       });
     } catch (error) {
+      callbacks.onCheckoutAborted?.();
       const err = error as { message?: string };
       if (err.message === "Payment cancelled by user") {
         toast.info("Payment cancelled");

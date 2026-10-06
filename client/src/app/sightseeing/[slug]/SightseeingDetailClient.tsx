@@ -344,6 +344,14 @@ export function SightseeingDetailClient({ tour, initialPax, initialDate, initial
       optionSelected: counts.youth + counts.child + counts.infant > 0
         ? `${selectedForPayment.name} - ${describeCounts(counts)}`
         : selectedForPayment.name,
+    }, {
+      // The Radix dialog must be gone before Razorpay opens, otherwise its
+      // pointer-events/focus lock makes the Razorpay popup unclickable.
+      onBeforeCheckout: async () => {
+        setPaymentOpen(false);
+        await new Promise((r) => setTimeout(r, 350));
+      },
+      onCheckoutAborted: () => setPaymentOpen(true),
     });
   };
 
