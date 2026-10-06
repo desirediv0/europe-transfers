@@ -143,7 +143,7 @@ function TransferSearchWidgetInner() {
   const toOptions = (() => {
     const raw = destinations
       ? destinations.map((l) => ({ id: l.id, label: l.name, sublabel: l.city }))
-      : locationOptions.filter((o) => o.id !== search.fromLocationId);
+      : locationOptions.filter((o) => o.label !== search.fromLocationName);
     const seen = new Map<string, { id: string; label: string; sublabel: string }>();
     for (const o of raw) {
       if (!seen.has(o.label)) {
@@ -168,9 +168,9 @@ function TransferSearchWidgetInner() {
               <DropdownPickerField
                 label="From"
                 icon={IconMapPin}
-                value={search.fromLocationId}
+                value={search.fromLocationName || search.fromLocationId}
                 placeholder="Address, airport, hotel, ..."
-                options={locationOptions.filter((o) => o.id !== search.toLocationId)}
+                options={locationOptions.filter((o) => o.label !== search.toLocationName)}
                 onChange={(id, name) => updateSearch({ fromLocationId: id, fromLocationName: name })}
               />
               <button
@@ -186,7 +186,7 @@ function TransferSearchWidgetInner() {
             <DropdownPickerField
               label="To"
               icon={IconMapPin}
-              value={search.toLocationId}
+              value={search.toLocationName || search.toLocationId}
               placeholder={search.fromLocationId ? "Select a destination" : "Pick a \"From\" location first"}
               options={toOptions}
               onChange={handleToChange}
