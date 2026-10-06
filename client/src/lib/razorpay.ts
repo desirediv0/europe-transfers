@@ -29,6 +29,21 @@ export interface RazorpayOptions {
     confirm_close?: boolean;
   };
   notes?: Record<string, string>;
+  // false stops Razorpay from reusing a phone number it saved in this
+  // browser from an earlier payment ("Using as +91 ..."), so the number we
+  // prefill is the one the OTP goes to.
+  remember_customer?: boolean;
+}
+
+// Razorpay reads a bare number as Indian (+91). Send "+<country><digits>"
+// with no spaces/dashes so the number the customer typed is used as-is.
+export function toE164(phone: string): string {
+  const trimmed = phone.trim();
+  if (!trimmed) return "";
+  const digits = trimmed.replace(/\D/g, "");
+  if (trimmed.startsWith("+")) return `+${digits}`;
+  if (trimmed.startsWith("00")) return `+${digits.slice(2)}`;
+  return digits;
 }
 
 export interface RazorpayResponse {
@@ -74,7 +89,7 @@ export async function initRazorpay(options: RazorpayOptions): Promise<void> {
       backdropclose: false,
     };
 
-    const rzp = new window.Razorpay(options);
+    const rzp = new window.Razorpay({ remember_customer: false, ...options });
 
     rzp.on?.("payment.failed", (response: { error: { description: string } }) => {
       reject(new Error(response.error.description || "Payment failed"));

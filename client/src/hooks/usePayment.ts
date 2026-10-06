@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
-import { initRazorpay, type RazorpayResponse } from "@/lib/razorpay";
+import { initRazorpay, toE164, type RazorpayResponse } from "@/lib/razorpay";
 import { toast } from "sonner";
 
 interface PaymentParams {
@@ -99,7 +99,7 @@ export function usePayment() {
         prefill: {
           name: params.customerName,
           email: params.customerEmail,
-          contact: params.customerPhone,
+          contact: toE164(params.customerPhone),
         },
         theme: { color: "#D4A843" },
       });

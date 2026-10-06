@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-import { initRazorpay, type RazorpayResponse } from "@/lib/razorpay";
+import { initRazorpay, toE164, type RazorpayResponse } from "@/lib/razorpay";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import type { Booking } from "@/lib/types";
@@ -147,7 +147,7 @@ function CheckoutContent() {
         prefill: {
           name: form.customerName,
           email: form.email || undefined,
-          contact: fullPhone || undefined,
+          contact: toE164(fullPhone) || undefined,
         },
         theme: { color: "#C9A227" },
         handler: async (response: RazorpayResponse) => {
