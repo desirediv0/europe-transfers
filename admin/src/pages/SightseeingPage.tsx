@@ -53,6 +53,14 @@ interface OptionRow {
 const optPrice = (v: number | string | undefined): number | undefined =>
   v === undefined || v === "" || Number.isNaN(Number(v)) ? undefined : Number(v);
 
+type PriceType = "price" | "youthPrice" | "childPrice" | "infantPrice";
+const PRICE_TYPES: Array<{ key: PriceType; label: string; short: string }> = [
+  { key: "price", label: "Adult (18+ years)", short: "Adult" },
+  { key: "youthPrice", label: "Youth (12-17 years)", short: "Youth" },
+  { key: "childPrice", label: "Child (2-11 years)", short: "Child" },
+  { key: "infantPrice", label: "Infant (under 2 years)", short: "Infant" },
+];
+
 export default function SightseeingPage() {
   const [activeTab, setActiveTab] = useState<"enquiries" | "tours">("enquiries");
 
@@ -104,11 +112,9 @@ export default function SightseeingPage() {
   const [editingIncludeText, setEditingIncludeText] = useState("");
 
   const [optionsList, setOptionsList] = useState<OptionRow[]>([]);
-  const [newOptChild, setNewOptChild] = useState<number | string>("");
-  const [newOptYouth, setNewOptYouth] = useState<number | string>("");
-  const [newOptInfant, setNewOptInfant] = useState<number | string>("");
   const [newOptName, setNewOptName] = useState("");
-  const [newOptPrice, setNewOptPrice] = useState<number | string>(0);
+  const [newOptType, setNewOptType] = useState<PriceType>("price");
+  const [newOptValues, setNewOptValues] = useState<Record<PriceType, string>>({ price: "", youthPrice: "", childPrice: "", infantPrice: "" });
   const [newOptDuration, setNewOptDuration] = useState("");
   const [editingOptionIndex, setEditingOptionIndex] = useState<number | null>(null);
   const [editingOptionData, setEditingOptionData] = useState<OptionRow>({ name: "", price: 0, duration: "" });
@@ -197,7 +203,6 @@ export default function SightseeingPage() {
     setNewHighlightInput("");
     setNewIncludesInput("");
     setNewOptName("");
-    setNewOptPrice(0);
     setNewOptDuration("");
     setNewScheduleAddress("");
     setNewScheduleMetro("");
@@ -335,19 +340,17 @@ export default function SightseeingPage() {
       ...optionsList,
       {
         name: newOptName.trim(),
-        price: Number(newOptPrice) || 0,
+        price: Number(newOptValues.price) || 0,
         duration: newOptDuration.trim() || form.duration,
-        childPrice: optPrice(newOptChild),
-        youthPrice: optPrice(newOptYouth),
-        infantPrice: optPrice(newOptInfant),
+        childPrice: optPrice(newOptValues.childPrice),
+        youthPrice: optPrice(newOptValues.youthPrice),
+        infantPrice: optPrice(newOptValues.infantPrice),
       },
     ]);
     setNewOptName("");
-    setNewOptPrice(0);
     setNewOptDuration("");
-    setNewOptChild("");
-    setNewOptYouth("");
-    setNewOptInfant("");
+    setNewOptValues({ price: "", youthPrice: "", childPrice: "", infantPrice: "" });
+    setNewOptType("price");
   };
   // Inline price edit: each age price can be typed straight into the option
   // row. Blank youth/child/infant clears that price (adult price / free).
@@ -1109,46 +1112,66 @@ export default function SightseeingPage() {
                 <IconTicket className="h-4 w-4 text-[#C9A227]" /> Tour Ticket Options Manager
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 bg-white p-3 rounded-xl border">
-                <div className="sm:col-span-2">
-                  <Input
-                    placeholder="Option Name (e.g. Standard Ticket)..."
-                    value={newOptName}
-                    onChange={(e) => setNewOptName(e.target.value)}
-                    className="h-9 text-xs font-medium"
-                  />
+              <div className="space-y-3 bg-white p-3 rounded-xl border">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="sm:col-span-2">
+                    <label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Option name</label>
+                    <Input
+                      placeholder="e.g. Standard Ticket"
+                      value={newOptName}
+                      onChange={(e) => setNewOptName(e.target.value)}
+                      className="h-9 text-xs font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Duration</label>
+                    <Input
+                      placeholder="e.g. 2 Hours"
+                      value={newOptDuration}
+                      onChange={(e) => setNewOptDuration(e.target.value)}
+                      className="h-9 text-xs"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Adult 18+ price (€)</label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    placeholder="Adult price (€)"
-                    value={newOptPrice}
-                    onChange={(e) => setNewOptPrice(e.target.value)}
-                    className="h-9 text-xs font-bold"
-                  />
-                </div>
-                <div>
-                  <Input
-                    placeholder="Duration (e.g. 2 Hours)"
-                    value={newOptDuration}
-                    onChange={(e) => setNewOptDuration(e.target.value)}
-                    className="h-9 text-xs"
-                  />
-                </div>
-                <Button type="button" onClick={addOption} className="h-9 bg-[#1B2A4A] text-white text-xs font-bold">
-                  <IconPlus className="h-3.5 w-3.5 mr-1" /> Add Option
-                </Button>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-white p-3 rounded-xl border">
-                <p className="sm:col-span-3 text-[11px] font-semibold text-slate-500">
-                  Optional age-wise prices for the option being added (€ per person). Leave blank to keep this option adult-only. Adult 18+, Youth 12-17, Child 2-11, Infant under 2 (blank Infant = free).
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Set price for</label>
+                    <select
+                      value={newOptType}
+                      onChange={(e) => setNewOptType(e.target.value as PriceType)}
+                      className="h-9 w-full rounded-md border border-input bg-white px-2 text-xs font-bold cursor-pointer"
+                    >
+                      {PRICE_TYPES.map((t) => (
+                        <option key={t.key} value={t.key}>{t.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Price (€ per person)</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder={newOptType === "price" ? "e.g. 130" : newOptType === "infantPrice" ? "blank = free" : "blank = same as adult"}
+                      value={newOptValues[newOptType]}
+                      onChange={(e) => setNewOptValues({ ...newOptValues, [newOptType]: e.target.value })}
+                      className="h-9 text-xs font-bold"
+                    />
+                  </div>
+                  <Button type="button" onClick={addOption} className="h-9 bg-[#1B2A4A] text-white text-xs font-bold">
+                    <IconPlus className="h-3.5 w-3.5 mr-1" /> Add Option
+                  </Button>
+                </div>
+
+                <p className="text-[11px] font-semibold text-slate-500">
+                  Pick a traveller type, type its price, then pick the next type. Entered so far:{" "}
+                  {PRICE_TYPES.map((t) => (
+                    <span key={t.key} className="mr-2">
+                      {t.short} {newOptValues[t.key] === "" ? (t.key === "price" ? "–" : t.key === "infantPrice" ? "Free" : "= Adult") : "€" + newOptValues[t.key]}
+                    </span>
+                  ))}
                 </p>
-                <div><label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Youth 12-17 price (€)</label><Input type="number" step="0.01" placeholder="Youth 12-17 (€)" value={newOptYouth} onChange={(e) => setNewOptYouth(e.target.value)} className="h-9 text-xs font-bold" /></div>
-                <div><label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Child 2-11 price (€)</label><Input type="number" step="0.01" placeholder="Child 2-11 (€)" value={newOptChild} onChange={(e) => setNewOptChild(e.target.value)} className="h-9 text-xs font-bold" /></div>
-                <div><label className="block text-[10px] font-black uppercase tracking-wide text-slate-500 mb-1">Infant under 2 price (€)</label><Input type="number" step="0.01" placeholder="Infant <2 (€, blank = free)" value={newOptInfant} onChange={(e) => setNewOptInfant(e.target.value)} className="h-9 text-xs font-bold" /></div>
               </div>
 
               {/* List of Added Options */}
