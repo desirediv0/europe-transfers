@@ -71,7 +71,11 @@ function CheckoutContent() {
   // Guards against a double click creating two bookings / Razorpay orders.
   const payingRef = useRef(false);
 
-  const fullPhone = `${form.countryCode}${form.phone.replace(/^\+/, "").replace(/\s/g, "")}`;
+  // A number typed with its own "+<country>" prefix is already complete;
+  // only bare numbers get the selected country code.
+  const fullPhone = form.phone.trim().startsWith("+")
+    ? `+${form.phone.replace(/\D/g, "")}`
+    : `${form.countryCode}${form.phone.replace(/\D/g, "").replace(/^0+/, "")}`;
 
   const [step, setStep] = useState<"form" | "paying" | "success" | "failed">("form");
   const [booking, setBooking] = useState<Booking | null>(null);
@@ -83,7 +87,7 @@ function CheckoutContent() {
       toast.error("Name and phone are required");
       return;
     }
-    const emailRe = /^[^s@]+@[^s@]+.[^s@]+$/;
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRe.test(form.email.trim())) {
       toast.error("Please enter a valid passenger email address");
       return;

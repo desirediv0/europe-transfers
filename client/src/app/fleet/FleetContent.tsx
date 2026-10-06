@@ -503,7 +503,7 @@ export default function FleetContent({
   const handleContinue = () => {
     if (isLocked) return;
     if (!selected) { return; }
-    const emailRe = /^[^s@]+@[^s@]+.[^s@]+$/;
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!passenger.name.trim() || !passenger.phone.trim()) { setFormError("Name and phone number are required."); return; }
     if (!emailRe.test(passenger.email.trim())) { setFormError("Please enter a valid passenger email address."); return; }
     if (!passenger.flight.trim()) { setFormError("Please enter your flight or train details."); return; }
