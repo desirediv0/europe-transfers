@@ -50,7 +50,7 @@ function PackagesSearchContent() {
             Tour <span className="text-gold">Packages</span>
           </h1>
           <p className="mt-3 text-sm sm:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed font-normal">
-            Hand-picked luxury chauffeured tour itineraries across Europe, designed for uncompromised comfort, scenic beauty, and memorable journeys.
+            Hand-picked luxury chauffeured tour itineraries across Europe, UK &amp; Scandinavia, designed for uncompromised comfort, scenic beauty, and memorable journeys.
           </p>
 
           {/* Hero Search Bar */}

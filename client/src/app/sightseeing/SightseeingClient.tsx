@@ -67,7 +67,7 @@ function SightseeingSearchContent() {
             Travel moments you&apos;ll love
           </h1>
           <p className="mt-3 text-sm sm:text-lg text-gray-300 max-w-2xl mx-auto font-normal">
-            Partnered with leading travel & tour experiences across Paris, France, Rome & Switzerland.
+            Europe, UK &amp; Scandinavia — Your Gateway to Exceptional Sightseeing
           </p>
 
           {/* Hero Search Bar */}

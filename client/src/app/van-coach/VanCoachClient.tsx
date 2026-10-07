@@ -90,7 +90,7 @@ function VanCoachSearchContent() {
             Van & Coach <span className="text-gold">Disposal</span>
           </h1>
           <p className="mt-4 text-base sm:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed font-normal mb-8">
-            Hire a private Mercedes-Benz vehicle with dedicated English-speaking chauffeur by the hour for business roadshows, shopping, or custom European itineraries.
+            Premium Fleet Solutions Across Europe, UK &amp; Scandinavia — Built for B2B Travel.
           </p>
 
           <div className="max-w-4xl mx-auto text-left">
