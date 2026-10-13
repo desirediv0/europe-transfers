@@ -124,15 +124,33 @@ export const getSightseeingTours = asyncHandler(async (req, res) => {
       : {}),
   };
 
-  const [tours, total] = await Promise.all([
-    prisma.sightseeingTour.findMany({
-      where,
-      orderBy: [{ order: "asc" }, { createdAt: "desc" }],
-      skip,
-      take: limit,
-    }),
-    prisma.sightseeingTour.count({ where }),
-  ]);
+  const baseOrder = [{ order: "asc" }, { createdAt: "desc" }];
+
+  // Public listing: cheapest first, across every page (so it has to be sorted
+  // here, not in the browser). Tours with no price ("On Request", priceFrom 0)
+  // go last. Ties keep the admin's manual order, then newest first. The admin
+  // list and the homepage "featured" picks keep their manual order.
+  const sortByPrice = !isAdmin && req.query.featured !== "true";
+
+  let tours;
+  let total;
+  if (sortByPrice) {
+    const all = await prisma.sightseeingTour.findMany({ where, orderBy: baseOrder });
+    const priceRank = (t) => (Number(t.priceFrom) > 0 ? Number(t.priceFrom) : Infinity);
+    all.sort((a, b) => {
+      const pa = priceRank(a);
+      const pb = priceRank(b);
+      if (pa === pb) return 0; // stable sort keeps baseOrder for ties
+      return pa < pb ? -1 : 1;
+    });
+    total = all.length;
+    tours = all.slice(skip, skip + limit);
+  } else {
+    [tours, total] = await Promise.all([
+      prisma.sightseeingTour.findMany({ where, orderBy: baseOrder, skip, take: limit }),
+      prisma.sightseeingTour.count({ where }),
+    ]);
+  }
 
   return apiResponse(res, 200, "Sightseeing tours retrieved", {
     items: tours,

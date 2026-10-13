@@ -82,7 +82,7 @@ function ResultsContent() {
 
   useEffect(() => {
     setLoading(true);
-    let url = `/packages?page=${currentPage}&limit=20`;
+    let url = `/packages?page=${currentPage}&limit=20&sort=price`;
 
     if (selectedCountry !== "all") {
       const countryObj = countries.find((c) => c.slug === selectedCountry || c.name.toLowerCase() === selectedCountry.toLowerCase());

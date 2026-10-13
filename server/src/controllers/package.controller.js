@@ -35,15 +35,33 @@ export const getPackages = asyncHandler(async (req, res) => {
     where.isActive = true;
   }
 
-  const [packages, total] = await Promise.all([
-    prisma.package.findMany({
+  let packages;
+  let total;
+  if (req.query.sort === "price") {
+    // Public listing: cheapest first across every page, so it is sorted
+    // here and then paged. Packages with no price (0) go last; ties keep
+    // newest first. The admin list does not pass sort=price.
+    const all = await prisma.package.findMany({
       where,
       include: { country: true, itineraryDays: true },
       orderBy: { createdAt: "desc" },
-      ...paginateArgs(page, limit),
-    }),
-    prisma.package.count({ where }),
-  ]);
+    });
+    const rank = (p) => (Number(p.priceFrom) > 0 ? Number(p.priceFrom) : Infinity);
+    all.sort((a, b) => (rank(a) === rank(b) ? 0 : rank(a) < rank(b) ? -1 : 1));
+    total = all.length;
+    const start = (page - 1) * limit;
+    packages = all.slice(start, start + limit);
+  } else {
+    [packages, total] = await Promise.all([
+      prisma.package.findMany({
+        where,
+        include: { country: true, itineraryDays: true },
+        orderBy: { createdAt: "desc" },
+        ...paginateArgs(page, limit),
+      }),
+      prisma.package.count({ where }),
+    ]);
+  }
 
   return apiResponse(res, 200, "Packages retrieved", {
     items: packages,

@@ -93,6 +93,7 @@ function ResultsContent() {
 
   const numericHours = Number(hours) || 8;
 
+  // Cheapest first (hourly rate); vehicles with no rate go last.
   const filteredFleet = fleet.filter((v) => {
     // Location filter: every vehicle name is expected to carry its city
     // as a "<City> - <Vehicle>" prefix (set in the admin). A name that
@@ -111,6 +112,10 @@ function ResultsContent() {
     if (!vehicleSearch.trim()) return true;
     const q = vehicleSearch.toLowerCase();
     return v.name.toLowerCase().includes(q) || v.category.toLowerCase().includes(q) || v.description.toLowerCase().includes(q);
+  }).sort((a, b) => {
+    const ra = a.hourlyRate > 0 ? a.hourlyRate : Infinity;
+    const rb = b.hourlyRate > 0 ? b.hourlyRate : Infinity;
+    return ra === rb ? 0 : ra < rb ? -1 : 1;
   });
 
   const hasActiveFilters = vehicleSearch.trim().length > 0;
