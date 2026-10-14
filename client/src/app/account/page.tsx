@@ -33,6 +33,7 @@ import {
 
 interface Order {
   id: string;
+  trackingId?: string | null;
   productType: "SIGHTSEEING" | "PACKAGE" | "VAN_COACH";
   productName: string;
   amount: number;
@@ -361,6 +362,11 @@ export default function AccountPage() {
                   >
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2 flex-wrap">
+                        {b.trackingId && (
+                          <span className="font-mono text-[11px] font-black text-navy bg-gold/15 px-2 py-0.5 rounded border border-gold/30">
+                            {b.trackingId}
+                          </span>
+                        )}
                         <span className="text-sm font-black text-navy flex items-center gap-1.5 group-hover:text-gold transition-colors">
                           <IconCar className="h-4 w-4 text-gold" />
                           {b.carType?.name || "Luxury Chauffeur Transfer"}
@@ -476,6 +482,11 @@ export default function AccountPage() {
                   >
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2 flex-wrap">
+                        {o.trackingId && (
+                          <span className="font-mono text-[11px] font-black text-navy bg-gold/15 px-2 py-0.5 rounded border border-gold/30">
+                            {o.trackingId}
+                          </span>
+                        )}
                         <Badge className="rounded-md bg-slate-100 text-navy border-0 text-[10px] font-black px-2 py-0.5">
                           {ORDER_PRODUCT_LABELS[o.productType]}
                         </Badge>
@@ -533,8 +544,8 @@ export default function AccountPage() {
                 <div className="space-y-4 text-xs font-semibold">
                   <div className="p-4 rounded-2xl bg-slate-50 border border-gray-200/80 space-y-2.5">
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-500">Booking Reference</span>
-                      <span className="font-mono font-black text-navy bg-gold/15 px-2.5 py-0.5 rounded border border-gold/30">{selectedBooking.id}</span>
+                      <span className="text-gray-500">Tracking ID</span>
+                      <span className="font-mono font-black text-navy bg-gold/15 px-2.5 py-0.5 rounded border border-gold/30">{selectedBooking.trackingId || selectedBooking.id}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-500">Vehicle Category</span>

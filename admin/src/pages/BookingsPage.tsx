@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Search, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -30,17 +32,27 @@ export default function BookingsPage() {
   const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, pages: 0 });
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [paymentFilter, setPaymentFilter] = useState<string>("");
+  // Search box: waits 400ms after typing stops, then reloads from page 1.
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setSearch(searchInput.trim()), 400);
+    return () => clearTimeout(t);
+  }, [searchInput]);
 
   const load = useCallback(async (page = 1) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ page: page.toString(), limit: "20" });
       if (statusFilter) params.set("status", statusFilter);
+      if (paymentFilter) params.set("paymentStatus", paymentFilter);
+      if (search) params.set("search", search);
       const data = await api.get<{ items: Booking[]; pagination: Pagination }>(`/bookings?${params}`);
       setItems(data.items);
       setPagination(data.pagination);
     } catch { toast.error("Failed to load bookings"); } finally { setLoading(false); }
-  }, [statusFilter]);
+  }, [statusFilter, paymentFilter, search]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -67,6 +79,30 @@ export default function BookingsPage() {
           <h1 className="text-2xl font-bold">Bookings</h1>
           <p className="text-sm text-muted-foreground mt-1">Private Transfers bookings (theeuropetransfers.com/private-transfers)</p>
         </div>
+        <div className="flex flex-wrap items-center gap-2 justify-end">
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+          <Input
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search tracking ID, name, phone, email..."
+            className="pl-9 pr-8 h-9 text-sm"
+          />
+          {searchInput && (
+            <button type="button" onClick={() => setSearchInput("")} aria-label="Clear search" className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 cursor-pointer">
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        <Select value={paymentFilter} onValueChange={(v) => setPaymentFilter(v === "ALL" ? "" : v)}>
+          <SelectTrigger className="w-40"><SelectValue placeholder="All Payments" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Payments</SelectItem>
+            <SelectItem value="PENDING">Payment Pending</SelectItem>
+            <SelectItem value="PAID">Paid</SelectItem>
+            <SelectItem value="FAILED">Failed</SelectItem>
+          </SelectContent>
+        </Select>
         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v === "ALL" ? "" : v)}>
           <SelectTrigger className="w-40"><SelectValue placeholder="All Status" /></SelectTrigger>
           <SelectContent>
@@ -78,13 +114,16 @@ export default function BookingsPage() {
             <SelectItem value="CANCELLED">Cancelled</SelectItem>
           </SelectContent>
         </Select>
+        </div>
       </div>
+      <p className="text-xs text-muted-foreground -mt-4">{pagination.total} booking{pagination.total === 1 ? "" : "s"}{search ? ` matching "${search}"` : ""}</p>
 
       <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Tracking ID</TableHead>
                 <TableHead>Customer</TableHead>
                 <TableHead>Route</TableHead>
                 <TableHead>Car</TableHead>
@@ -98,11 +137,14 @@ export default function BookingsPage() {
             </TableHeader>
             <TableBody>
               {loading ? Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i}><TableCell colSpan={9}><Skeleton className="h-4 w-full" /></TableCell></TableRow>
+                <TableRow key={i}><TableCell colSpan={10}><Skeleton className="h-4 w-full" /></TableCell></TableRow>
               )) : items.length === 0 ? (
-                <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No bookings found</TableCell></TableRow>
+                <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">No bookings found</TableCell></TableRow>
               ) : items.map((item) => (
                 <TableRow key={item.id}>
+                  <TableCell>
+                    <span className="font-mono text-xs font-black text-[#1B2A4A] bg-[#C9A227]/15 border border-[#C9A227]/30 px-2 py-0.5 rounded whitespace-nowrap">{item.trackingId || "—"}</span>
+                  </TableCell>
                   <TableCell>
                     <div className="text-sm">
                       <div className="font-medium">{item.customerName}</div>

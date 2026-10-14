@@ -334,6 +334,7 @@ model VanCoachEnquiry {
 
 model Booking {
   id            String        @id @default(cuid())
+  trackingId    String?       @unique
   routeId       String
   route         Route         @relation(fields: [routeId], references: [id], onDelete: Restrict)
   carTypeId     String
@@ -380,6 +381,7 @@ enum OrderStatus {
 
 model Order {
   id               String          @id @default(cuid())
+  trackingId       String?         @unique
   userId           String?
   user             User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
   productType      OrderProductType

@@ -4,6 +4,7 @@ import apiResponse from "../utils/apiResponse.js";
 import ApiError from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { sendEmail } from "../config/mailer.js";
+import { generateTrackingId } from "../utils/trackingId.js";
 export const getMyBookings = asyncHandler(async (req, res) => {
   const phone = req.user.phone;
   const email = req.user.email;
@@ -34,7 +35,22 @@ export const getBookings = asyncHandler(async (req, res) => {
   const status = req.query.status;
   const skip = (page - 1) * limit;
 
-  const where = status ? { bookingStatus: status } : {};
+  const search = (req.query.search || "").trim();
+  const where = {
+    ...(status ? { bookingStatus: status } : {}),
+    ...(req.query.paymentStatus ? { paymentStatus: req.query.paymentStatus } : {}),
+    ...(search
+      ? {
+          OR: [
+            { trackingId: { contains: search, mode: "insensitive" } },
+            { customerName: { contains: search, mode: "insensitive" } },
+            { phone: { contains: search } },
+            { email: { contains: search, mode: "insensitive" } },
+            { paymentId: { contains: search, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+  };
 
   const [bookings, total] = await Promise.all([
     prisma.booking.findMany({
@@ -173,8 +189,13 @@ export const createBooking = asyncHandler(async (req, res) => {
     return apiResponse(res, 201, "Booking created", reused);
   }
 
+  const trackingId = await generateTrackingId(
+    async (id) => !!(await prisma.booking.findUnique({ where: { trackingId: id }, select: { id: true } }))
+  );
+
   const booking = await prisma.booking.create({
     data: {
+      trackingId,
       route: { connect: { id: routeId } },
       carType: { connect: { id: carTypeId } },
       phone,

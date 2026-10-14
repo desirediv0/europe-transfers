@@ -1,6 +1,7 @@
 import "./config/env.config.js";
 import app from "./app.js";
 import prisma from "./config/db.js";
+import { generateTrackingId } from "./utils/trackingId.js";
 import env from "./config/env.config.js";
 
 // One-off schema patches that ship in code instead of a separate migration
@@ -64,6 +65,30 @@ const runBookingPatches = async () => {
   await prisma.$executeRawUnsafe(`ALTER TABLE "Booking" ADD COLUMN IF NOT EXISTS "amountInr" DECIMAL(10,2)`);
 };
 
+// Tracking IDs (TET + 5 digits) for Private Transfer bookings and Sightseeing
+// orders. Purely additive: adds a nullable column + unique index, then gives
+// every existing row that has no ID one. Safe to run on every boot - rows
+// that already have an ID are never touched.
+const runTrackingIdPatches = async () => {
+  for (const table of ["Booking", "Order"]) {
+    await prisma.$executeRawUnsafe(`ALTER TABLE "${table}" ADD COLUMN IF NOT EXISTS "trackingId" TEXT`);
+    await prisma.$executeRawUnsafe(`CREATE UNIQUE INDEX IF NOT EXISTS "${table}_trackingId_key" ON "${table}"("trackingId")`);
+
+    const missing = await prisma.$queryRawUnsafe(`SELECT "id" FROM "${table}" WHERE "trackingId" IS NULL ORDER BY "createdAt" ASC`);
+    if (missing.length === 0) continue;
+    const used = new Set(
+      (await prisma.$queryRawUnsafe(`SELECT "trackingId" FROM "${table}" WHERE "trackingId" IS NOT NULL`)).map((r) => r.trackingId)
+    );
+    for (const row of missing) {
+      const id = await generateTrackingId(async (candidate) => used.has(candidate));
+      used.add(id);
+      // "AND trackingId IS NULL" so a concurrent write is never overwritten.
+      await prisma.$executeRawUnsafe(`UPDATE "${table}" SET "trackingId" = $1 WHERE "id" = $2 AND "trackingId" IS NULL`, id, row.id);
+    }
+    console.log(`Tracking IDs assigned to ${missing.length} existing ${table} rows`);
+  }
+};
+
 const startServer = async () => {
   try {
     await prisma.$connect();
@@ -72,6 +97,7 @@ const startServer = async () => {
     await runSchemaPatches();
     await runB2bUserPatches();
     await runBookingPatches();
+    await runTrackingIdPatches();
     console.log("Schema patches applied");
 
     app.listen(env.PORT, () => {

@@ -102,6 +102,7 @@ export interface Package {
 
 export interface Booking {
   id: string;
+  trackingId?: string;
   routeId: string;
   carTypeId: string;
   customerName: string;

@@ -173,6 +173,7 @@ export interface Package {
 
 export interface Booking {
   id: string;
+  trackingId?: string | null;
   routeId: string;
   carTypeId: string;
   customerName: string;

@@ -73,21 +73,28 @@ export function usePayment() {
           // verification a few times before giving up - the server ignores
           // repeats, so a retry can never double-process the order.
           let verified = false;
+          let trackingId = "";
           for (let attempt = 0; attempt < 3 && !verified; attempt++) {
             try {
-              await api.post("/payments/verify-payment", {
+              const verifiedRes = await api.post<{ order?: { trackingId?: string | null } }>("/payments/verify-payment", {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
                 orderId: orderData.orderId,
               });
               verified = true;
+              trackingId = verifiedRes?.order?.trackingId || "";
             } catch {
               await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
             }
           }
           if (verified) {
-            toast.success("Payment successful! Booking confirmed.");
+            toast.success(
+              trackingId
+                ? `Payment successful! Your tracking ID is ${trackingId}.`
+                : "Payment successful! Booking confirmed.",
+              { duration: trackingId ? 12000 : undefined }
+            );
             router.push("/account#orders");
           } else {
             toast.error(

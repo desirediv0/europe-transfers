@@ -4,16 +4,18 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useCurrencyRates, type ViewCurrency } from "@/hooks/useCurrencyRates";
-import { Eye, Download, RefreshCw } from "lucide-react";
+import { Eye, Download, RefreshCw, Search, X } from "lucide-react";
 
 const CURRENCY_SYMBOLS: Record<ViewCurrency, string> = { EUR: "€", USD: "$", INR: "₹" };
 
 interface Order {
   id: string;
+  trackingId?: string | null;
   productType: string;
   productId: string;
   productName: string;
@@ -56,17 +58,25 @@ export default function SightseeingOrdersPage() {
   const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, pages: 0 });
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("");
+  // Search box: waits 400ms after typing stops, then reloads from page 1.
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setSearch(searchInput.trim()), 400);
+    return () => clearTimeout(t);
+  }, [searchInput]);
 
   const load = useCallback(async (page = 1) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ page: page.toString(), limit: "20", productType: "SIGHTSEEING" });
       if (statusFilter) params.set("status", statusFilter);
+      if (search) params.set("search", search);
       const data = await api.get<{ items: Order[]; pagination: Pagination }>(`/payments/admin/all?${params}`);
       setItems(data.items);
       setPagination(data.pagination);
     } catch { toast.error("Failed to load orders"); } finally { setLoading(false); }
-  }, [statusFilter]);
+  }, [statusFilter, search]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -84,9 +94,9 @@ export default function SightseeingOrdersPage() {
   };
 
   const exportCSV = () => {
-    const headers = ["ID", "Customer", "Email", "Phone", "Product", "Amount", "Status", "Payment ID", "Date"];
+    const headers = ["Tracking ID", "Customer", "Email", "Phone", "Product", "Amount", "Status", "Payment ID", "Date"];
     const rows = items.map((o) => [
-      o.id.slice(0, 8),
+      o.trackingId || o.id.slice(0, 8),
       o.customerName,
       o.customerEmail,
       o.customerPhone,
@@ -123,7 +133,21 @@ export default function SightseeingOrdersPage() {
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+          <Input
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search tracking ID, name, email, phone, tour..."
+            className="pl-9 pr-8 h-9 text-sm"
+          />
+          {searchInput && (
+            <button type="button" onClick={() => setSearchInput("")} aria-label="Clear search" className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 cursor-pointer">
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v === "ALL" ? "" : v)}>
           <SelectTrigger className="w-48">
             <SelectValue placeholder="Filter by status" />
@@ -137,7 +161,7 @@ export default function SightseeingOrdersPage() {
             <SelectItem value="REFUNDED">Refunded</SelectItem>
           </SelectContent>
         </Select>
-        <Badge variant="secondary">{pagination.total} orders</Badge>
+        <Badge variant="secondary">{pagination.total} orders{search ? ` matching "${search}"` : ""}</Badge>
 
         <Select value={viewCurrency} onValueChange={(v) => setViewCurrency(v as ViewCurrency)}>
           <SelectTrigger className="w-28 ml-auto">
@@ -156,6 +180,7 @@ export default function SightseeingOrdersPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Tracking ID</TableHead>
                 <TableHead>Customer</TableHead>
                 <TableHead>Product</TableHead>
                 <TableHead>Amount</TableHead>
@@ -169,18 +194,21 @@ export default function SightseeingOrdersPage() {
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
-                    {Array.from({ length: 7 }).map((_, j) => (
+                    {Array.from({ length: 8 }).map((_, j) => (
                       <TableCell key={j}><Skeleton className="h-4 w-20" /></TableCell>
                     ))}
                   </TableRow>
                 ))
               ) : items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-gray-500">No sightseeing orders found</TableCell>
+                  <TableCell colSpan={8} className="text-center py-8 text-gray-500">No sightseeing orders found</TableCell>
                 </TableRow>
               ) : (
                 items.map((order) => (
                   <TableRow key={order.id}>
+                    <TableCell>
+                      <span className="font-mono text-xs font-black text-[#1B2A4A] bg-[#C9A227]/15 border border-[#C9A227]/30 px-2 py-0.5 rounded whitespace-nowrap">{order.trackingId || "—"}</span>
+                    </TableCell>
                     <TableCell>
                       <div>
                         <p className="font-medium text-sm">{order.customerName}</p>

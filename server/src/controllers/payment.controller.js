@@ -7,6 +7,7 @@ import ApiError from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { sendEmail } from "../config/mailer.js";
 import { getRates } from "../config/currency.js";
+import { generateTrackingId } from "../utils/trackingId.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -85,8 +86,13 @@ export const createOrder = asyncHandler(async (req, res) => {
     },
   });
 
+  const trackingId = await generateTrackingId(
+    async (id) => !!(await prisma.order.findUnique({ where: { trackingId: id }, select: { id: true } }))
+  );
+
   const order = await prisma.order.create({
     data: {
+      trackingId,
       userId,
       productType,
       productId,
@@ -195,6 +201,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
           <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0;">
             <h2 style="color: #060C17; margin-top: 0;">Payment Received</h2>
             <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+              <tr><td style="padding: 8px 0; color: #64748b; width: 140px;">Tracking ID:</td><td style="padding: 8px 0; font-weight: bold;">${order.trackingId || "-"}</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b; width: 140px;">Product:</td><td style="padding: 8px 0; font-weight: bold;">${order.productName}</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b;">Type:</td><td style="padding: 8px 0; font-weight: bold;">${order.productType}</td></tr>
               <tr><td style="padding: 8px 0; color: #64748b;">Amount:</td><td style="padding: 8px 0; font-weight: bold; color: #059669;">₹${order.amountInr ?? order.amount}</td></tr>
@@ -222,6 +229,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
             <p style="color: #475569; font-size: 14px;">Dear <strong>${order.customerName}</strong>,</p>
             <p style="color: #475569; font-size: 14px;">Your payment for <strong>${order.productName}</strong> has been received successfully.</p>
             <div style="background-color: #f1f5f9; border-radius: 12px; padding: 16px; margin: 20px 0;">
+              <p style="margin: 4px 0; font-size: 13px;"><strong>Tracking ID:</strong> ${order.trackingId || "-"}</p>
               <p style="margin: 4px 0; font-size: 13px;"><strong>Product:</strong> ${order.productName}</p>
               <p style="margin: 4px 0; font-size: 13px;"><strong>Amount:</strong> ₹${order.amountInr ?? order.amount}</p>
               <p style="margin: 4px 0; font-size: 13px;"><strong>Payment ID:</strong> ${razorpay_payment_id}</p>
@@ -355,6 +363,7 @@ export const verifyBookingPayment = asyncHandler(async (req, res) => {
   const travelDate = new Date(paid.travelDate).toDateString();
   const summary = `
     <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      ${detailRow("Tracking ID", paid.trackingId)}
       ${detailRow("Route", route)}
       ${detailRow("Vehicle", paid.carType.name)}
       ${detailRow("Date / Time", `${travelDate}${paid.travelTime ? " · " + paid.travelTime : ""}`)}
@@ -431,9 +440,21 @@ export const getAllOrders = asyncHandler(async (req, res) => {
   const status = req.query.status;
   const productType = req.query.productType;
 
+  const search = (req.query.search || "").trim();
+
   const where = {};
   if (status) where.status = status;
   if (productType) where.productType = productType;
+  if (search) {
+    where.OR = [
+      { trackingId: { contains: search, mode: "insensitive" } },
+      { customerName: { contains: search, mode: "insensitive" } },
+      { customerEmail: { contains: search, mode: "insensitive" } },
+      { customerPhone: { contains: search } },
+      { productName: { contains: search, mode: "insensitive" } },
+      { razorpayPaymentId: { contains: search, mode: "insensitive" } },
+    ];
+  }
 
   const [orders, total] = await Promise.all([
     prisma.order.findMany({
